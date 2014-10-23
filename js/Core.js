@@ -1,0 +1,4 @@
+/**
+ * @author DeadbraiN
+ */
+var Evo = {};
