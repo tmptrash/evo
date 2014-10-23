@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+            <html>
+            <head lang="en">
+                    <meta charset="UTF-8">
+                    <title>Evolution</title>
+
+            <script type="text/javascript" src="js/Core.js"></script>
+        <script type="text/javascript" src="js/Interpreter.js"></script>
+        </head>
+        <body>
+        <script>
+            /*
+             set   123 one        # 0000 007B 0001 # sets number to variable
+             move  one two        # 0001 0001 0002 # moves data from  var 'one' to var 'two'
+             inc   one            # 0002 0001      # increments variable 'one'
+             dec   one            # 0003 0001      # decrements variable 'one'
+             add   one two        # 0004 0001 0002 # adds 'one' to 'two'. Result will be in 'one'
+             sub   one two        # 0005 0001 0002 # subs 'two' from 'one'. Result will be in 'one'
+             read  one two        # 0006 0001 0002 # reads one byte from memory by index 'idx' into variable 'one'
+             write one two        # 0007 0001 0002 # writes one byte from 'one' var to 'two' var
+             jump  label          # 0008 0001      # jumps to 'label'.
+             jumpg one two label  # 0009 0002      # jumps if 'one' is greater then 'two' to the 'label'
+             jumpl one two label  # 000A 0003      # jumps if 'one' is less then 'two' to the 'label'
+             jumpz one label      # 000B 0004      # jumps if 'one' is zero to the 'label'
+             jumpn one label      # 000C 0005      # jumps if 'one' is not a zero to the 'label'
+             */
+            var code = new Uint16Array(3 * 4);
+            code[0]  = 0;  // no label
+            code[1]  = 0;  // set
+            code[2]  = 7;  // 7
+            code[3]  = 0;  // zero var
+
+            code[4]  = 0;  // no label
+            code[5]  = 1;  // move
+            code[6]  = 0;  // zero var
+            code[7]  = 1;  // one var
+
+            code[8]  = 0;  // no label
+            code[9]  = 2;  // inc
+            code[10] = 1;  // one var
+
+            Evo.Interpreter.run(code);
+        </script>
+    </body>
+</html>

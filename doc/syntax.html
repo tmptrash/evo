@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <style>
+            h3 {margin-bottom: 0;}
+        </style>
+        <h2>evo language manual</h2>
+        <pre>
+            <h3>General syntax</h3>    label command arg1 arg2 ...
+        where
+            label   - named and unique label
+            command - command
+            argX    - variable or constant
+            <h3>Embedded variables</h3>    one, two, three, fore, five, six, seven, eight, nine, ten, 11, 12... 4 bytes based variables
+            <h3>Labels</h3>    Every label must be unique
+            <h3>Commands</h3>    set   123 one        # 0000 007B 0001 # sets number to variable
+    move  one two        # 0001 0001 0002 # moves data from  var 'one' to var 'two'
+    inc   one            # 0002 0001      # increments variable 'one'
+    dec   one            # 0003 0001      # decrements variable 'one'
+    add   one two        # 0004 0001 0002 # adds 'one' to 'two'. Result will be in 'one'
+    sub   one two        # 0005 0001 0002 # subs 'two' from 'one'. Result will be in 'one'
+    read  one two        # 0006 0001 0002 # reads one byte from memory by index 'idx' into variable 'one'
+    write one two        # 0007 0001 0002 # writes one byte from 'one' var to 'two' var
+    jump  label          # 0008 0001      # jumps to 'label'.
+    jumpg one two label  # 0009 0002      # jumps if 'one' is greater then 'two' to the 'label'
+    jumpl one two label  # 000A 0003      # jumps if 'one' is less then 'two' to the 'label'
+    jumpz one label      # 000B 0004      # jumps if 'one' is zero to the 'label'
+    jumpn one label      # 000C 0005      # jumps if 'one' is not a zero to the 'label'
+        </pre>
+    </body>
+</html>
