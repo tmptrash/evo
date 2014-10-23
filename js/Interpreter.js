@@ -1,4 +1,5 @@
 /**
+ * TODO: describe all!!!
  * @author DeadbraiN
  */
 Evo.Interpreter = (function () {
@@ -56,19 +57,7 @@ Evo.Interpreter = (function () {
     function _inc(i) {
         _vars[_code[i + 2]]++;
     }
-    /**
-     * Collects all label names and indexes and stores in _labels field
-     */
-    function _collectLabels() {
-        var i;
-        var l = _code.length;
 
-        for (i = 0; i < l; i+=_MAX_LINE_SEGMENTS) {
-            if (_code[i]) {
-                _labels[_code[i]] = i;
-            }
-        }
-    }
 
     //
     // public section
@@ -81,21 +70,20 @@ Evo.Interpreter = (function () {
          * @return {Boolean} true - all ok, false - not
          */
         run: function (code) {
-            if (!(code instanceof Uint16Array)) {
-                return false;
-            }
-
-            var i = 0;
+            var i;
             var l = code.length;
 
             _code = code;
             //
             // All labels will be saved in _labels field
             //
-            _collectLabels();
+            for (i = 0; i < l; i+=_MAX_LINE_SEGMENTS) {
+                if (_code[i]) {_labels[_code[i]] = i;}
+            }
             //
-            // This is a main loop, where all command are ran
+            // This is a main loop, where all commands are ran
             //
+            i = 0;
             while (i < l) {
                 i += (_cmds[code[i + 1]](i) || _MAX_LINE_SEGMENTS);
             }
