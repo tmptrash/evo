@@ -104,8 +104,8 @@ Evo.Interpreter = (function () {
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
      *
-     *     0000 0001 0002 0004
-     *          move two  four
+     *     0000 0001 0002 0004 0000
+     *          move two  four unused
      */
     var _vars = [];
     /**
