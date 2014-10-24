@@ -37,15 +37,15 @@
  * index of current command line in binary array. Using this index, current handler
  * may obtain all code line related info like: label, command and all arguments:
  *
- *     _code[i + 0] label
- *     _code[i + 1] cmd
- *     _code[i + 2] arg1
- *     _code[i + 3] arg2
+ *     code[i + 0] label
+ *     code[i + 1] cmd
+ *     code[i + 2] arg1
+ *     code[i + 3] arg2
  *
  * For example:
  *
  *     function _inc(i) {
- *         _vars[_code[i + 2]]++;
+ *         vars[code[i + 2]]++;
  *     }
  *
  * You should also note, that evo language should be read from left to the right.
@@ -89,12 +89,6 @@ Evo.Interpreter = (function () {
      */
     var _LINE_SEGMENTS = 4;
     /**
-     * {UInt16Array} Array of code to interpret. This code has binary representation. See
-     * it's description at the top of the file. It's set in run() method and used during
-     * interpretation.
-     */
-    var _code = null;
-    /**
      * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
     var _labels = {};
@@ -118,27 +112,33 @@ Evo.Interpreter = (function () {
 
     /**
      * 'set' command handler. Initializes variable by specific value
-     * Example: set 0001 two -> 0000 0001 0002
+     * Example: 0000 0001 0002 # set 0001 two
+     * @param {Array} vars Array of variable values by index
+     * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      */
-    function _set(i) {
-        _vars[_code[i + 3]] = _code[i + 2];
+    function _set(vars, code, i) {
+        vars[code[i + 3]] = code[i + 2];
     }
     /**
      * move command handler. Moves value from first argument to second one.
      * Example: move one two -> 0000 0001 0001 0002
+     * @param {Array} vars Array of variable values by index
+     * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      */
-    function _move(i) {
-        _vars[_code[i + 3]] = _vars[_code[i + 2]];
+    function _move(vars, code, i) {
+        vars[code[i + 3]] = vars[code[i + 2]];
     }
     /**
      * inc command handler. Increments variable.
      * Example: inc one # 0002 0001
+     * @param {Array} vars Array of variable values by index
+     * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      */
-    function _inc(i) {
-        _vars[_code[i + 2]]++;
+    function _inc(vars, code, i) {
+        vars[code[i + 2]]++;
     }
 
 
@@ -154,21 +154,21 @@ Evo.Interpreter = (function () {
          */
         run: function (code) {
             var i;
-            var l = code.length;
+            var l    = code.length;
+            var vars = _vars;
 
-            _code = code;
             //
             // All labels will be saved in _labels field
             //
             for (i = 0; i < l; i+=_LINE_SEGMENTS) {
-                if (_code[i]) {_labels[_code[i]] = i;}
+                if (code[i]) {_labels[code[i]] = i;}
             }
             //
             // This is a main loop, where all commands are ran
             //
             i = 0;
             while (i < l) {
-                i += (_cmds[code[i + 1]](i) || _LINE_SEGMENTS);
+                i += (_cmds[code[i + 1]](vars, code, i) || _LINE_SEGMENTS);
             }
         }
     };
