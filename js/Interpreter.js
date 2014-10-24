@@ -1,13 +1,22 @@
 /**
- * Interpreter of evo language. Main goal of this interpreter is to interpret
- * as fast as possible. It interprets code line by line from up to the bottom.
- * This module doesn't have any checks (maybe only minimal) to increase running
- * speed.
- * Script on evo language is presented by UInt16Array. Every line of code is
- * _MAX_LINE_SEGMENTS words (two bytes) in this array. Script line format is:
+ * Interpreter of evo language. Main goal of this interpreter is to run the
+ * script as fast as possible. It interprets code line by line from up to the
+ * bottom. This module doesn't have any checks (maybe only minimal) to increase
+ * running speed. In general script looks like simple assembler and has binary
+ * format stored in UInt16Array. Every line of code is _LINE_SEGMENTS
+ * words (two bytes) in this array. So, for evo interpreter - script is a
+ * binary array of UInt16 words. Take a look at simple script
  *
- *     label cmd   arg1  arg2
- *     0000  0001  0002  0003   # move two three -> [0, 1, 2, 3]
+ *     0000 0000 0001 0000       # set  1    zero
+ *     0000 0001 0000 0001       # move zero one
+ *     0000 0002 0001            # inc  one
+ *
+ * One standard script line format is:
+ *
+ *     label cmd   arg1  arg2    # segments description
+ *     0000  0001  0002  0003    # binary representation
+ *  or      move  two   three   # readable representation
+ *  or [0,   1,    2,    3]      # JS representation
  * where:
  *     label - Unique label number. 0000 means no label
  *     cmd   - Command, like move, add, inc, jump and so on
@@ -20,15 +29,41 @@
  *
  * is presented inside the interpreter. First 0000 means no label. Value greater
  * then 0000 means unique label number. Second 0001 means command index. For this
- * example is move command. Two arguments 0002 and 0003 means two variables, with
+ * example is 'move' command. Two arguments 0002 and 0003 means two variables, with
  * appropriate indexes. So this line of code will move the value from variable
  * with index 0002 to variable with index 0003.
+ *
+ * Every command handler works in a similar way. It obtains only one parameter -
+ * index of current command line in binary array. Using this index, current handler
+ * may obtain all code line related info like: label, command and all arguments:
+ *
+ *     _code[i + 0] label
+ *     _code[i + 1] cmd
+ *     _code[i + 2] arg1
+ *     _code[i + 3] arg2
+ *
+ * For example:
+ *
+ *     function _inc(i) {
+ *         _vars[_code[i + 2]]++;
+ *     }
+ *
+ * You should also note, that evo language should be read from left to the right.
+ * For example command:
+ *
+ *     move two three
+ *
+ * Should be read as 'Move value of "two" variable into "three" variable' and not
+ * like 'Move value of "three" variable into "two" variable'.
  *
  * Dependencies:
  *     Core
  *
  * Example:
- *     // two lines of code
+ *     //
+ *     // Binary representation of our two
+ *     // lines script (4 words in each line)
+ *     //
  *     var code = new Uint16Array(2 * 4);
  *
  *     // set 7 zero
@@ -48,49 +83,50 @@
  * @author DeadbraiN
  */
 Evo.Interpreter = (function () {
-    //
-    // private section
-    //
-
     /**
      * @constant
-     * {Number} Amount of segments (parts) in one code line: label, keyword, argument, argument
+     * {Number} Amount of segments (parts) in one script line: label, keyword, arg1, arg2
      */
-    var _MAX_LINE_SEGMENTS = 4;
+    var _LINE_SEGMENTS = 4;
     /**
      * {UInt16Array} Array of code to interpret. This code has binary representation. See
-     * it's description at the top of the file.
+     * it's description at the top of the file. It's set in run() method and used during
+     * interpretation.
      */
     var _code = null;
     /**
-     * {Object} Labels map. Key - label name, value - label line index
+     * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
     var _labels = {};
     /**
-     * {Array} Array of variables values. Every variable has it's
-     * own unique index started from zero.
+     * {Array} Array of variables values. Every variable has it's own unique index
+     * started from zero. We use these indexes in different command. e.g.:
+     *
+     *     0000 0001 0002 0004
+     *          move two  four
      */
     var _vars = [];
     /**
-     * {Array} Available commands by index
+     * {Array} Available commands by index. It's very important to keep these indexes
+     * in a correct way, because all scripts will be broken.
      */
     var _cmds = [
-        _set,
-        _move,
-        _inc
+        _set,    // 0
+        _move,   // 1
+        _inc     // 2
     ];
 
     /**
-     * move command handler. Moves value from 'from' to 'to' variable.
-     * Example: move one two # 0001 0001 0002
+     * 'set' command handler. Initializes variable by specific value
+     * Example: set 0001 two -> 0000 0001 0002
      * @param {Number} i Index of current code line
      */
     function _set(i) {
         _vars[_code[i + 3]] = _code[i + 2];
     }
     /**
-     * move command handler. Moves value from 'from' to 'to' variable.
-     * Example: move one two # 0001 0001 0002
+     * move command handler. Moves value from first argument to second one.
+     * Example: move one two -> 0000 0001 0001 0002
      * @param {Number} i Index of current code line
      */
     function _move(i) {
@@ -124,7 +160,7 @@ Evo.Interpreter = (function () {
             //
             // All labels will be saved in _labels field
             //
-            for (i = 0; i < l; i+=_MAX_LINE_SEGMENTS) {
+            for (i = 0; i < l; i+=_LINE_SEGMENTS) {
                 if (_code[i]) {_labels[_code[i]] = i;}
             }
             //
@@ -132,7 +168,7 @@ Evo.Interpreter = (function () {
             //
             i = 0;
             while (i < l) {
-                i += (_cmds[code[i + 1]](i) || _MAX_LINE_SEGMENTS);
+                i += (_cmds[code[i + 1]](i) || _LINE_SEGMENTS);
             }
         }
     };
