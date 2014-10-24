@@ -99,7 +99,7 @@ Evo.Interpreter = (function () {
     /**
      * {Array} Internal memory for reading and writing. Is used with read and write command
      */
-    var _mem    = [];
+    var _mem    = null;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
@@ -330,6 +330,7 @@ Evo.Interpreter = (function () {
             var segs   = _LINE_SEGMENTS;
             var cmds   = _cmds;
 
+            _mem = mem;
             //
             // All labels will be saved in _labels field
             //
@@ -342,7 +343,7 @@ Evo.Interpreter = (function () {
             //
             i = 1;
             while (i < l) {
-                i += (cmds[code[i]](vars, code, i) || segs);
+                i += (cmds[code[i]](code, i, vars) || segs);
             }
         }
     };

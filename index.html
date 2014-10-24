@@ -24,26 +24,30 @@
              jumpz one label      # 000B 0004      # jumps if 'one' is zero to the 'label'
              jumpn one label      # 000C 0005      # jumps if 'one' is not a zero to the 'label'
              */
-            var code = new Uint16Array(3 * 4);
+            var code = new Uint16Array(3 * 5);
             code[0]  = 0;  // no label
             code[1]  = 0;  // set
             code[2]  = 7;  // 7
             code[3]  = 0;  // zero var
+            code[4]  = 0;  // unused
 
-            code[4]  = 0;  // no label
-            code[5]  = 1;  // move
-            code[6]  = 0;  // zero var
-            code[7]  = 1;  // one var
+            code[5]  = 0;  // no label
+            code[6]  = 1;  // move
+            code[7]  = 0;  // zero var
+            code[8]  = 1;  // one var
+            code[9]  = 0;  // unused
 
-            code[8]  = 0;  // no label
-            code[9]  = 2;  // inc
-            code[10] = 1;  // one var
+            code[10] = 0;  // no label
+            code[11] = 2;  // inc
+            code[12] = 1;  // one var
+            code[13] = 0;  // unused
+            code[14] = 0;  // unused
 
             console.time('local');
             for (var i = 0; i < 100000000; i++) {
                 Evo.Interpreter.run(code);
             }
-            console.timeEnd('local')
+            console.timeEnd('local');
         </script>
     </body>
 </html>
