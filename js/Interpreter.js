@@ -37,15 +37,15 @@
  * index of current command line in binary array. Using this index, current handler
  * may obtain all code line related info like: label, command and all arguments:
  *
- *     code[i + 0] label
- *     code[i + 1] cmd
- *     code[i + 2] arg1
- *     code[i + 3] arg2
+ *     code[i - 1] label
+ *     code[i + 0] cmd
+ *     code[i + 1] arg1
+ *     code[i + 2] arg2
  *
  * For example:
  *
  *     function _inc(i) {
- *         vars[code[i + 2]]++;
+ *         vars[code[i + 1]]++;
  *     }
  *
  * You should also note, that evo language should be read from left to the right.
@@ -107,38 +107,85 @@ Evo.Interpreter = (function () {
     var _cmds = [
         _set,    // 0
         _move,   // 1
-        _inc     // 2
+        _inc,    // 2
+        _dec,    // 3
+        _add,    // 4
+        _sub     // 5
     ];
 
     /**
      * 'set' command handler. Initializes variable by specific value
      * Example: 0000 0001 0002 # set 0001 two
+     *
      * @param {Array} vars Array of variable values by index
      * @param {Uint16Array} code Script in binary representation
-     * @param {Number} i Index of current code line
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
      */
     function _set(vars, code, i) {
-        vars[code[i + 3]] = code[i + 2];
+        vars[code[i + 2]] = code[i + 1];
     }
     /**
-     * move command handler. Moves value from first argument to second one.
-     * Example: move one two -> 0000 0001 0001 0002
+     * 'move' command handler. Moves value from first argument to second one.
+     * Example: 0000 0001 0001 0002 # move one two
+     *
      * @param {Array} vars Array of variable values by index
      * @param {Uint16Array} code Script in binary representation
-     * @param {Number} i Index of current code line
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
      */
     function _move(vars, code, i) {
-        vars[code[i + 3]] = vars[code[i + 2]];
+        vars[code[i + 2]] = vars[code[i + 1]];
     }
     /**
-     * inc command handler. Increments variable.
-     * Example: inc one # 0002 0001
+     * 'inc' command handler. Increments a variable.
+     * Example: 0002 0001 # inc one
+     *
      * @param {Array} vars Array of variable values by index
      * @param {Uint16Array} code Script in binary representation
-     * @param {Number} i Index of current code line
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
      */
     function _inc(vars, code, i) {
-        vars[code[i + 2]]++;
+        vars[code[i + 1]]++;
+    }
+    /**
+     * 'dec' command handler. Decrements a variable.
+     * Example: 0003 0001 # dec one
+     *
+     * @param {Array} vars Array of variable values by index
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
+     */
+    function _dec(vars, code, i) {
+        vars[code[i + 1]]--;
+    }
+    /**
+     * 'add' command handler. Sums two variables and puts the
+     * result into second variable
+     * Example: 0004 0001 0002 # add one two
+     *
+     * @param {Array} vars Array of variable values by index
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
+     */
+    function _add(vars, code, i) {
+        vars[code[i + 2]]+=vars[code[i + 1]];
+    }
+    /**
+     * 'sub' command handler. Substitutes two variables and puts the
+     * result into second variable
+     * Example: 0005 0001 0002 # sub one two
+     *
+     * @param {Array} vars Array of variable values by index
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
+     */
+    function _sub(vars, code, i) {
+        vars[code[i + 2]]-=vars[code[i + 1]];
     }
 
 
@@ -147,28 +194,30 @@ Evo.Interpreter = (function () {
     //
     return {
         /**
-         * Runs an interpreter
-         * TODO:
-         * @param {Uint16Array} code Lines of code in binary
-         * @return {Boolean} true - all ok, false - not
+         * Runs an interpreter till last script code line will be finished.
+         * @param {Uint16Array} code Lines of code in binary format
          */
         run: function (code) {
             var i;
-            var l    = code.length;
-            var vars = _vars;
+            var l      = code.length;
+            var vars   = _vars;
+            var labels = _labels;
+            var segs   = _LINE_SEGMENTS;
+            var cmds   = _cmds;
 
             //
             // All labels will be saved in _labels field
             //
-            for (i = 0; i < l; i+=_LINE_SEGMENTS) {
-                if (code[i]) {_labels[code[i]] = i;}
+            for (i = 0; i < l; i += segs) {
+                if (code[i]) {labels[code[i]] = i;}
             }
             //
-            // This is a main loop, where all commands are ran
+            // This is a main loop, where all commands are ran.
+            // i === 1, because we loop thought commands (not labels)
             //
-            i = 0;
+            i = 1;
             while (i < l) {
-                i += (_cmds[code[i + 1]](vars, code, i) || _LINE_SEGMENTS);
+                i += (cmds[code[i]](vars, code, i) || segs);
             }
         }
     };

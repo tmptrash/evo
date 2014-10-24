@@ -39,7 +39,11 @@
             code[9]  = 2;  // inc
             code[10] = 1;  // one var
 
-            Evo.Interpreter.run(code);
+            console.time('local');
+            for (var i = 0; i < 100000000; i++) {
+                Evo.Interpreter.run(code);
+            }
+            console.timeEnd('local')
         </script>
     </body>
 </html>
