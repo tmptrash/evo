@@ -97,7 +97,8 @@ Evo.Interpreter = (function () {
      */
     var _labels = {};
     /**
-     * {Array} Internal memory for reading and writing. Is used with read and write command
+     * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
+     * 'write' command
      */
     var _mem    = null;
     /**
@@ -320,7 +321,7 @@ Evo.Interpreter = (function () {
         /**
          * Runs an interpreter till last script code line will be finished.
          * @param {Uint16Array} code Lines of code in binary format
-         * @param {Array} mem Memory for read and write commands
+         * @param {Uint16Array} mem Memory for read and write commands
          */
         run: function (code, mem) {
             var i;
@@ -329,13 +330,18 @@ Evo.Interpreter = (function () {
             var labels = _labels;
             var segs   = _LINE_SEGMENTS;
             var cmds   = _cmds;
+            var line;
 
+            //
+            // Memory block, which is set from outside and
+            // should be used by current script
+            //
             _mem = mem;
             //
             // All labels will be saved in _labels field
             //
             for (i = 0; i < l; i += segs) {
-                if (code[i]) {labels[code[i]] = i;}
+                if (code[i]) {labels[code[i]] = i + 1;} // + 1 means index of command and not a label
             }
             //
             // This is a main loop, where all commands are ran.
@@ -343,7 +349,12 @@ Evo.Interpreter = (function () {
             //
             i = 1;
             while (i < l) {
-                i += (cmds[code[i]](code, i, vars) || segs);
+                line = cmds[code[i]](code, i, vars);
+                if (line) {
+                    i = line;
+                } else {
+                    i += segs;
+                }
             }
         }
     };
