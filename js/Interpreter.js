@@ -92,6 +92,11 @@ Evo.Interpreter = (function () {
      * {Number} Amount of segments (parts) in one script line: label, keyword, arg1, arg2
      */
     var _LINE_SEGMENTS = 5;
+
+    /**
+     * {Function} Shortcut for console.log() function
+     */
+    var _log = console.log;
     /**
      * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
@@ -101,6 +106,10 @@ Evo.Interpreter = (function () {
      * 'write' command
      */
     var _mem    = null;
+    /**
+     * {Array} Output array. Here organism will add it's numbers (outputs)
+     */
+    var _out    = null;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
@@ -127,9 +136,19 @@ Evo.Interpreter = (function () {
         _jumpl,  // 10
         _jumpe,  // 11
         _jumpz,  // 12
-        _jumpn   // 13
+        _jumpn,  // 13
+        _echo    // 14
     ];
 
+
+    /**
+     * Puts one number into the output stream: Array
+     * @param {Object} val Value to output
+     */
+    function _put(val) {
+        _out.push(val);
+        _log(val);
+    }
     /**
      * 'set' command handler. Initializes variable by specific value
      * Example: 0000 0001 0002 # set 0001 two
@@ -312,6 +331,18 @@ Evo.Interpreter = (function () {
     function _jumpn(code, i, vars) {
         return vars[code[i + 1]] !== 0 ? _labels[code[i + 2]] : undefined;
     }
+    /**
+     * 'echo' command handler. Echoes (outputs) a value of specified
+     * variable. Example: 000E 0000 # echo one
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line + 1. It points
+     * to the command and not to the label.
+     * @param {Array} vars Array of variable values by index
+     */
+    function _echo(code, i, vars) {
+        return _put(vars[code[i + 1]]);
+    }
 
 
     //
@@ -323,7 +354,7 @@ Evo.Interpreter = (function () {
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
          */
-        run: function (code, mem) {
+        run: function (code, mem, out) {
             var i;
             var l      = code.length;
             var vars   = _vars;
@@ -337,6 +368,10 @@ Evo.Interpreter = (function () {
             // should be used by current script
             //
             _mem = mem;
+            //
+            // Output stream (Array). Here organism must puts it's output numbers
+            //
+            _out = out;
             //
             // All labels will be saved in _labels field
             //
