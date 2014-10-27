@@ -10,10 +10,10 @@ Evo.Organism = (function () {
      * @private
      */
     function _correctOutput(out) {
-        // TODO: this is temporary code
-        if (out.length) {
-            console.log(out);
-        }
+        //
+        // TODO: this is temporary code.
+        // TODO: need to create some check logic here.
+        //
         return out[0] === 1;
     }
 
@@ -26,7 +26,7 @@ Evo.Organism = (function () {
             //
             // TODO: These values should be obtained from config
             //
-            var mem       = new Uint16Array(1);
+            var mem       = new Uint16Array(65536);
             var code      = new Uint16Array(65536);
             var out       = [];
             var mutate    = Evo.Mutator.mutate;
@@ -48,7 +48,7 @@ Evo.Organism = (function () {
             // TODO: Think about ability to get state of organism:
             // TODO: memory dump, code text and so on.
             //
-            for (var i = 0; i < 65530; i++) {
+            for (var i = 0; i < 1000; i++) {
                 mutate(code, getLabels(), getLength(), segs);
                 run(code, mem, out);
 
@@ -57,7 +57,14 @@ Evo.Organism = (function () {
                 }
             }
 
-            console.log('done');
+            // TODO: this code should be moved somewhere.
+            var res = [];
+            for (var  i = 0; i < out.length; i++) {
+                if (out[i]) {
+                    res.push(i);
+                }
+            }
+            console.log(res, out);
         }
     };
 })();

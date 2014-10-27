@@ -36,18 +36,18 @@ Evo.Mutator = (function () {
         _set,   // 0
         _move,  // 1
         _inc,   // 2
-        _dec   // 3
-//        _add,   // 4
-//        _sub,   // 5
-//        _read,  // 6
-//        _write, // 7
-//        _jump,  // 8
-//        _jumpg, // 9
-//        _jumpl, // 10
-//        _jumpe, // 11
-//        _jumpz, // 12
-//        _jumpn, // 13
-//        _echo   // 14
+        _dec,   // 3
+        _add,   // 4
+        _sub,   // 5
+        _read,  // 6
+        _write, // 7
+        _jump,  // 8
+        _jumpg, // 9
+        _jumpl, // 10
+        _jumpe, // 11
+        _jumpz, // 12
+        _jumpn, // 13
+        _echo   // 14
     ];
     /**
      * {Number} Just amount of commands
@@ -56,7 +56,7 @@ Evo.Mutator = (function () {
     /**
      * {Number} Amount of code lines in current binary script
      */
-    var _codeLen    = null;
+    var _codeLen = null;
 
 
     /**
@@ -131,7 +131,161 @@ Evo.Mutator = (function () {
      * @private
      */
     function _dec(code, i) {
-        code.set([_createLabel(), 2, _createNumber(), 0, 0], i || _codeLen);
+        code.set([_createLabel(), 3, _createNumber(), 0, 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'add' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _add(code, i) {
+        code.set([_createLabel(), 4, _createNumber(), _createNumber(), 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'sub' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _sub(code, i) {
+        code.set([_createLabel(), 5, _createNumber(), _createNumber(), 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'read' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _read(code, i) {
+        code.set([_createLabel(), 6, _createNumber(), _createNumber(), 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'write' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _write(code, i) {
+        code.set([_createLabel(), 7, _createNumber(), _createNumber(), 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'jump' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _jump(code, i) {
+        code.set([_createLabel(), 8, _createNumber(), 0, 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'jumpg' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _jumpg(code, i) {
+        code.set([_createLabel(), 9, _createNumber(), _createNumber(), _createNumber()], i || _codeLen);
+    }
+    /**
+     * Generates command 'jumpl' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _jumpl(code, i) {
+        code.set([_createLabel(), 10, _createNumber(), _createNumber(), _createNumber()], i || _codeLen);
+    }
+    /**
+     * Generates command 'jumpg' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _jumpe(code, i) {
+        code.set([_createLabel(), 11, _createNumber(), _createNumber(), _createNumber()], i || _codeLen);
+    }
+    /**
+     * Generates command 'jumpz' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _jumpz(code, i) {
+        code.set([_createLabel(), 12, _createNumber(), _createNumber(), 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'jumpn' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _jumpn(code, i) {
+        code.set([_createLabel(), 13, _createNumber(), _createNumber(), 0], i || _codeLen);
+    }
+    /**
+     * Generates command 'echo' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     * If this index is equal to null then new set command
+     * should be created. Otherwise (i !== null) existing set command
+     * will be mutated.
+     * @private
+     */
+    function _echo(code, i) {
+        code.set([_createLabel(), 14, _createNumber(), 0, 0], i || _codeLen);
     }
 
 

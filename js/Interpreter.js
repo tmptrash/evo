@@ -96,7 +96,7 @@ Evo.Interpreter = (function () {
     /**
      * {Function} Shortcut for console.log() function
      */
-    var _log = console.log;
+    var _log = console.log.bind(console);
     /**
      * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
@@ -153,7 +153,8 @@ Evo.Interpreter = (function () {
      */
     function _put(val) {
         _out.push(val);
-        _log(val);
+        // TODO: do we need this in log?
+        //_log(val);
     }
 
     /**
