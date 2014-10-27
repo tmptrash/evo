@@ -9,7 +9,7 @@ Evo.Mutator = (function () {
     /**
      * {Number} Max word number + 1
      */
-    var _MAX_NUMBER = 65536;
+    var _MAX_NUMBER_PLUS_ONE = Evo.MAX_NUMBER + 1;
     /**
      * {Function} Object.keys method shortcut
      */
@@ -71,11 +71,11 @@ Evo.Mutator = (function () {
     }
 
     /**
-     * Create number randomly in range [0...65535]
+     * Create number randomly in range [0..._MAX_NUMBER]
      * @return {Number}
      */
     function _createNumber() {
-        return _floor(_rnd() * _MAX_NUMBER);
+        return _floor(_rnd() * _MAX_NUMBER_PLUS_ONE);
     }
     /**
      * Generates command 'set' with random arguments. This command may
@@ -295,10 +295,10 @@ Evo.Mutator = (function () {
          * @param {Uint16Array} code Script code in binary format
          * @param {Object} labels Labels map
          * @param {Number} codeLen
-         * @param {Number} segs  Amount of segments in one line.
          * Segments are: label, command, arguments,...
          */
-        mutate: function (code, labels, codeLen, segs) {
+        mutate: function (code, labels, codeLen) {
+            var segs = Evo.LINE_SEGMENTS;
             //
             // This labels map will be used for generating new unique label ids
             //

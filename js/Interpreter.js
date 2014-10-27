@@ -91,12 +91,11 @@ Evo.Interpreter = (function () {
      * @constant
      * {Number} Amount of segments (parts) in one script line: label, keyword, arg1, arg2
      */
-    var _LINE_SEGMENTS = 5;
-
+    var _LINE_SEGMENTS = Evo.LINE_SEGMENTS;
     /**
-     * {Function} Shortcut for console.log() function
+     * {Number} Shortcut for Evo.MAX_NUMBER
      */
-    var _log = console.log.bind(console);
+    var _MAX_NUMBER = Evo.MAX_NUMBER;
     /**
      * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
@@ -123,7 +122,7 @@ Evo.Interpreter = (function () {
      *
      *  It's important that all variables are initialized by zero value.
      */
-    var _vars = new Uint16Array(65536);
+    var _vars = new Uint16Array(_MAX_NUMBER);
     /**
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, because all scripts will be broken.
@@ -153,8 +152,6 @@ Evo.Interpreter = (function () {
      */
     function _put(val) {
         _out.push(val);
-        // TODO: do we need this in log?
-        //_log(val);
     }
 
     /**
@@ -213,8 +210,8 @@ Evo.Interpreter = (function () {
         var index = code[i + 1];
 
         vars[index]++;
-        if (vars[index] > 65535) {
-            vars[index] = 65535;
+        if (vars[index] > _MAX_NUMBER) {
+            vars[index] = _MAX_NUMBER;
         }
     }
     /**
@@ -249,8 +246,8 @@ Evo.Interpreter = (function () {
         var index = code[i + 2];
 
         vars[index] += vars[code[i + 1]];
-        if (vars[index] > 65535) {
-            vars[index] = 65535;
+        if (vars[index] > _MAX_NUMBER) {
+            vars[index] = _MAX_NUMBER;
         }
     }
     /**
@@ -398,13 +395,10 @@ Evo.Interpreter = (function () {
     //
     return {
         /**
-         * {Number} Amount of segments in one line. Segments are: label, command, arguments,...
-         */
-        LINE_SEGMENTS: _LINE_SEGMENTS,
-        /**
          * Runs an interpreter till last script code line will be finished.
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
+         * @param {Array} out Output stream
          */
         run: function (code, mem, out) {
             var i;
@@ -449,6 +443,7 @@ Evo.Interpreter = (function () {
         },
 
         /**
+         * @readonly
          * Returns labels map. See _labels field for details
          * @return {Object}
          */
@@ -466,7 +461,8 @@ Evo.Interpreter = (function () {
         },
 
         /**
-         * {Uint16Array} Returns variable values array
+         * @readonly
+         * @return {Uint16Array} Returns variable values array
          */
         getVars: function () {
             return _vars;

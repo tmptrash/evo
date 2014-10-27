@@ -16,6 +16,19 @@ Evo.Organism = (function () {
         //
         return out[0] === 1;
     }
+    /**
+     * Prints a report about last mutations iteration. This report
+     * means, that one more data set was processed and new script
+     * was created for that. All previous data sets were also
+     * processed correctly.
+     * @param {Array} out Output stream
+     * @param {Uint16Array} code Current binary script
+     * @param {Number} len Length of binary script
+     */
+    function _printReport(out, code, len) {
+        console.log('Output stream:', out);
+        console.log('Generated script:', code.subarray(0, len));
+    }
 
 
     return {
@@ -23,48 +36,47 @@ Evo.Organism = (function () {
          * Starts organism to leave on
          */
         live: function () {
-            //
-            // TODO: These values should be obtained from config
-            //
-            var mem       = new Uint16Array(65536);
-            var code      = new Uint16Array(65536);
+            var mem       = new Uint16Array(Evo.MAX_NUMBER);
+            var code      = new Uint16Array(Evo.MAX_NUMBER);
             var out       = [];
             var mutate    = Evo.Mutator.mutate;
             var run       = Evo.Interpreter.run;
             var getLabels = Evo.Interpreter.getLabels;
             var getLength = Evo.Interpreter.getLength;
-            var segs      = Evo.Interpreter.LINE_SEGMENTS;
+            var data      = Evo.Data;
+            var d;
+            var dl;
 
-            //
-            // TIP: this is only a test, we are waiting from
-            // TIP: organism 1 in output with index 1 (not 1)
-            //
-            mem[0] = 1;
-            //
-            // This is a main loop. Here organism checks if
-            // last mutation do the job: generates correct
-            // output.
-            //
-            // TODO: Think about ability to get state of organism:
-            // TODO: memory dump, code text and so on.
-            //
-            for (var i = 0; i < 1000; i++) {
-                mutate(code, getLabels(), getLength(), segs);
-                run(code, mem, out);
+            for (d = 0, dl = data.length; d < dl; d += 2) {
+                //
+                // This is how we set initial value to the organism's memory.
+                // It should read this and put the result into the output stream.
+                // Initial value ends by 5 zeroes at the end.
+                //
+                mem.set(data[d], 0);
+                mem.set([0, 0, 0, 0, 0], data[d].length);
+                //
+                // This is a main loop. Here organism checks if
+                // last mutation do the job: generates correct
+                // output.
+                //
+                // TODO: Think about ability to get state of organism:
+                // TODO: memory dump, code text and so on.
+                //
+                for (var i = 0; i < 1000; i++) {
+                    mutate(code, getLabels(), getLength());
+                    run(code, mem, out);
 
-                if (_correctOutput(out)) {
-                    break;
+                    if (_correctOutput(out, data, d)) {
+                        break;
+                    }
                 }
+                _printReport(out, code, getLength());
+                //
+                // Output stream should be cleared for every new data set
+                //
+                out = [];
             }
-
-            // TODO: this code should be moved somewhere.
-            var res = [];
-            for (var  i = 0; i < out.length; i++) {
-                if (out[i]) {
-                    res.push(i);
-                }
-            }
-            console.log(res, out);
         }
     };
 })();
