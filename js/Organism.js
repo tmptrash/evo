@@ -5,15 +5,21 @@
  */
 Evo.Organism = (function () {
     /**
-     * Checks if last mutation generates correct output
+     * Returns amount of passed data sets.
      * @param {Array} out Output stream
+     * @param {Array} data Data set
+     * @param {Number} i Index of current data set
+     * @param {Number} passed Amount of passed data sets on previous iteration
+     * @return {Number}
      * @private
      */
-    function _correctOutput(out) {
-        //
-        // TODO: this is temporary code.
-        // TODO: need to create some check logic here.
-        //
+    function _getPassed(out, data, i, passed) {
+        var d;
+        var dl;
+
+        for (d = 0, dl = data.length; d <= i; d += 2) {
+
+        }
         return out[0] === 1;
     }
     /**
@@ -27,6 +33,9 @@ Evo.Organism = (function () {
      */
     function _printReport(out, code, len) {
         console.log('Output stream:', out);
+        //
+        // TODO: here should be a converter from binary script to readable assembler
+        //
         console.log('Generated script:', code.subarray(0, len));
     }
 
@@ -40,10 +49,13 @@ Evo.Organism = (function () {
             var code      = new Uint16Array(Evo.MAX_NUMBER);
             var out       = [];
             var mutate    = Evo.Mutator.mutate;
+            var rollback  = Evo.Mutator.rollback;
             var run       = Evo.Interpreter.run;
             var getLabels = Evo.Interpreter.getLabels;
             var getLength = Evo.Interpreter.getLength;
             var data      = Evo.Data;
+            var passed;
+            var oldPassed = 0;
             var d;
             var dl;
 
@@ -51,10 +63,8 @@ Evo.Organism = (function () {
                 //
                 // This is how we set initial value to the organism's memory.
                 // It should read this and put the result into the output stream.
-                // Initial value ends by 5 zeroes at the end.
                 //
                 mem.set(data[d], 0);
-                mem.set([0, 0, 0, 0, 0], data[d].length);
                 //
                 // This is a main loop. Here organism checks if
                 // last mutation do the job: generates correct
@@ -67,9 +77,12 @@ Evo.Organism = (function () {
                     mutate(code, getLabels(), getLength());
                     run(code, mem, out);
 
-                    if (_correctOutput(out, data, d)) {
+                    passed = _getPassed(out, data, d, oldPassed);
+                    if (passed <= oldPassed) {
+                        rollback(code);
                         break;
                     }
+                    oldPassed = passed;
                 }
                 _printReport(out, code, getLength());
                 //

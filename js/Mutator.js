@@ -57,6 +57,20 @@ Evo.Mutator = (function () {
      * {Number} Amount of code lines in current binary script
      */
     var _codeLen = null;
+    /**
+     * {Array} Binary script code line, before mutation. It's
+     * used for reverting.
+     */
+    var _lastLine = [];
+    /**
+     * {Number} Index of last mutated binary script line
+     */
+    var _lastIndex = 0;
+    /**
+     * {Boolean} Sets to true if mutation method has added new
+     * line at the end of binary script.
+     */
+    var _atTheEnd = false;
 
 
     /**
@@ -312,9 +326,34 @@ Evo.Mutator = (function () {
             //
             // TODO: we need to check if code array is full and reallocate it's size * 2
             if (_floor(_rnd() * codeLen) === 1 || !codeLen) {
+                _atTheEnd = true;
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, null);
             } else {
-                _cmds[_floor(_rnd() * _cmdsAmount)](code, _floor(_rnd() * (codeLen / segs)) * segs);
+                //
+                // Old binary script line should be saved in temp array _lastLine.
+                // It will be used for rollback.
+                //
+                _lastIndex = _floor(_rnd() * (codeLen / segs)) * segs;
+                _lastLine = code.subarray(_lastIndex, segs);
+                _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
+            }
+        },
+
+        /**
+         * Rollbacks last mutation
+         * @param {Uint16Array} code Script code in binary format
+         */
+        rollback: function (code) {
+            var segs  = Evo.LINE_SEGMENTS;
+            var empty = [];
+            var i;
+            var l;
+
+            if (_atTheEnd) {
+                for (i = 0, l = segs; i < l; i++) {empty[i] = 0;}
+                code.set(empty, _codeLen - segs);
+            } else {
+                code.set(_lastLine, _lastIndex);
             }
         }
     };
