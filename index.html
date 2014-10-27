@@ -4,39 +4,13 @@
         <meta charset="UTF-8">
         <title>Evolution</title>
             <script type="text/javascript" src="js/Core.js"></script>
-           <script type="text/javascript" src="js/Interpreter.js"></script>
+            <script type="text/javascript" src="js/Interpreter.js"></script>
+            <script type="text/javascript" src="js/Mutator.js"></script>
+            <script type="text/javascript" src="js/Organism.js"></script>
     </head>
     <body>
         <script>
-            /*
-             set   123 one        # 0000 007B 0001      # sets number to variable
-             move  one two        # 0001 0001 0002      # moves data from  var 'one' to var 'two'
-             inc   one            # 0002 0001           # increments variable 'one'
-             dec   one            # 0003 0001           # decrements variable 'one'
-             add   one two        # 0004 0001 0002      # adds 'one' to 'two'. Result will be in 'one'
-             sub   one two        # 0005 0001 0002      # subs 'one' from 'two'. Result will be in 'two'
-             read  one two        # 0006 0001 0002      # reads one byte from memory by index 'one' into variable 'two'
-             write one two        # 0007 0001 0002      # writes one byte from memory by index 'one' to variable 'two'
-             jump  label          # 0008 0001           # jumps to 'label'.
-             jumpg one two label  # 0009 0001 0002 0001 # jumps to the 'label' if 'one' is greater then 'two'
-             jumpl one two label  # 000A 0001 0002 0001 # jumps to the 'label' if 'one' is less then 'two'
-             jumpe one two label  # 000B 0001 0002 0001 # jumps to the 'label' if 'one' is equals to 'two'
-             jumpz one label      # 000C 0001 0001      # jumps to the 'label' if 'one' is zero
-             jumpn one label      # 000D 0001 0001      # jumps to the 'label' if 'one' is not a zero
-             */
-            var arr  = [
-                0, 0,  1000, 0, 0,    // set    1000  zero
-                1, 3,  0,    0, 0,    // dec    zero
-                0, 8,  2,    0, 0,    // jump   2
-                2, 1,  0,    1, 0,    // move   zero  one
-                0, 13, 0,    1, 0     // jumpn  1
-            ];
-            var code = new Uint16Array(arr);
-            var mem  = new Uint16Array();
-
-            console.time('local');
-            Evo.Interpreter.run(code, mem);
-            console.timeEnd('local');
+            Evo.Organism.live();
         </script>
     </body>
 </html>

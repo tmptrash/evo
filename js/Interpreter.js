@@ -105,19 +105,25 @@ Evo.Interpreter = (function () {
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command
      */
-    var _mem    = null;
+    var _mem = null;
     /**
      * {Array} Output array. Here organism will add it's numbers (outputs)
      */
-    var _out    = null;
+    var _out = null;
+    /**
+     * {Number} Amount of numbers in binary script array
+     */
+    var _codeLen = null;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
      *
      *     0000 0001 0002 0004 0000
      *          move two  four unused
+     *
+     *  It's important that all variables are initialized by zero value.
      */
-    var _vars = [];
+    var _vars = new Uint16Array(65536);
     /**
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, because all scripts will be broken.
@@ -148,6 +154,26 @@ Evo.Interpreter = (function () {
     function _put(val) {
         _out.push(val);
         _log(val);
+    }
+
+    /**
+     * Checks if current binary script line is empty.
+     * Empty means that all it's number are equal to zero.
+     * @param {Uint16Array} code Entire script array
+     * @param {Number} line Current script line index
+     * @returns {Boolean}
+     */
+    function _emptyLine(code, line) {
+        var i;
+        var l = _LINE_SEGMENTS;
+
+        for (i = 0; i < l; i++) {
+            if (code[line + i]) {
+                return false;
+            }
+        }
+
+        return true;
     }
     /**
      * 'set' command handler. Initializes variable by specific value
@@ -183,10 +209,16 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _inc(code, i, vars) {
-        vars[code[i + 1]]++;
+        var index = code[i + 1];
+
+        vars[index]++;
+        if (vars[index] > 65535) {
+            vars[index] = 65535;
+        }
     }
     /**
-     * 'dec' command handler. Decrements a variable.
+     * 'dec' command handler. Decrements a variable. It's important
+     * that you can't decrease zero variable. 0-- === 0.
      * Example: 0003 0001 # dec one
      *
      * @param {Uint16Array} code Script in binary representation
@@ -195,7 +227,12 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _dec(code, i, vars) {
-        vars[code[i + 1]]--;
+        var index = code[i + 1];
+
+        vars[index]--;
+        if (vars[index] < 0) {
+            vars[index] = 0;
+        }
     }
     /**
      * 'add' command handler. Sums two variables and puts the
@@ -208,7 +245,12 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _add(code, i, vars) {
-        vars[code[i + 2]] += vars[code[i + 1]];
+        var index = code[i + 2];
+
+        vars[index] += vars[code[i + 1]];
+        if (vars[index] > 65535) {
+            vars[index] = 65535;
+        }
     }
     /**
      * 'sub' command handler. Substitutes two variables and puts the
@@ -221,7 +263,12 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _sub(code, i, vars) {
-        vars[code[i + 2]] -= vars[code[i + 1]];
+        var index = code[i + 2];
+
+        vars[index] -= vars[code[i + 1]];
+        if (vars[index] < 0) {
+            vars[index] = 0;
+        }
     }
     /**
      * 'read' command handler. Reads one number from the memory by index.
@@ -350,6 +397,10 @@ Evo.Interpreter = (function () {
     //
     return {
         /**
+         * {Number} Amount of segments in one line. Segments are: label, command, arguments,...
+         */
+        LINE_SEGMENTS: _LINE_SEGMENTS,
+        /**
          * Runs an interpreter till last script code line will be finished.
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
@@ -373,17 +424,20 @@ Evo.Interpreter = (function () {
             //
             _out = out;
             //
-            // All labels will be saved in _labels field
+            // All labels will be saved in _labels field. _codeLen field will be
+            // set to amount of numbers in binary script.
             //
+            _codeLen = null;
             for (i = 0; i < l; i += segs) {
                 if (code[i]) {labels[code[i]] = i + 1;} // + 1 means index of command and not a label
+                if (_codeLen === null && _emptyLine(code, i)) {_codeLen = i;}
             }
             //
             // This is a main loop, where all commands are ran.
             // i === 1, because we loop thought commands (not labels)
             //
             i = 1;
-            while (i < l) {
+            while (i < _codeLen) {
                 line = cmds[code[i]](code, i, vars);
                 if (line) {
                     i = line;
@@ -391,6 +445,30 @@ Evo.Interpreter = (function () {
                     i += segs;
                 }
             }
+        },
+
+        /**
+         * Returns labels map. See _labels field for details
+         * @return {Object}
+         */
+        getLabels: function () {
+            return _labels;
+        },
+
+        /**
+         * Returns length of code. The length of the code is not its
+         * allocated size in array.
+         * @return {Number}
+         */
+        getLength: function () {
+            return _codeLen || 0;
+        },
+
+        /**
+         * {Uint16Array} Returns variable values array
+         */
+        getVars: function () {
+            return _vars;
         }
     };
 })();

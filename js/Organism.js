@@ -6,10 +6,15 @@
 Evo.Organism = (function () {
     /**
      * Checks if last mutation generates correct output
+     * @param {Array} out Output stream
      * @private
      */
-    function _correctOutput() {
-
+    function _correctOutput(out) {
+        // TODO: this is temporary code
+        if (out.length) {
+            console.log(out);
+        }
+        return out[0] === 1;
     }
 
 
@@ -18,9 +23,17 @@ Evo.Organism = (function () {
          * Starts organism to leave on
          */
         live: function () {
-            var mem  = new Uint16Array(1);
-            var code = new Uint16Array(256);
-            var out  = [];
+            //
+            // TODO: These values should be obtained from config
+            //
+            var mem       = new Uint16Array(1);
+            var code      = new Uint16Array(65536);
+            var out       = [];
+            var mutate    = Evo.Mutator.mutate;
+            var run       = Evo.Interpreter.run;
+            var getLabels = Evo.Interpreter.getLabels;
+            var getLength = Evo.Interpreter.getLength;
+            var segs      = Evo.Interpreter.LINE_SEGMENTS;
 
             //
             // TIP: this is only a test, we are waiting from
@@ -32,14 +45,19 @@ Evo.Organism = (function () {
             // last mutation do the job: generates correct
             // output.
             //
-            while (1) {
-                Evo.Mutator.mutate(code);
-                Evo.Interpreter.run(code, mem, out);
+            // TODO: Think about ability to get state of organism:
+            // TODO: memory dump, code text and so on.
+            //
+            for (var i = 0; i < 65530; i++) {
+                mutate(code, getLabels(), getLength(), segs);
+                run(code, mem, out);
 
-                if (_correctOutput(mem)) {
+                if (_correctOutput(out)) {
                     break;
                 }
             }
+
+            console.log('done');
         }
     };
 })();
