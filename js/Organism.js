@@ -61,11 +61,6 @@ Evo.Organism = (function () {
 
             for (d = 0, dl = data.length; d < dl; d += 2) {
                 //
-                // This is how we set initial value to the organism's memory.
-                // It should read this and put the result into the output stream.
-                //
-                mem.set(data[d], 0);
-                //
                 // This is a main loop. Here organism checks if
                 // last mutation do the job: generates correct
                 // output.
@@ -75,6 +70,11 @@ Evo.Organism = (function () {
                 //
                 for (var i = 0; i < 1000; i++) {
                     mutate(code, getLabels(), getLength());
+                    //
+                    // This is how we set initial value to the organism's memory.
+                    // It should read this and put the result into the output stream.
+                    //
+                    mem.set(data[d], 0);
                     run(code, mem, out);
 
                     passed = _getPassed(out, data, d, oldPassed);
