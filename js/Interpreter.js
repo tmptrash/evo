@@ -408,6 +408,7 @@ Evo.Interpreter = (function () {
             // set to amount of numbers in binary script.
             //
             _codeLen = null;
+            _labels  = {0: 0};
             for (i = 0; i < l; i += segs) {
                 if (code[i]) {labels[code[i]] = i + 1;} // + 1 means index of command and not a label
                 if (_codeLen === null && _emptyLine(code, i)) {_codeLen = i; break;}

@@ -69,7 +69,7 @@ Evo.Organism = (function () {
                 // TODO: memory dump, code text and so on.
                 //
                 //while (!clever) {
-                for (var k = 0; k < 1000; k++) {
+                for (var k = 0; k < 1; k++) {
                     mutate(code, getLabels(), getVarsLen(), getLength());
                     //
                     // Assume that after current mutation our organism is clever
