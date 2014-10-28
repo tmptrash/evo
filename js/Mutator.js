@@ -326,8 +326,9 @@ Evo.Mutator = (function () {
             //
             // TODO: we need to check if code array is full and reallocate it's size * 2
             if (_floor(_rnd() * codeLen) === 1 || !codeLen) {
-                _atTheEnd = true;
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, null);
+                _atTheEnd = true;
+                _codeLen += segs;
             } else {
                 //
                 // Old binary script line should be saved in temp array _lastLine.

@@ -198,7 +198,8 @@ Evo.Interpreter = (function () {
         vars[code[i + 2]] = vars[code[i + 1]];
     }
     /**
-     * 'inc' command handler. Increments a variable.
+     * 'inc' command handler. Increments a variable. If the value
+     * equals to 65535 and will be incremented, then it will be zero.
      * Example: 0002 0001 # inc one
      *
      * @param {Uint16Array} code Script in binary representation
@@ -207,16 +208,11 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _inc(code, i, vars) {
-        var index = code[i + 1];
-
-        vars[index]++;
-        if (vars[index] > _MAX_NUMBER) {
-            vars[index] = _MAX_NUMBER;
-        }
+        vars[code[i + 1]]++;
     }
     /**
      * 'dec' command handler. Decrements a variable. It's important
-     * that you can't decrease zero variable. 0-- === 0.
+     * that you can decrease zero variable. 0-- === 65535.
      * Example: 0003 0001 # dec one
      *
      * @param {Uint16Array} code Script in binary representation
@@ -225,16 +221,12 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _dec(code, i, vars) {
-        var index = code[i + 1];
-
-        vars[index]--;
-        if (vars[index] < 0) {
-            vars[index] = 0;
-        }
+        vars[code[i + 1]]--;
     }
     /**
      * 'add' command handler. Sums two variables and puts the
-     * result into second variable
+     * result into second variable. Important: 65535 + 1 === 0.
+     * 65535 + 2 === 1 and so on.
      * Example: 0004 0001 0002 # add one two
      *
      * @param {Uint16Array} code Script in binary representation
@@ -243,16 +235,12 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _add(code, i, vars) {
-        var index = code[i + 2];
-
-        vars[index] += vars[code[i + 1]];
-        if (vars[index] > _MAX_NUMBER) {
-            vars[index] = _MAX_NUMBER;
-        }
+        vars[code[i + 2]] += vars[code[i + 1]];
     }
     /**
      * 'sub' command handler. Substitutes two variables and puts the
-     * result into second variable
+     * result into second variable. Important: 0 - 1 === 65535,
+     * 0 - 2 === 65534 and so on.
      * Example: 0005 0001 0002 # sub one two
      *
      * @param {Uint16Array} code Script in binary representation
@@ -261,12 +249,7 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _sub(code, i, vars) {
-        var index = code[i + 2];
-
-        vars[index] -= vars[code[i + 1]];
-        if (vars[index] < 0) {
-            vars[index] = 0;
-        }
+        vars[code[i + 2]] -= vars[code[i + 1]];
     }
     /**
      * 'read' command handler. Reads one number from the memory by index.

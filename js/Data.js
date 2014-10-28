@@ -1,6 +1,7 @@
 /**
  * TODO: describe this module. It's used for increase organism intellect
  * TODO: every new data set should be more complicated then previous
+ * TODO: left array - in data, right array - out data
  *
  * @author DeadbraiN
  */

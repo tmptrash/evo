@@ -9,18 +9,11 @@ Evo.Organism = (function () {
      * @param {Array} out Output stream
      * @param {Array} data Data set
      * @param {Number} i Index of current data set
-     * @param {Number} passed Amount of passed data sets on previous iteration
-     * @return {Number}
+     * @return {Boolean}
      * @private
      */
-    function _getPassed(out, data, i, passed) {
-        var d;
-        var dl;
-
-        for (d = 0, dl = data.length; d <= i; d += 2) {
-
-        }
-        return out[0] === 1;
+    function _getPassed(out, data, i) {
+        return out.join('').indexOf(data.join('')) !== -1;
     }
     /**
      * Prints a report about last mutations iteration. This report
@@ -42,6 +35,7 @@ Evo.Organism = (function () {
 
     return {
         /**
+         * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop
          * Starts organism to leave on
          */
         live: function () {
@@ -54,12 +48,16 @@ Evo.Organism = (function () {
             var getLabels = Evo.Interpreter.getLabels;
             var getLength = Evo.Interpreter.getLength;
             var data      = Evo.Data;
-            var passed;
-            var oldPassed = 0;
+            var clever;
+            var i;
             var d;
-            var dl;
+            var l;
 
-            for (d = 0, dl = data.length; d < dl; d += 2) {
+            //
+            // This loop checks if organism passes all data tests
+            //
+            for (d = 0, l = data.length; d < l; d += 2) {
+                clever = false;
                 //
                 // This is a main loop. Here organism checks if
                 // last mutation do the job: generates correct
@@ -68,21 +66,29 @@ Evo.Organism = (function () {
                 // TODO: Think about ability to get state of organism:
                 // TODO: memory dump, code text and so on.
                 //
-                for (var i = 0; i < 1000; i++) {
+                //while (!clever) {
+                for (var k = 0; k < 1; k++) {
                     mutate(code, getLabels(), getLength());
                     //
-                    // This is how we set initial value to the organism's memory.
-                    // It should read this and put the result into the output stream.
+                    // Assume that after current mutation our organism is clever
                     //
-                    mem.set(data[d], 0);
-                    run(code, mem, out);
-
-                    passed = _getPassed(out, data, d, oldPassed);
-                    if (passed <= oldPassed) {
-                        rollback(code);
-                        break;
+                    clever = true;
+                    //
+                    // This loop checks all previous data sets. They should be passed.
+                    //
+                    for (i = 0; i <= d; i += 2) {
+                        //
+                        // This is how we set initial value to the organism's memory.
+                        // It should read this and put the result into the output stream.
+                        //
+                        mem.set(data[i], 0);
+                        run(code, mem, out);
+                        if (!_getPassed(out, data, i)) {
+                            rollback(code);
+                            clever = false;
+                            break;
+                        }
                     }
-                    oldPassed = passed;
                 }
                 _printReport(out, code, getLength());
                 //
