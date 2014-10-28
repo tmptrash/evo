@@ -2,6 +2,7 @@
  * TODO: describe this module: mutations, random generator,
  * TODO: accurate mutations (only correct commands and it's
  * TODO: parameters may be generated).
+ * TODO: Add examples of command for all generators like _set, _move,...
  *
  * @author DeadbraiN
  */
@@ -25,9 +26,13 @@ Evo.Mutator = (function () {
      */
     var _rnd = Math.random;
     /**
-     * {Object} map of labels. Key - label id, value - it's script index
+     * {Number} Amount of labels in binary script
      */
-    var _labels = null;
+    var _labelsLen = null;
+    /**
+     * {Number} Amount of variables
+     */
+    var _varsLen = null;
     /**
      * {Array} All available mutations, which will be used
      * for random generator.
@@ -81,7 +86,7 @@ Evo.Mutator = (function () {
         //
         // This formula means random boolean number 0 or 1
         //
-        return _floor(_rnd() * 2) ? _keys(_labels).length : 0;
+        return _floor(_rnd() * 2) ? _labelsLen : 0;
     }
 
     /**
@@ -103,7 +108,11 @@ Evo.Mutator = (function () {
      * @private
      */
     function _set(code, i) {
-        code.set([_createLabel(), 0, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //
+        // +1 means that rare one new variable will be added
+        //
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 0, _createNumber(), _floor(_rnd() * _varsLen) + 1, 0], i || _codeLen);
     }
     /**
      * Generates command 'move' with random arguments. This command may
@@ -117,7 +126,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _move(code, i) {
-        code.set([_createLabel(), 1, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 1, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'inc' with random arguments. This command may
@@ -131,7 +141,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _inc(code, i) {
-        code.set([_createLabel(), 2, _createNumber(), 0, 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 2, _floor(_rnd() * _varsLen), 0, 0], i || _codeLen);
     }
     /**
      * Generates command 'dec' with random arguments. This command may
@@ -145,7 +156,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _dec(code, i) {
-        code.set([_createLabel(), 3, _createNumber(), 0, 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 3, _floor(_rnd() * _varsLen), 0, 0], i || _codeLen);
     }
     /**
      * Generates command 'add' with random arguments. This command may
@@ -159,7 +171,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _add(code, i) {
-        code.set([_createLabel(), 4, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 4, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'sub' with random arguments. This command may
@@ -173,7 +186,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _sub(code, i) {
-        code.set([_createLabel(), 5, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 5, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'read' with random arguments. This command may
@@ -187,7 +201,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _read(code, i) {
-        code.set([_createLabel(), 6, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 6, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'write' with random arguments. This command may
@@ -201,7 +216,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _write(code, i) {
-        code.set([_createLabel(), 7, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 7, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'jump' with random arguments. This command may
@@ -215,7 +231,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _jump(code, i) {
-        code.set([_createLabel(), 8, _createNumber(), 0, 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 8, _floor(_rnd() * _varsLen), 0, 0], i || _codeLen);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -229,7 +246,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _jumpg(code, i) {
-        code.set([_createLabel(), 9, _createNumber(), _createNumber(), _createNumber()], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i || _codeLen);
     }
     /**
      * Generates command 'jumpl' with random arguments. This command may
@@ -243,7 +261,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _jumpl(code, i) {
-        code.set([_createLabel(), 10, _createNumber(), _createNumber(), _createNumber()], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i || _codeLen);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -257,7 +276,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _jumpe(code, i) {
-        code.set([_createLabel(), 11, _createNumber(), _createNumber(), _createNumber()], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i || _codeLen);
     }
     /**
      * Generates command 'jumpz' with random arguments. This command may
@@ -271,7 +291,8 @@ Evo.Mutator = (function () {
      * @private
      */
     function _jumpz(code, i) {
-        code.set([_createLabel(), 12, _createNumber(), _createNumber(), 0], i || _codeLen);
+        //noinspection JSCheckFunctionSignatures
+        code.set([_createLabel(), 12, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'jumpn' with random arguments. This command may
@@ -285,7 +306,7 @@ Evo.Mutator = (function () {
      * @private
      */
     function _jumpn(code, i) {
-        code.set([_createLabel(), 13, _createNumber(), _createNumber(), 0], i || _codeLen);
+        code.set([_createLabel(), 13, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i || _codeLen);
     }
     /**
      * Generates command 'echo' with random arguments. This command may
@@ -299,7 +320,7 @@ Evo.Mutator = (function () {
      * @private
      */
     function _echo(code, i) {
-        code.set([_createLabel(), 14, _createNumber(), 0, 0], i || _codeLen);
+        code.set([_createLabel(), 14, _floor(_rnd() * _varsLen), 0, 0], i || _codeLen);
     }
 
 
@@ -308,16 +329,18 @@ Evo.Mutator = (function () {
          * Makes one mutation in code
          * @param {Uint16Array} code Script code in binary format
          * @param {Object} labels Labels map
+         * @param {Array} varsLen Amount of variables
          * @param {Number} codeLen
          * Segments are: label, command, arguments,...
          */
-        mutate: function (code, labels, codeLen) {
+        mutate: function (code, labels, varsLen, codeLen) {
             var segs = Evo.LINE_SEGMENTS;
             //
             // This labels map will be used for generating new unique label ids
             //
-            _labels  = labels;
-            _codeLen = codeLen;
+            _labelsLen = _keys(labels).length;
+            _codeLen   = codeLen;
+            _varsLen   = varsLen;
 
             //
             // This check means that we need to generate new command or mutate
@@ -353,6 +376,7 @@ Evo.Mutator = (function () {
             if (_atTheEnd) {
                 for (i = 0, l = segs; i < l; i++) {empty[i] = 0;}
                 code.set(empty, _codeLen - segs);
+                _codeLen -= segs;
             } else {
                 code.set(_lastLine, _lastIndex);
             }

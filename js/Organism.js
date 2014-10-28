@@ -39,15 +39,17 @@ Evo.Organism = (function () {
          * Starts organism to leave on
          */
         live: function () {
-            var mem       = new Uint16Array(Evo.MAX_NUMBER);
-            var code      = new Uint16Array(Evo.MAX_NUMBER);
-            var out       = [];
-            var mutate    = Evo.Mutator.mutate;
-            var rollback  = Evo.Mutator.rollback;
-            var run       = Evo.Interpreter.run;
-            var getLabels = Evo.Interpreter.getLabels;
-            var getLength = Evo.Interpreter.getLength;
-            var data      = Evo.Data;
+            var mem        = new Uint16Array(Evo.MAX_NUMBER);
+            var code       = new Uint16Array(Evo.MAX_NUMBER);
+            var out        = [];
+            var mutate     = Evo.Mutator.mutate.bind(Evo.Mutator);
+            var rollback   = Evo.Mutator.rollback.bind(Evo.Mutator);
+            var analyze    = Evo.Interpreter.analyze.bind(Evo.Interpreter);
+            var run        = Evo.Interpreter.run.bind(Evo.Interpreter);
+            var getLabels  = Evo.Interpreter.getLabels.bind(Evo.Interpreter);
+            var getLength  = Evo.Interpreter.getLength.bind(Evo.Interpreter);
+            var getVarsLen = Evo.Interpreter.getVarsLen.bind(Evo.Interpreter);
+            var data       = Evo.Data;
             var clever;
             var i;
             var d;
@@ -67,8 +69,8 @@ Evo.Organism = (function () {
                 // TODO: memory dump, code text and so on.
                 //
                 //while (!clever) {
-                for (var k = 0; k < 1; k++) {
-                    mutate(code, getLabels(), getLength());
+                for (var k = 0; k < 1000; k++) {
+                    mutate(code, getLabels(), getVarsLen(), getLength());
                     //
                     // Assume that after current mutation our organism is clever
                     //
@@ -85,6 +87,7 @@ Evo.Organism = (function () {
                         run(code, mem, out);
                         if (!_getPassed(out, data, i)) {
                             rollback(code);
+                            analyze(code, mem, out);
                             clever = false;
                             break;
                         }

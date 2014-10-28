@@ -93,13 +93,9 @@ Evo.Interpreter = (function () {
      */
     var _LINE_SEGMENTS = Evo.LINE_SEGMENTS;
     /**
-     * {Number} Shortcut for Evo.MAX_NUMBER
-     */
-    var _MAX_NUMBER = Evo.MAX_NUMBER;
-    /**
      * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
-    var _labels = {};
+    var _labels = {0: 0};
     /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command
@@ -120,9 +116,14 @@ Evo.Interpreter = (function () {
      *     0000 0001 0002 0004 0000
      *          move two  four unused
      *
-     *  It's important that all variables are initialized by zero value.
+     *  It's important to have at least one zero variable, because all new generated
+     *  command will be referenced to this zero variable as well.
      */
-    var _vars = new Uint16Array(_MAX_NUMBER);
+    var _vars = new Uint16Array(Evo.MAX_NUMBER);
+    /**
+     * {Number} Amount of variables within _vars
+     */
+    var _varsLen = 1;
     /**
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, because all scripts will be broken.
@@ -183,7 +184,12 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _set(code, i, vars) {
-        vars[code[i + 2]] = code[i + 1];
+        var varIndex = code[i + 2];
+
+        vars[varIndex] = code[i + 1];
+        if (varIndex >= _varsLen) {
+            _varsLen = varIndex;
+        }
     }
     /**
      * 'move' command handler. Moves value from first argument to second one.
@@ -378,19 +384,15 @@ Evo.Interpreter = (function () {
     //
     return {
         /**
-         * Runs an interpreter till last script code line will be finished.
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
          * @param {Array} out Output stream
          */
-        run: function (code, mem, out) {
+        analyze: function (code, mem, out) {
             var i;
             var l      = code.length;
-            var vars   = _vars;
             var labels = _labels;
             var segs   = _LINE_SEGMENTS;
-            var cmds   = _cmds;
-            var line;
 
             //
             // Memory block, which is set from outside and
@@ -408,8 +410,24 @@ Evo.Interpreter = (function () {
             _codeLen = null;
             for (i = 0; i < l; i += segs) {
                 if (code[i]) {labels[code[i]] = i + 1;} // + 1 means index of command and not a label
-                if (_codeLen === null && _emptyLine(code, i)) {_codeLen = i;}
+                if (_codeLen === null && _emptyLine(code, i)) {_codeLen = i; break;}
             }
+        },
+
+        /**
+         * Runs an interpreter till last script code line will be finished.
+         * @param {Uint16Array} code Lines of code in binary format
+         * @param {Uint16Array} mem Memory for read and write commands
+         * @param {Array} out Output stream
+         */
+        run: function (code, mem, out) {
+            var i;
+            var vars = _vars;
+            var segs = _LINE_SEGMENTS;
+            var cmds = _cmds;
+            var line;
+
+            this.analyze(code, mem, out);
             //
             // This is a main loop, where all commands are ran.
             // i === 1, because we loop thought commands (not labels)
@@ -445,10 +463,10 @@ Evo.Interpreter = (function () {
 
         /**
          * @readonly
-         * @return {Uint16Array} Returns variable values array
+         * @returns {Number} Returns amount of real variables
          */
-        getVars: function () {
-            return _vars;
+        getVarsLen: function () {
+            return _varsLen;
         }
     };
 })();
