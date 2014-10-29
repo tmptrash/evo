@@ -71,11 +71,6 @@ Evo.Mutator = (function () {
      * {Number} Index of last mutated binary script line
      */
     var _lastIndex = 0;
-    /**
-     * {Boolean} Sets to true if mutation method has added new
-     * line at the end of binary script.
-     */
-    var _atTheEnd = false;
 
 
     /**
@@ -347,12 +342,16 @@ Evo.Mutator = (function () {
             //
             // This check means that we need to generate new command or mutate
             // existing. New command will be added as are as more command we
-            // already have.
+            // already have. Note, that every time we need to create new Uint16Array
+            // we must create new Uint16Array instance, because subarray() method
+            // returns not a copy, but reference to array part. So you may change
+            // one array by changing other one.
             //
             // TODO: we need to check if code array is full and reallocate it's size * 2
             if (_floor(_rnd() * codeLen) === 1 || !codeLen) {
+                _lastIndex = _codeLen;
+                _lastLine = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, null);
-                _atTheEnd = true;
                 _codeLen += segs;
             } else {
                 //
@@ -360,9 +359,8 @@ Evo.Mutator = (function () {
                 // It will be used for rollback.
                 //
                 _lastIndex = _floor(_rnd() * (codeLen / segs)) * segs;
-                _lastLine = code.subarray(_lastIndex, segs);
+                _lastLine = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
-                _atTheEnd = false;
             }
         },
 
@@ -371,18 +369,7 @@ Evo.Mutator = (function () {
          * @param {Uint16Array} code Script code in binary format
          */
         rollback: function (code) {
-            var segs  = Evo.LINE_SEGMENTS;
-            var empty = [];
-            var i;
-            var l;
-
-            if (_atTheEnd) {
-                for (i = 0, l = segs; i < l; i++) {empty[i] = 0;}
-                code.set(empty, _codeLen - segs);
-                _codeLen -= segs;
-            } else {
-                code.set(_lastLine, _lastIndex);
-            }
+            code.set(_lastLine, _lastIndex);
         }
     };
 })();

@@ -13,7 +13,7 @@ Evo.Organism = (function () {
      * @private
      */
     function _getPassed(out, data, i) {
-        return out.join('').indexOf(data.join('')) !== -1;
+        return out.join(',').indexOf(data[i].join(',')) !== -1;
     }
     /**
      * Prints a report about last mutations iteration. This report
