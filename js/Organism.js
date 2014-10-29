@@ -82,6 +82,10 @@ Evo.Organism = (function () {
                     //
                     for (i = 0; i <= d; i += 2) {
                         //
+                        // Output stream should be cleared for every new data set
+                        //
+                        out = [];
+                        //
                         // This is how we set initial value to the organism's memory.
                         // It should read this and put the result into the output stream.
                         //
@@ -107,10 +111,6 @@ Evo.Organism = (function () {
                     }
                 }
                 _printReport(out, code, getLength());
-                //
-                // Output stream should be cleared for every new data set
-                //
-                out = [];
             }
 
             console.log('All tests were done!');
