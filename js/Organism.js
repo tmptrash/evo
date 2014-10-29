@@ -13,20 +13,24 @@ Evo.Organism = (function () {
      * @private
      */
     function _getPassed(out, data, i) {
-        return out.join(',').indexOf(data[i].join(',')) !== -1;
+        var outStr  = ',' + out.join(',') + ',';
+        var dataStr = ',' + data[i + 1].join(',') + ',';
+
+        return outStr.indexOf(dataStr) !== -1;
     }
     /**
      * Prints a report about last mutations iteration. This report
      * means, that one more data set was processed and new script
      * was created for that. All previous data sets were also
      * processed correctly.
-     * @apram {Array} input Input data for organism
-     * @param {Array} out Output stream
+     * @param {Array} inData Input data for test
+     * @param {Array} outData Output data for test
+     * @param {Array} out Output stream of organism
      * @param {Uint16Array} code Current binary script
      * @param {Number} len Length of binary script
      */
-    function _printReport(input, out, code, len) {
-        console.log('in :[%s] out [%s]', input + '', out + '');
+    function _printReport(inData, outData, out, code, len) {
+        console.log('in [%s] out [%s] stream [%s]', inData + '', outData + '', out + '');
         //
         // TODO: here should be a converter from binary script to readable assembler
         //
@@ -111,7 +115,7 @@ Evo.Organism = (function () {
                         }
                     }
                 }
-                _printReport(data[d], out, code, getLength());
+                _printReport(data[d], data[d + 1], out, code, getLength());
             }
 
             console.log('All tests were done!');

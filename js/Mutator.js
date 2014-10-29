@@ -81,7 +81,7 @@ Evo.Mutator = (function () {
         //
         // This formula means random boolean number 0 or 1
         //
-        return _floor(_rnd() * 2) ? _labelsLen : 0;
+        return _floor(_rnd() * 2) ? _labelsLen || 1 : 0;
     }
 
     /**

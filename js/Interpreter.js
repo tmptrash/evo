@@ -95,7 +95,7 @@ Evo.Interpreter = (function () {
     /**
      * {Object} Labels map. Key - label name, value - label line index started from zero.
      */
-    var _labels = {0: 0};
+    var _labels = {};
     /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command
@@ -412,7 +412,7 @@ Evo.Interpreter = (function () {
             // set to amount of numbers in binary script.
             //
             _codeLen = null;
-            _labels  = {0: 0};
+            _labels  = {};
             for (i = 0; i < l; i += segs) {
                 if (code[i]) {labels[code[i]] = i + 1;} // + 1 means index of command and not a label
                 if (_codeLen === null && _emptyLine(code, i)) {_codeLen = i; break;}
