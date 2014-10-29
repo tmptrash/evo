@@ -50,6 +50,8 @@ Evo.Organism = (function () {
             var getLength  = Evo.Interpreter.getLength.bind(Evo.Interpreter);
             var getVarsLen = Evo.Interpreter.getVarsLen.bind(Evo.Interpreter);
             var data       = Evo.Data;
+            var floor      = Math.floor;
+            var rnd        = Math.random;
             var clever;
             var i;
             var d;
@@ -68,8 +70,8 @@ Evo.Organism = (function () {
                 // TODO: Think about ability to get state of organism:
                 // TODO: memory dump, code text and so on.
                 //
-                //while (!clever) {
-                for (var k = 0; k < 1; k++) {
+                while (!clever) {
+                //for (var k = 0; k < 1000; k++) {
                     mutate(code, getLabels(), getVarsLen(), getLength());
                     //
                     // Assume that after current mutation our organism is clever
@@ -86,8 +88,15 @@ Evo.Organism = (function () {
                         mem.set(data[i], 0);
                         run(code, mem, out);
                         if (!_getPassed(out, data, i)) {
-                            rollback(code);
-                            analyze(code, mem, out);
+                            //
+                            // This condition turns on a capability to 'forget'
+                            // reverting of invalid mutations. It's a rarely process
+                            // and needed for slowly script size increasing
+                            //
+                            if (floor(rnd() * getLength()) !== 1) {
+                                rollback(code);
+                                analyze(code, mem, out);
+                            }
                             clever = false;
                             break;
                         }
