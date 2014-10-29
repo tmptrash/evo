@@ -70,8 +70,8 @@ Evo.Organism = (function () {
                 // TODO: Think about ability to get state of organism:
                 // TODO: memory dump, code text and so on.
                 //
-                while (!clever) {
-                //for (var k = 0; k < 1000; k++) {
+                //while (!clever) {
+                for (var k = 0; k < 1000; k++) {
                     mutate(code, getLabels(), getVarsLen(), getLength());
                     //
                     // Assume that after current mutation our organism is clever
@@ -95,6 +95,10 @@ Evo.Organism = (function () {
                             //
                             if (floor(rnd() * getLength()) !== 1) {
                                 rollback(code);
+                                //
+                                // We need to analyze (not run) our code to update
+                                // internal fields: varsLens, codeLen,...
+                                //
                                 analyze(code, mem, out);
                             }
                             clever = false;
