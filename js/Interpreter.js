@@ -407,6 +407,7 @@ Evo.Interpreter = (function () {
             // We need to reset all variables states for every new run
             //
             _varsLen = 1;
+            _vars[0] = 0;
             //
             // All labels will be saved in _labels field. _codeLen field will be
             // set to amount of numbers in binary script.
