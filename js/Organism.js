@@ -70,8 +70,8 @@ Evo.Organism = (function () {
                 // TODO: Think about ability to get state of organism:
                 // TODO: memory dump, code text and so on.
                 //
-                //while (!clever) {
-                for (var k = 0; k < 1000; k++) {
+                while (!clever) {
+                //for (var k = 0; k < 1000; k++) {
                     mutate(code, getLabels(), getVarsLen(), getLength());
                     //
                     // Assume that after current mutation our organism is clever
@@ -112,6 +112,8 @@ Evo.Organism = (function () {
                 //
                 out = [];
             }
+
+            console.log('All tests were done!');
         }
     };
 })();
