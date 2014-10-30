@@ -9,5 +9,5 @@ var Evo = {
     /**
      * {Number} Amount of segments in one binary script line: label command arg1 arg2 arg3
      */
-    LINE_SEGMENTS: 5
+    LINE_SEGMENTS: 4
 };
