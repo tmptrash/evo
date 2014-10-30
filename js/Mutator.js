@@ -77,15 +77,22 @@ Evo.Mutator = (function () {
      * Returns new generated label id or 0 if no label
      * @return {Number}
      */
-    function _createLabel() {
+    function _createLabel(code, i) {
+        //
+        // If current line already contains label, then leave it
+        //
+        if (i !== _codeLen) {
+            return code[i];
+        }
+
         //
         // This formula means random boolean number 0 or 1
         //
-        return _floor(_rnd() * 2) ? _labelsLen || 1 : 0;
+        return _floor(_rnd() * 2) ? _labelsLen + 1 : 0;
     }
 
     /**
-     * Create number randomly in range [0..._MAX_NUMBER]
+     * Create number randomly in range [0..._MAX_NUMBER]x
      * @return {Number}
      */
     function _createNumber() {
@@ -107,7 +114,7 @@ Evo.Mutator = (function () {
         // +1 means that rare one new variable will be added
         //
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 0, _createNumber(), _floor(_rnd() * _varsLen) + 1, 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 0, _createNumber(), _floor(_rnd() * _varsLen) + 1, 0], i);
     }
     /**
      * Generates command 'move' with random arguments. This command may
@@ -122,7 +129,7 @@ Evo.Mutator = (function () {
      */
     function _move(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 1, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 1, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'inc' with random arguments. This command may
@@ -137,7 +144,7 @@ Evo.Mutator = (function () {
      */
     function _inc(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 2, _floor(_rnd() * _varsLen), 0, 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 2, _floor(_rnd() * _varsLen), 0, 0], i);
     }
     /**
      * Generates command 'dec' with random arguments. This command may
@@ -152,7 +159,7 @@ Evo.Mutator = (function () {
      */
     function _dec(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 3, _floor(_rnd() * _varsLen), 0, 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 3, _floor(_rnd() * _varsLen), 0, 0], i);
     }
     /**
      * Generates command 'add' with random arguments. This command may
@@ -167,7 +174,7 @@ Evo.Mutator = (function () {
      */
     function _add(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 4, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 4, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'sub' with random arguments. This command may
@@ -182,7 +189,7 @@ Evo.Mutator = (function () {
      */
     function _sub(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 5, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 5, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'read' with random arguments. This command may
@@ -197,7 +204,7 @@ Evo.Mutator = (function () {
      */
     function _read(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 6, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 6, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'write' with random arguments. This command may
@@ -212,7 +219,7 @@ Evo.Mutator = (function () {
      */
     function _write(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 7, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 7, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'jump' with random arguments. This command may
@@ -227,7 +234,7 @@ Evo.Mutator = (function () {
      */
     function _jump(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 8, _floor(_rnd() * _varsLen), 0, 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 8, _floor(_rnd() * _varsLen), 0, 0], i);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -242,7 +249,7 @@ Evo.Mutator = (function () {
      */
     function _jumpg(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i);
     }
     /**
      * Generates command 'jumpl' with random arguments. This command may
@@ -257,7 +264,7 @@ Evo.Mutator = (function () {
      */
     function _jumpl(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -272,7 +279,7 @@ Evo.Mutator = (function () {
      */
     function _jumpe(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i);
     }
     /**
      * Generates command 'jumpz' with random arguments. This command may
@@ -287,7 +294,7 @@ Evo.Mutator = (function () {
      */
     function _jumpz(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 12, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 12, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i);
     }
     /**
      * Generates command 'jumpn' with random arguments. This command may
@@ -302,7 +309,7 @@ Evo.Mutator = (function () {
      */
     function _jumpn(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 13, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 13, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i);
     }
     /**
      * Generates command 'echo' with random arguments. This command may
@@ -317,7 +324,7 @@ Evo.Mutator = (function () {
      */
     function _echo(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(), 14, _floor(_rnd() * _varsLen), 0, 0], i === null ? _codeLen : i);
+        code.set([_createLabel(code, i), 14, _floor(_rnd() * _varsLen), 0, 0], i);
     }
 
 
@@ -351,7 +358,7 @@ Evo.Mutator = (function () {
             if (_floor(_rnd() * codeLen) === 1 || !codeLen) {
                 _lastIndex = _codeLen;
                 _lastLine = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
-                _cmds[_floor(_rnd() * _cmdsAmount)](code, null);
+                _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
                 _codeLen += segs;
             } else {
                 //
