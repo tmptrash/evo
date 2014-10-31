@@ -361,7 +361,7 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _echo(code, i, vars) {
-        return _out.push(vars[code[i + 1]]);
+        _out.push(vars[code[i + 1]]);
     }
 
 
