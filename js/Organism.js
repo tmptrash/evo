@@ -12,7 +12,7 @@ Evo.Organism = (function () {
      * @return {Boolean}
      * @private
      */
-    function _getPassed(out, data, i) {
+    function _testPassed(out, data, i) {
         var outStr  = ',' + out.join(',') + ',';
         var dataStr = ',' + data[i + 1].join(',') + ',';
 
@@ -51,7 +51,6 @@ Evo.Organism = (function () {
             var rollback   = Evo.Mutator.rollback.bind(Evo.Mutator);
             var analyze    = Evo.Interpreter.analyze.bind(Evo.Interpreter);
             var run        = Evo.Interpreter.run.bind(Evo.Interpreter);
-            var getLabels  = Evo.Interpreter.getLabels.bind(Evo.Interpreter);
             var getCodeLen = Evo.Interpreter.getCodeLen.bind(Evo.Interpreter);
             var getVarsLen = Evo.Interpreter.getVarsLen.bind(Evo.Interpreter);
             var data       = Evo.Data;
@@ -77,7 +76,7 @@ Evo.Organism = (function () {
                 //
                 while (!clever) {
                 //for (var k = 0; k < 1000; k++) {
-                    mutate(code, getLabels(), getVarsLen(), getCodeLen());
+                    mutate(code, getVarsLen(), getCodeLen());
                     //
                     // Assume that after current mutation our organism is clever
                     //
@@ -96,7 +95,7 @@ Evo.Organism = (function () {
                         //
                         mem.set(data[i], 0);
                         run(code, mem, out);
-                        if (!_getPassed(out, data, i)) {
+                        if (!_testPassed(out, data, i)) {
                             //
                             // This condition turns on a capability to 'forget'
                             // reverting of invalid mutations. It's a rarely process

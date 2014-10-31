@@ -8,36 +8,28 @@
  */
 Evo.Mutator = (function () {
     /**
-     * {Number} Max word number + 1
+     * {Number} Max word number + 1. + 1 is needed for randomizer.
      */
     var _MAX_NUMBER_PLUS_ONE = Evo.MAX_NUMBER + 1;
-    /**
-     * {Function} Object.keys method shortcut
-     */
-    var _keys = Object.keys;
     /**
      * {Function} Math.floor() method shortcut
      * @type {Function}
      * @private
      */
-    var _floor = Math.floor;
+    var _floor      = Math.floor;
     /**
      * {Function} MAth.random() method shortcut
      */
-    var _rnd = Math.random;
-    /**
-     * {Number} Amount of labels in binary script
-     */
-    var _labelsLen = null;
+    var _rnd        = Math.random;
     /**
      * {Number} Amount of variables
      */
-    var _varsLen = null;
+    var _varsLen    = null;
     /**
      * {Array} All available mutations, which will be used
      * for random generator.
      */
-    var _cmds = [
+    var _cmds       = [
         _set,   // 0
         _move,  // 1
         _inc,   // 2
@@ -61,60 +53,36 @@ Evo.Mutator = (function () {
     /**
      * {Number} Amount of code lines in current binary script
      */
-    var _codeLen = null;
+    var _codeLen    = null;
     /**
      * {Array} Binary script code line, before mutation. It's
      * used for reverting.
      */
-    var _lastLine = [];
+    var _lastLine   = [];
     /**
      * {Number} Index of last mutated binary script line
      */
-    var _lastIndex = 0;
-
-
+    var _lastIndex  = 0;
     /**
-     * Returns new generated label id or 0 if no label
-     * @return {Number}
+     * {Number} Amount of one code line segments. Like command, arg1, arg2, arg3
      */
-    function _createLabel(code, i) {
-        //
-        // If current line already contains label, then leave it
-        //
-        if (i !== _codeLen) {
-            return code[i];
-        }
+    var _segs       = Evo.LINE_SEGMENTS;
 
-        //
-        // This formula means random boolean number 0 or 1
-        //
-        return _floor(_rnd() * 2) ? _labelsLen + 1 : 0;
-    }
 
     /**
-     * Create number randomly in range [0..._MAX_NUMBER]x
-     * @return {Number}
-     */
-    function _createNumber() {
-        return _floor(_rnd() * _MAX_NUMBER_PLUS_ONE);
-    }
-    /**
-     * Generates command 'set' with random arguments. This command may
+     * Generates 'set' command with random arguments. This command may
      * be added to the end or in any script position, removing
-     * previous command at this position.
+     * previous command at this position. Only this method may create new
+     * variables (new indexes).
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _set(code, i) {
         //
         // +1 means that rare one new variable will be added
         //
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 0, _createNumber(), _floor(_rnd() * _varsLen) + 1, 0], i);
+        code.set([0, _floor(_rnd() * _MAX_NUMBER_PLUS_ONE), _floor(_rnd() * _varsLen) + 1, 0], i);
     }
     /**
      * Generates command 'move' with random arguments. This command may
@@ -122,14 +90,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _move(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 1, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([1, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'inc' with random arguments. This command may
@@ -137,14 +101,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _inc(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 2, _floor(_rnd() * _varsLen), 0, 0], i);
+        code.set([2, _floor(_rnd() * _varsLen), 0, 0], i);
     }
     /**
      * Generates command 'dec' with random arguments. This command may
@@ -152,14 +112,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _dec(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 3, _floor(_rnd() * _varsLen), 0, 0], i);
+        code.set([3, _floor(_rnd() * _varsLen), 0, 0], i);
     }
     /**
      * Generates command 'add' with random arguments. This command may
@@ -167,14 +123,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _add(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 4, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([4, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'sub' with random arguments. This command may
@@ -182,14 +134,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _sub(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 5, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([5, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'read' with random arguments. This command may
@@ -197,14 +145,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _read(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 6, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([6, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'write' with random arguments. This command may
@@ -212,14 +156,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _write(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 7, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([7, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'jump' with random arguments. This command may
@@ -227,14 +167,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _jump(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 8, _floor(_rnd() * _varsLen), 0, 0], i);
+        code.set([8, _floor(_rnd() * _varsLen), 0, 0], i);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -242,14 +178,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _jumpg(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i);
+        code.set([9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i], i);
     }
     /**
      * Generates command 'jumpl' with random arguments. This command may
@@ -257,14 +189,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _jumpl(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i);
+        code.set([10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i], i);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -272,14 +200,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _jumpe(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen)], i);
+        code.set([11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i], i);
     }
     /**
      * Generates command 'jumpz' with random arguments. This command may
@@ -287,14 +211,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _jumpz(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 12, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i);
+        code.set([12, _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i, 0], i);
     }
     /**
      * Generates command 'jumpn' with random arguments. This command may
@@ -302,14 +222,10 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _jumpn(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 13, _floor(_rnd() * _varsLen), _floor(_rnd() * _labelsLen), 0], i);
+        code.set([13, _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i, 0], i);
     }
     /**
      * Generates command 'echo' with random arguments. This command may
@@ -317,38 +233,29 @@ Evo.Mutator = (function () {
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
-     * If this index is equal to null then new set command
-     * should be created. Otherwise (i !== null) existing set command
-     * will be mutated.
-     * @private
      */
     function _echo(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([_createLabel(code, i), 14, _floor(_rnd() * _varsLen), 0, 0], i);
+        code.set([14, _floor(_rnd() * _varsLen), 0, 0], i);
     }
 
 
     return {
         /**
-         * Makes one mutation in code
+         * Makes one mutation in code. It means, that some code line will be
+         * changed by random command and it's arguments.
          * @param {Uint16Array} code Script code in binary format
-         * @param {Object} labels Labels map
          * @param {Array} varsLen Amount of variables
          * @param {Number} codeLen
-         * Segments are: label, command, arguments,...
          */
-        mutate: function (code, labels, varsLen, codeLen) {
+        mutate: function (code, varsLen, codeLen) {
             var segs = Evo.LINE_SEGMENTS;
-            //
-            // This labels map will be used for generating new unique label ids
-            //
-            _labelsLen = _keys(labels).length;
-            _codeLen   = codeLen;
-            _varsLen   = varsLen;
 
+            _codeLen = codeLen;
+            _varsLen = varsLen;
             //
             // This check means that we need to generate new command or mutate
-            // existing. New command will be added as are as more command we
+            // existing. New command will be added as rare as more command we
             // already have. Note, that every time we need to create new Uint16Array
             // we must create new Uint16Array instance, because subarray() method
             // returns not a copy, but reference to array part. So you may change
@@ -370,12 +277,12 @@ Evo.Mutator = (function () {
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
             }
         },
-
         /**
-         * Rollbacks last mutation
+         * Rollbacks last mutation created by mutate() method.
          * @param {Uint16Array} code Script code in binary format
          */
         rollback: function (code) {
+            //noinspection JSCheckFunctionSignatures
             code.set(_lastLine, _lastIndex);
         }
     };
