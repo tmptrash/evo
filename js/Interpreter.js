@@ -370,6 +370,8 @@ Evo.Interpreter = (function () {
     //
     return {
         /**
+         * This is only a code analyzer. It initializes internal variables
+         * for script to run. run() method calls this one inside.
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
          * @param {Array} out Output stream
@@ -409,10 +411,10 @@ Evo.Interpreter = (function () {
          * @param {Array} out Output stream
          */
         run: function (code, mem, out) {
-            var i;
             var vars = _vars;
             var segs = _LINE_SEGMENTS;
             var cmds = _cmds;
+            var i;
             var line;
 
             this.analyze(code, mem, out);
@@ -436,7 +438,7 @@ Evo.Interpreter = (function () {
          * allocated size in array.
          * @return {Number}
          */
-        getLength: function () {
+        getCodeLen: function () {
             return _codeLen || 0;
         },
 

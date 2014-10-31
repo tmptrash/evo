@@ -52,7 +52,7 @@ Evo.Organism = (function () {
             var analyze    = Evo.Interpreter.analyze.bind(Evo.Interpreter);
             var run        = Evo.Interpreter.run.bind(Evo.Interpreter);
             var getLabels  = Evo.Interpreter.getLabels.bind(Evo.Interpreter);
-            var getLength  = Evo.Interpreter.getLength.bind(Evo.Interpreter);
+            var getCodeLen = Evo.Interpreter.getCodeLen.bind(Evo.Interpreter);
             var getVarsLen = Evo.Interpreter.getVarsLen.bind(Evo.Interpreter);
             var data       = Evo.Data;
             var floor      = Math.floor;
@@ -77,7 +77,7 @@ Evo.Organism = (function () {
                 //
                 while (!clever) {
                 //for (var k = 0; k < 1000; k++) {
-                    mutate(code, getLabels(), getVarsLen(), getLength());
+                    mutate(code, getLabels(), getVarsLen(), getCodeLen());
                     //
                     // Assume that after current mutation our organism is clever
                     //
@@ -102,7 +102,7 @@ Evo.Organism = (function () {
                             // reverting of invalid mutations. It's a rarely process
                             // and needed for slowly script size increasing
                             //
-                            if (floor(rnd() * getLength()) !== 1) {
+                            if (floor(rnd() * getCodeLen()) !== 1) {
                                 rollback(code);
                                 //
                                 // We need to analyze (not run) our code to update
@@ -115,7 +115,7 @@ Evo.Organism = (function () {
                         }
                     }
                 }
-                _printReport(data[d], data[d + 1], out, code, getLength());
+                _printReport(data[d], data[d + 1], out, code, getCodeLen());
             }
 
             console.log('All tests were done!');
