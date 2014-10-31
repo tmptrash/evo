@@ -41,18 +41,22 @@ Evo.Organism = (function () {
     return {
         /**
          * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop
-         * Starts organism to leave on
+         * Starts organism to leave on. Live means pass all data sets (tests) by
+         * finding specific binary script obtained by mutations.
          */
         live: function () {
-            var mem        = new Uint16Array(Evo.MAX_NUMBER);
-            var code       = new Uint16Array(Evo.MAX_NUMBER);
+            var maxNumber  = Evo.MAX_NUMBER;
+            var evoMutator = Evo.Mutator;
+            var evoInterpr = Evo.Interpreter;
+            var mem        = new Uint16Array(maxNumber);
+            var code       = new Uint16Array(maxNumber);
             var out        = [];
-            var mutate     = Evo.Mutator.mutate.bind(Evo.Mutator);
-            var rollback   = Evo.Mutator.rollback.bind(Evo.Mutator);
-            var analyze    = Evo.Interpreter.analyze.bind(Evo.Interpreter);
-            var run        = Evo.Interpreter.run.bind(Evo.Interpreter);
-            var getCodeLen = Evo.Interpreter.getCodeLen.bind(Evo.Interpreter);
-            var getVarsLen = Evo.Interpreter.getVarsLen.bind(Evo.Interpreter);
+            var mutate     = evoMutator.mutate.bind(evoMutator);
+            var rollback   = evoMutator.rollback.bind(evoMutator);
+            var analyze    = evoInterpr.analyze.bind(evoInterpr);
+            var run        = evoInterpr.run.bind(evoInterpr);
+            var getCodeLen = evoInterpr.getCodeLen.bind(evoInterpr);
+            var getVarsLen = evoInterpr.getVarsLen.bind(evoInterpr);
             var data       = Evo.Data;
             var floor      = Math.floor;
             var rnd        = Math.random;

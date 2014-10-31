@@ -422,7 +422,7 @@ Evo.Interpreter = (function () {
             // This is a main loop, where all commands are ran.
             // i === 1, because we loop thought commands
             //
-            i = 1;
+            i = 0;
             while (i < _codeLen) {
                 line = cmds[code[i]](code, i, vars);
                 if (line) {

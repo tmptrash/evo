@@ -170,7 +170,7 @@ Evo.Mutator = (function () {
      */
     function _jump(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([8, _floor(_rnd() * _varsLen), 0, 0], i);
+        code.set([8, (_floor(_rnd() * (_codeLen - i) / _segs) * _segs + i + _segs) || 1, 0, 0], i);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -181,7 +181,7 @@ Evo.Mutator = (function () {
      */
     function _jumpg(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i], i);
+        code.set([9, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i + _segs], i);
     }
     /**
      * Generates command 'jumpl' with random arguments. This command may
@@ -192,7 +192,7 @@ Evo.Mutator = (function () {
      */
     function _jumpl(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i], i);
+        code.set([10, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i + _segs], i);
     }
     /**
      * Generates command 'jumpg' with random arguments. This command may
@@ -203,7 +203,7 @@ Evo.Mutator = (function () {
      */
     function _jumpe(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i], i);
+        code.set([11, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i + _segs], i);
     }
     /**
      * Generates command 'jumpz' with random arguments. This command may
@@ -214,7 +214,7 @@ Evo.Mutator = (function () {
      */
     function _jumpz(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([12, _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i, 0], i);
+        code.set([12, _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i + _segs, 0], i);
     }
     /**
      * Generates command 'jumpn' with random arguments. This command may
@@ -225,7 +225,7 @@ Evo.Mutator = (function () {
      */
     function _jumpn(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([13, _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i, 0], i);
+        code.set([13, _floor(_rnd() * _varsLen), _floor(_rnd() * (_codeLen - i) / _segs) * _segs + i + _segs, 0], i);
     }
     /**
      * Generates command 'echo' with random arguments. This command may
