@@ -101,11 +101,11 @@ Evo.Code2Text = (function () {
             separator = separator || ' ';
             newLine   = newLine   || '\n';
 
-            return code.map(function (line) {
+            return code.map(function (line, idx) {
                 for (i = 0, l = line.length; i < l; i++) {
                     line[i] = _pad(line[i], padWidth);
                 }
-                return line.join(separator);
+                return _pad(idx + ':', 4) + line.join(separator);
             }).join(newLine);
         }
     };
