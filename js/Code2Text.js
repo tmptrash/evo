@@ -1,14 +1,37 @@
 /**
- * TODO: Describe this module in details
+ * Main idea of this module is to convert binary script to human
+ * readable assembler like text. For example, code like this:
+ *
+ *     0001 0002 0003
+ *
+ * Will be converted to:
+ *
+ *     move v2 v3
+ *
+ * Depending on parameters convert() method returns array,
+ * string or outputs the code with console. During convertation
+ * you may use padding. Padding means adding spaces at the end
+ * of source string if it's length is less then specified width.
+ * For example, string:
+ *
+ *     pad('set', 4);
+ *
+ * Will be transformed to:
+ *
+ *     'set '
+ *
+ * Dependencies:
+ *     Evo
  *
  * @author DeadbraiN
  */
 Evo.Code2Text = (function () {
     /**
-     * Adds spaces to the s string till width length
+     * Adds spaces to s string if the length of this string
+     * is less then width.
      * @param {String} s String to pad
      * @param {Number} width Width of string we need to obtain
-     * @return {String}
+     * @return {String} Padded string
      */
     function _pad(s, width) {
         var i;
@@ -29,16 +52,23 @@ Evo.Code2Text = (function () {
          *
          * There are some names are supported:
          *
-         *     'v' - variable
+         *     'v' - variable index
          *     'n' - number
+         *     'l' - line number
          *
-         * @param {Uint16Array} code
+         * @param {Uint16Array} code Binary script
+         * @return {Array} Array of lines. Every line is an
+         * array of segments. Example:
+         *
+         *     [['set', '123', '1'],...]
+         *
          */
         convert: function (code) {
-            var segs = Evo.LINE_SEGMENTS;
-            var v    = 'v';
-            var n    = 'n';
-            var cmds = [
+            var segs    = Evo.LINE_SEGMENTS;
+            var v       = 'v'; // variable name
+            var n       = 'n'; // number
+            var l       = 'l'; // line number
+            var cmds    = [
                 [ 'set',   n, v    ],
                 [ 'move',  v, v    ],
                 [ 'inc',   v       ],
@@ -47,12 +77,12 @@ Evo.Code2Text = (function () {
                 [ 'sub',   v, v    ],
                 [ 'read',  v, v    ],
                 [ 'write', v, v    ],
-                [ 'jump',  n       ],
-                [ 'jumpg', v, v, n ],
-                [ 'jumpl', v, v, n ],
-                [ 'jumpe', v, v, n ],
-                [ 'jumpz', v, n    ],
-                [ 'jumpn', v, n    ],
+                [ 'jump',  l       ],
+                [ 'jumpg', v, v, l ],
+                [ 'jumpl', v, v, l ],
+                [ 'jumpe', v, v, l ],
+                [ 'jumpz', v, l    ],
+                [ 'jumpn', v, l    ],
                 [ 'echo',  v       ]
             ];
             var strCode = [];
@@ -75,7 +105,17 @@ Evo.Code2Text = (function () {
                 // converts binary code to human
                 //
                 for (j = 1, jLen = cmd.length; j < jLen; j++) {
-                    line.push(cmd[j] === v ? v + code[i + j] : code[i + j]);
+                    switch (cmd[j]) {
+                        case v:
+                            line.push(v + code[i + j]);
+                            break;
+                        case l:
+                            line.push(l + code[i + j] / segs);
+                            break;
+                        default:
+                            line.push(code[i + j]);
+                            break;
+                    }
                 }
                 strCode.push(line);
             }
@@ -83,17 +123,19 @@ Evo.Code2Text = (function () {
             return strCode;
         },
         /**
-         * Formats array of line arrays. Example:
+         * Formats array of lines into human readable string. Example:
          *
-         *     [[cmd, arg1, arg2, arg3],...]
+         *     [['set', 3, 2]] -> 'set 3   v2  '
          *
          * @param {Array} code String based code lines. See example above
-         * @param {Number} padWidth Width of one code line segment like: command or argument
-         * @param {String=} separator Separator string between commands and args
-         * @param {String=} newLine Symbol for lines break
-         * @return {String} Lines of code separated by '\n\' symbol
+         * @param {Number=} padWidth Width of one code line segment like
+         * command or argument. 5 by default.
+         * @param {String=} separator Separator string between commands
+         * and args. ' ' by default.
+         * @param {String=} newLine Symbol for lines break. '\n' by default.
+         * @return {String} Lines of code separated by '\n' symbol
          */
-        formatLines: function (code, padWidth, separator, newLine) {
+        format: function (code, padWidth, separator, newLine) {
             var i;
             var l;
 

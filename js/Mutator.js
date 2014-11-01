@@ -1,8 +1,20 @@
 /**
- * TODO: describe this module: mutations, random generator,
- * TODO: accurate mutations (only correct commands and it's
- * TODO: parameters may be generated).
- * TODO: Add examples of command for all generators like _set, _move,...
+ * This module generates mutations for binary script of organism.
+ * Mutations are random and accurate changes in code, which may
+ * help it to pass the tests (see Evo.Data). If some mutation
+ * doesn't help the organism, then it will be reverted. From
+ * time to time (randomly) Mutator may produce some extra command.
+ * This is how our binary code is growing. It's important, that
+ * the Mutator should produce pretty accurate code. It should
+ * create correct commands and they arguments. It doesn't
+ * understand code's meaning, but understand code format. Also
+ * Mutator produces one way code. It means that it doesn't
+ * contains infinite loops. Every jump command may produce
+ * destination lines greater then current. It's important,
+ * because impossible to find infinite loops in the script.
+ *
+ * Dependencies:
+ *     Evo
  *
  * @author DeadbraiN
  */

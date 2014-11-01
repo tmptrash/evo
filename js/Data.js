@@ -1,17 +1,35 @@
 /**
- * TODO: describe this module. It's used for increase organism intellect
- * TODO: every new data set should be more complicated then previous
- * TODO: left array - in data, right array - out data
+ * This module is just a container for test data. It consist
+ * of two parts: input data and output data. Main idea here is
+ * to pass input data to organism and it should produce an
+ * output data by echo command. The format of data is:
+ *
+ *     [[input numbers], [output numbers], ..]
+ *
+ * So all data in this array should be even. Every next data
+ * set should be more complicated then previous. This is how
+ * organism should develop itself.
+ *
+ * Dependencies
+ *     Evo
  *
  * @author DeadbraiN
  */
 Evo.Data = [
-    [0], [0]
+ // In   Out
+    [0], [0],
+    [1], [1],
+    [2], [2],
+    [3], [3],
+    [4], [4],
+    [5], [5],
+    [6], [6],
+    [7], [7],
+    [8], [8]
+
+
 //    [0,0,0,0,0,0,0,0,0,0], [1,1,1,1,1,1,1,1,1,1]
 //    [1,1,1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0,0,0]
-
-
-
 
 
 //    [2],   [2], // simple output

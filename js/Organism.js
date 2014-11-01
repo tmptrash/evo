@@ -45,11 +45,9 @@ Evo.Organism = (function () {
      * @param {Number} len Length of binary script
      */
     function _printReport(inData, outData, out, code, len) {
-        console.log('in [%s] out [%s] stream [%s]', inData + '', outData + '', out + '');
-        //
-        // TODO: here should be a converter from binary script to readable assembler
-        //
-        console.log('Scr:', code.subarray(0, len));
+        console.log('%cin[%s] out[%s] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', out + '');
+        //console.log('Scr:', code.subarray(0, len));
+        Evo.Organism.getCode('useConsole');
     }
 
 
@@ -94,8 +92,6 @@ Evo.Organism = (function () {
                 // TODO: memory dump, code text and so on.
                 //
                 while (!clever) {
-                //for (var k = 0; k < 1000; k++) {
-                    mutate(code, getVarsLen(), getCodeLen());
                     //
                     // Assume that after current mutation our organism is clever
                     //
@@ -132,6 +128,12 @@ Evo.Organism = (function () {
                             break;
                         }
                     }
+                    //
+                    // We need to mutate our code only on case of some tests were failed
+                    //
+                    if (!clever) {
+                        mutate(code, getVarsLen(), getCodeLen());
+                    }
                 }
                 _printReport(data[d], data[d + 1], out, code, getCodeLen());
             }
@@ -139,11 +141,28 @@ Evo.Organism = (function () {
             console.log('All tests were done!');
         },
         /**
-         * Returns organism's code.
-         * @returns {Uint16Array} Final generated binary script of organism
+         * Returns organism's code in different formats.
+         * @param {String|Boolean=} skipFormat true to return formatted human readable code,
+         * false to return binary code. 'useConsole' to show code using console.log() and
+         * without return value.
+         * @param {Number=} padWidth Width in symbols for every code segment
+         * @returns {Uint16Array|String} Final generated binary script of organism
          */
-        getCode: function () {
-            return new Uint16Array(_code.subarray(0, Evo.Interpreter.getCodeLen()));
+        getCode: function (skipFormat, padWidth) {
+            var c2t  = Evo.Code2Text;
+            var code = new Uint16Array(_code.subarray(0, Evo.Interpreter.getCodeLen()));
+
+            padWidth = padWidth || 5;
+
+            if (skipFormat === 'useConsole') {
+                console.log('%c' + c2t.format(c2t.convert(code), padWidth), 'color: ' + Evo.COLOR_CODE);
+                return undefined;
+            }
+            if (skipFormat) {
+                return code;
+            }
+
+            return c2t.format(c2t.convert(code), padWidth);
         },
         /**
          * Returns memory dump of organism
