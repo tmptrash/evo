@@ -5,6 +5,21 @@
  */
 Evo.Organism = (function () {
     /**
+     * {Uint16Array} Binary code of the organism. This code will be
+     * changed by Mutator module.
+     */
+    var _code = null;
+    /**
+     * {Uint16Array} Organism's internal memory. We use this memory
+     * to set input data and check output in _out field.
+     */
+    var _mem  = null;
+    /**
+     * {Array} Output stream. Is used for output numbers from organism
+     */
+    var _out  = null;
+
+    /**
      * Returns amount of passed data sets.
      * @param {Array} out Output stream
      * @param {Array} data Data set
@@ -48,9 +63,9 @@ Evo.Organism = (function () {
             var maxNumber  = Evo.MAX_NUMBER;
             var evoMutator = Evo.Mutator;
             var evoInterpr = Evo.Interpreter;
-            var mem        = new Uint16Array(maxNumber);
-            var code       = new Uint16Array(maxNumber);
-            var out        = [];
+            var mem        = _mem  = new Uint16Array(maxNumber);
+            var code       = _code = new Uint16Array(maxNumber);
+            var out        = _out  = [];
             var mutate     = evoMutator.mutate.bind(evoMutator);
             var rollback   = evoMutator.rollback.bind(evoMutator);
             var analyze    = evoInterpr.analyze.bind(evoInterpr);
@@ -122,6 +137,27 @@ Evo.Organism = (function () {
             }
 
             console.log('All tests were done!');
+        },
+        /**
+         * Returns organism's code.
+         * @returns {Uint16Array} Final generated binary script of organism
+         */
+        getCode: function () {
+            return new Uint16Array(_code.subarray(0, Evo.Interpreter.getCodeLen()));
+        },
+        /**
+         * Returns memory dump of organism
+         * @returns {Uint16Array}
+         */
+        getMemory: function () {
+            return new Uint16Array(_mem);
+        },
+        /**
+         * Returns output stream of organism. It uses echo command for output.
+         * @returns {Array}
+         */
+        getOutput: function () {
+            return _out;
         }
     };
 })();

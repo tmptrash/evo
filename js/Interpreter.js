@@ -398,9 +398,9 @@ Evo.Interpreter = (function () {
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
-            _codeLen = null;
+            _codeLen = l;
             for (i = 0; i < l; i += segs) {
-                if (_codeLen === null && _emptyLine(code, i)) {_codeLen = i; break;}
+                if (_codeLen === l && _emptyLine(code, i)) {_codeLen = i; break;}
             }
         },
 
