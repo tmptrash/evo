@@ -147,7 +147,7 @@ Evo.Code2Text = (function () {
                 for (i = 0, l = line.length; i < l; i++) {
                     line[i] = _pad(line[i], padWidth);
                 }
-                return _pad(idx + ':', 4) + line.join(separator);
+                return _pad(idx + ':', padWidth) + line.join(separator);
             }).join(newLine);
         }
     };

@@ -38,5 +38,9 @@ window.Evo = {
     /**
      * {String} The color of script
      */
-    COLOR_CODE: '#707070'
+    COLOR_CODE: '#707070',
+    /**
+     * {String} Color of final done message
+     */
+    COLOR_FINAL: '#00AA00'
 };

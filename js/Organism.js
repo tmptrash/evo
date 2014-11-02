@@ -46,7 +46,6 @@ Evo.Organism = (function () {
      */
     function _printReport(inData, outData, out, code, len) {
         console.log('%cin[%s] out[%s] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', out + '');
-        //console.log('Scr:', code.subarray(0, len));
         Evo.Organism.getCode('useConsole');
     }
 
@@ -58,6 +57,11 @@ Evo.Organism = (function () {
          * finding specific binary script obtained by mutations.
          */
         live: function () {
+            //
+            // This is how we start running time measurement
+            //
+            console.time('running time');
+
             var maxNumber  = Evo.MAX_NUMBER;
             var evoMutator = Evo.Mutator;
             var evoInterpr = Evo.Interpreter;
@@ -138,7 +142,12 @@ Evo.Organism = (function () {
                 _printReport(data[d], data[d + 1], out, code, getCodeLen());
             }
 
-            console.log('All tests were done!');
+            console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);
+            //
+            // This is how we finish running time measurement. See console.time()
+            // call at the beginning of current method
+            //
+            console.timeEnd('running time');
         },
         /**
          * Returns organism's code in different formats.
