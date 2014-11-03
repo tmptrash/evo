@@ -94,24 +94,29 @@ Evo.Interpreter = (function () {
      * This variable it just a shortcut for performance interpreter issue.
      */
     var _LINE_SEGMENTS = Evo.LINE_SEGMENTS;
+    /**
+     * @constant
+     * {Number} Amount of internal variables
+     */
+    var _VARS_AMOUNT   = 8;
 
     /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command. Memory may be set from outside. It stores it's values between
      * script runs.
      */
-    var _mem     = null;
+    var _mem      = null;
     /**
      * {Array} Output stream. Here organism will add it's numbers (outputs). This
      * is an analog of communication channel between organism and environment.
      */
-    var _out     = null;
+    var _out      = null;
     /**
      * {Number} Amount of numbers in binary script array. This is an amount of all
      * words. This is not an amount of code lines. You may calculate amount of
      * script words by formula: amountOfLines * _LINE_SEGMENTS .
      */
-    var _codeLen = null;
+    var _codeLen  = null;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
@@ -123,16 +128,18 @@ Evo.Interpreter = (function () {
      *  command will be referenced to this zero variable from scratch. Because
      *  Uint16Array immutable, we need to allocate big amount of data from start.
      */
-    var _vars    = new Uint16Array(Evo.MAX_NUMBER);
+    var _vars     = new Uint16Array(_VARS_AMOUNT);
     /**
-     * {Number} Amount of variables within _vars. By default we have one zero variable.
+     * {Uint16Array} Zero valued array, which is used for clearing of _vars field. We
+     * need to do it every time, then run() method is called. Because previous variables
+     * states, shouldn't affect to current running.
      */
-    var _varsLen = 1;
+    var _zeroVars = new Uint16Array(_VARS_AMOUNT);
     /**
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, otherwise all scripts may be broken.
      */
-    var _cmds    = [
+    var _cmds     = [
         _set,    // 0
         _move,   // 1
         _inc,    // 2
@@ -173,23 +180,13 @@ Evo.Interpreter = (function () {
     /**
      * 'set' command handler. Initializes variable by specific value
      * Example: 0000 0001 0002 # set 0001 two
-     * Only this method may create new variable.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
     function _set(code, i, vars) {
-        var varIndex = code[i + 2];
-
-        //
-        // It's possible to set value into newly created variable.
-        // In this case, we need to increment _varsLen counter.
-        //
-        vars[varIndex] = code[i + 1];
-        if (varIndex >= _varsLen) {
-            _varsLen = varIndex;
-        }
+        vars[code[i + 2]] = code[i + 1];
     }
     /**
      * 'move' command handler. Moves value from first argument to second one.
@@ -370,16 +367,24 @@ Evo.Interpreter = (function () {
     //
     return {
         /**
-         * This is only a code analyzer. It initializes internal variables
-         * for script to run. run() method calls this one inside.
+         * @constant
+         * {Number} Amount of internal variables
+         */
+        VARS_AMOUNT: _VARS_AMOUNT,
+        /**
+         * Runs an interpreter till last script code line will be finished.
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
          * @param {Array} out Output stream
+         * @param {Number=} codeLen Amount of words (Uint16) in binary script.
+         * If is not set, then it will be set to code.length
          */
-        analyze: function (code, mem, out) {
-            var i;
-            var l    = code.length;
+        run: function (code, mem, out, codeLen) {
+            var vars = _vars;
             var segs = _LINE_SEGMENTS;
+            var cmds = _cmds;
+            var i;
+            var line;
 
             //
             // Memory block, which is set from outside and
@@ -391,39 +396,19 @@ Evo.Interpreter = (function () {
             //
             _out = out;
             //
-            // We need to reset all variables states for every new run
-            //
-            _varsLen = 1;
-            _vars[0] = 0;
-            //
             // _codeLen field will be set to amount of numbers in binary script.
             //
-            _codeLen = l;
-            for (i = 0; i < l; i += segs) {
-                if (_codeLen === l && _emptyLine(code, i)) {_codeLen = i; break;}
-            }
-        },
-
-        /**
-         * Runs an interpreter till last script code line will be finished.
-         * @param {Uint16Array} code Lines of code in binary format
-         * @param {Uint16Array} mem Memory for read and write commands
-         * @param {Array} out Output stream
-         */
-        run: function (code, mem, out) {
-            var vars = _vars;
-            var segs = _LINE_SEGMENTS;
-            var cmds = _cmds;
-            var i;
-            var line;
-
-            this.analyze(code, mem, out);
+            _codeLen = codeLen = (codeLen === undefined ? code.length : codeLen);
+            //
+            // We need to clear all internal variables every time when new run is called
+            //
+            _vars.set(_zeroVars);
             //
             // This is a main loop, where all commands are ran.
             // i === 1, because we loop thought commands
             //
             i = 0;
-            while (i < _codeLen) {
+            while (i < codeLen) {
                 line = cmds[code[i]](code, i, vars);
                 if (line) {
                     i = line;
@@ -443,11 +428,11 @@ Evo.Interpreter = (function () {
         },
 
         /**
-         * @readonly
-         * @returns {Number} Returns amount of real variables
+         * Returns variables array
+         * @return {Uint16Array}
          */
-        getVarsLen: function () {
-            return _varsLen;
+        getVars: function () {
+            return new Uint16Array(_vars);
         }
     };
 })();

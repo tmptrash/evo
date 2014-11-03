@@ -65,7 +65,7 @@ Evo.Mutator = (function () {
     /**
      * {Number} Amount of code lines in current binary script
      */
-    var _codeLen    = null;
+    var _codeLen    = 0;
     /**
      * {Array} Binary script code line, before mutation. It's
      * used for reverting.
@@ -79,13 +79,17 @@ Evo.Mutator = (function () {
      * {Number} Amount of one code line segments. Like command, arg1, arg2, arg3
      */
     var _segs       = Evo.LINE_SEGMENTS;
+    /**
+     * {Boolean} Flag, which shows if last mutation was an extra mutation. It means
+     * that last mutation was added new command at the end of binary script.
+     */
+    var _isLast     = false;
 
 
     /**
      * Generates 'set' command with random arguments. This command may
      * be added to the end or in any script position, removing
-     * previous command at this position. Only this method may create new
-     * variables (new indexes).
+     * previous command at this position.
      * @param {Uint16Array} code Script code in binary format
      * @param {Number} i Index of set command we need to mutate.
      */
@@ -94,7 +98,7 @@ Evo.Mutator = (function () {
         // +1 means that rare one new variable will be added
         //
         //noinspection JSCheckFunctionSignatures
-        code.set([0, _floor(_rnd() * _MAX_NUMBER_PLUS_ONE), _floor(_rnd() * _varsLen) + 1, 0], i);
+        code.set([0, _floor(_rnd() * _MAX_NUMBER_PLUS_ONE), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'move' with random arguments. This command may
@@ -261,7 +265,7 @@ Evo.Mutator = (function () {
          * @param {Number} codeLen
          */
         mutate: function (code, varsLen, codeLen) {
-            var segs = Evo.LINE_SEGMENTS;
+            var segs = _segs;
 
             _codeLen = codeLen;
             _varsLen = varsLen;
@@ -275,17 +279,19 @@ Evo.Mutator = (function () {
             //
             // TODO: we need to check if code array is full and reallocate it's size * 2
             if (_floor(_rnd() * codeLen) === 1 || !codeLen) {
-                _lastIndex = _codeLen;
-                _lastLine = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
-                _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
+                _isLast    = true;
+                _lastIndex = codeLen;
+                _lastLine  = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
+                _cmds[_floor(_rnd() * _cmdsAmount)](code, codeLen);
                 _codeLen += segs;
             } else {
                 //
                 // Old binary script line should be saved in temp array _lastLine.
                 // It will be used for rollback.
                 //
+                _isLast    = false;
                 _lastIndex = _floor(_rnd() * (codeLen / segs)) * segs;
-                _lastLine = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
+                _lastLine  = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
             }
         },
@@ -296,6 +302,21 @@ Evo.Mutator = (function () {
         rollback: function (code) {
             //noinspection JSCheckFunctionSignatures
             code.set(_lastLine, _lastIndex);
+            //
+            // If last mutation was added at the end of binary code,
+            // then we need to decrease _codeLen
+            //
+            if (_isLast) {
+                _codeLen -= _segs;
+            }
+        },
+
+        /**
+         * Returns amount of words (Uint16) in binary script
+         * @returns {Number}
+         */
+        getCodeLen: function () {
+            return _codeLen;
         }
     };
 })();

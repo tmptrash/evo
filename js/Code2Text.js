@@ -129,7 +129,7 @@ Evo.Code2Text = (function () {
          *
          * @param {Array} code String based code lines. See example above
          * @param {Number=} padWidth Width of one code line segment like
-         * command or argument. 5 by default.
+         * command or argument. Evo.CODE_PADDING by default.
          * @param {String=} separator Separator string between commands
          * and args. ' ' by default.
          * @param {String=} newLine Symbol for lines break. '\n' by default.
@@ -139,7 +139,7 @@ Evo.Code2Text = (function () {
             var i;
             var l;
 
-            padWidth  = padWidth  || 5;
+            padWidth  = padWidth  || Evo.CODE_PADDING;
             separator = separator || ' ';
             newLine   = newLine   || '\n';
 

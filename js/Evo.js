@@ -25,7 +25,7 @@ window.Evo = {
      * which our organism may proceed. It also understandable for
      * Interpreter and Mutator.
      */
-    MAX_NUMBER: 65535,
+    MAX_NUMBER   : 65535,
     /**
      * {Number} Amount of segments in one binary script line:
      * command arg1 arg2 arg3
@@ -34,13 +34,17 @@ window.Evo = {
     /**
      * {String} The color of text of input and output data
      */
-    COLOR_DATA: '#AA0000',
+    COLOR_DATA   : '#AA0000',
     /**
      * {String} The color of script
      */
-    COLOR_CODE: '#707070',
+    COLOR_CODE   : '#707070',
     /**
      * {String} Color of final done message
      */
-    COLOR_FINAL: '#00AA00'
+    COLOR_FINAL  : '#00AA00',
+    /**
+     * {Number} Default padding for human readable scripts
+     */
+    CODE_PADDING : 5
 };

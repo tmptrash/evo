@@ -70,10 +70,9 @@ Evo.Organism = (function () {
             var out        = _out  = [];
             var mutate     = evoMutator.mutate.bind(evoMutator);
             var rollback   = evoMutator.rollback.bind(evoMutator);
-            var analyze    = evoInterpr.analyze.bind(evoInterpr);
             var run        = evoInterpr.run.bind(evoInterpr);
-            var getCodeLen = evoInterpr.getCodeLen.bind(evoInterpr);
-            var getVarsLen = evoInterpr.getVarsLen.bind(evoInterpr);
+            var getCodeLen = evoMutator.getCodeLen.bind(evoInterpr);
+            var varsLen    = evoInterpr.VARS_AMOUNT;
             var data       = Evo.Data;
             var floor      = Math.floor;
             var rnd        = Math.random;
@@ -107,26 +106,22 @@ Evo.Organism = (function () {
                         //
                         // Output stream should be cleared for every new data set
                         //
-                        out = [];
+                        out.length = 0;
                         //
                         // This is how we set initial value to the organism's memory.
                         // It should read this and put the result into the output stream.
                         //
                         mem.set(data[i], 0);
-                        run(code, mem, out);
+                        run(code, mem, out, getCodeLen());
                         if (!_testPassed(out, data, i)) {
                             //
                             // This condition turns on a capability to 'forget'
-                            // reverting of invalid mutations. It's a rarely process
-                            // and needed for slowly script size increasing
+                            // reverting of invalid mutations from time to time.
+                            // It's a rarely process and needed for slowly script
+                            // size increasing
                             //
                             if (floor(rnd() * getCodeLen()) !== 1) {
                                 rollback(code);
-                                //
-                                // We need to analyze (not run) our code to update
-                                // internal fields: varsLens, codeLen,...
-                                //
-                                analyze(code, mem, out);
                             }
                             clever = false;
                             break;
@@ -136,7 +131,7 @@ Evo.Organism = (function () {
                     // We need to mutate our code only on case of some tests were failed
                     //
                     if (!clever) {
-                        mutate(code, getVarsLen(), getCodeLen());
+                        mutate(code, varsLen, getCodeLen());
                     }
                 }
                 _printReport(data[d], data[d + 1], out, code, getCodeLen());
@@ -150,7 +145,8 @@ Evo.Organism = (function () {
             console.timeEnd('running time');
         },
         /**
-         * Returns organism's code in different formats.
+         * Returns organism's code in different formats. This method may contain unoptimized
+         * code, because it's used rare.
          * @param {String|Boolean=} skipFormat true to return formatted human readable code,
          * false to return binary code. 'useConsole' to show code using console.log() and
          * without return value.
@@ -161,7 +157,7 @@ Evo.Organism = (function () {
             var c2t  = Evo.Code2Text;
             var code = new Uint16Array(_code.subarray(0, Evo.Interpreter.getCodeLen()));
 
-            padWidth = padWidth || 5;
+            padWidth = padWidth || Evo.CODE_PADDING;
 
             if (skipFormat === 'useConsole') {
                 console.log('%c' + c2t.format(c2t.convert(code), padWidth), 'color: ' + Evo.COLOR_CODE);
@@ -182,10 +178,12 @@ Evo.Organism = (function () {
         },
         /**
          * Returns output stream of organism. It uses echo command for output.
+         * This method creates a copy of output array to prevent it's modification
+         * from outside.
          * @returns {Array}
          */
         getOutput: function () {
-            return _out;
+            return _out.slice(0);
         }
     };
 })();
