@@ -91,9 +91,6 @@ Evo.Organism = (function () {
                 // last mutation do the job: generates correct
                 // output.
                 //
-                // TODO: Think about ability to get state of organism:
-                // TODO: memory dump, code text and so on.
-                //
                 while (!clever) {
                     //
                     // Assume that after current mutation our organism is clever
