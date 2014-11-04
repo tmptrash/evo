@@ -146,7 +146,8 @@ Evo.Organism = (function () {
          * code, because it's used rare.
          * @param {String|Boolean=} skipFormat true to return formatted human readable code,
          * false to return binary code. 'useConsole' to show code using console.log() and
-         * without return value.
+         * without return value. 'noLines' to show code without line numbers. It's possible
+         * to combine these parameters like this: 'useConsole, noLines'
          * @param {Number=} padWidth Width in symbols for every code segment
          * @returns {Uint16Array|String} Final generated binary script of organism
          */
@@ -156,15 +157,15 @@ Evo.Organism = (function () {
 
             padWidth = padWidth || Evo.CODE_PADDING;
 
-            if (skipFormat === 'useConsole') {
-                console.log('%c' + c2t.format(c2t.convert(code), padWidth), 'color: ' + Evo.COLOR_CODE);
-                return undefined;
-            }
-            if (skipFormat) {
+            if (skipFormat === true || skipFormat === undefined) {
                 return code;
             }
+            if (skipFormat.indexOf('useConsole') !== -1) {
+                console.log('%c' + c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('noLines') !== -1), 'color: ' + Evo.COLOR_CODE);
+                return undefined;
+            }
 
-            return c2t.format(c2t.convert(code), padWidth);
+            return c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('noLines') !== -1);
         },
         /**
          * Returns memory dump of organism
