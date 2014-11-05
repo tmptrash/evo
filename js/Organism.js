@@ -41,11 +41,10 @@ Evo.Organism = (function () {
      * @param {Array} inData Input data for test
      * @param {Array} outData Output data for test
      * @param {Array} out Output stream of organism
-     * @param {Uint16Array} code Current binary script
-     * @param {Number} len Length of binary script
+     * @param {Number} runAmount Amount of script run
      */
-    function _printReport(inData, outData, out, code, len) {
-        console.log('%cin[%s] out[%s] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', out + '');
+    function _printReport(inData, outData, out, runAmount) {
+        console.log('%cin[%s] out[%s] runs[%d] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', runAmount, out + '');
         Evo.Organism.getCode('useConsole');
     }
 
@@ -76,6 +75,7 @@ Evo.Organism = (function () {
             var data       = Evo.Data;
             var floor      = Math.floor;
             var rnd        = Math.random;
+            var runAmount  = 0;
             var clever;
             var i;
             var d;
@@ -110,6 +110,7 @@ Evo.Organism = (function () {
                         //
                         mem.set(data[i], 0);
                         run(code, mem, out, getCodeLen());
+                        runAmount++;
                         if (!_testPassed(out, data, i)) {
                             //
                             // This condition turns on a capability to 'forget'
@@ -131,7 +132,8 @@ Evo.Organism = (function () {
                         mutate(code, varsLen, getCodeLen());
                     }
                 }
-                _printReport(data[d], data[d + 1], out, code, getCodeLen());
+                _printReport(data[d], data[d + 1], out, runAmount);
+                runAmount = 0;
             }
 
             console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);

@@ -108,7 +108,7 @@ Evo.Interpreter = (function () {
     var _mem      = null;
     /**
      * {Array} Output stream. Here organism will add it's numbers (outputs). This
-     * is an analog of communication channel between organism and environment.
+     * is an analogy of communication channel between organism and environment.
      */
     var _out      = null;
     /**
