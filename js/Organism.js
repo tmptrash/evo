@@ -18,15 +18,27 @@ Evo.Organism = (function () {
      * {Array} Output stream. Is used for output numbers from organism
      */
     var _out  = null;
-
-    // TODO: remove this
     /**
-     * {Number} prevDist Distance of previous comparison
-     * by Damerau-Levenshtein of output and current data set
+     * {Number} Coefficient of similarity. As bit this value is
+     * as much similar data set and output are.
      */
     var _prevCommon = 0;
+    /**
+     * {Function} Just a shortcut for fromCharCode(). I used for
+     * performance issue.
+     */
     var _fromChCode = String.fromCharCode;
 
+
+    /**
+     * This method checks if last mutation has some benefit instead
+     * previous one. It takes output buffer and current data set and
+     * converts them into strings. Comparing these string, it understands
+     * how they are similar.
+     * @param {Array} out Output buffer
+     * @param {Array} data Current data set
+     * @returns {boolean}
+     */
     function _goodMutation(out, data) {
         var outStr  = _fromChCode.apply(String, out);
         var dataStr = _fromChCode.apply(String, data);
@@ -89,7 +101,6 @@ Evo.Organism = (function () {
             var code       = _code = new Uint16Array(maxNumber);
             var out        = _out  = [];
             var mutate     = evoMutator.mutate.bind(evoMutator);
-            var reset      = evoMutator.reset.bind(evoMutator);
             var rollback   = evoMutator.rollback.bind(evoMutator);
             var run        = evoInterpr.run.bind(evoInterpr);
             var getCodeLen = evoMutator.getCodeLen.bind(evoInterpr);
@@ -139,30 +150,24 @@ Evo.Organism = (function () {
                             // It's a rarely process and needed for slowly script
                             // size increasing
                             //
-                            //if (floor(rnd() * getCodeLen()) !== 1) {
                             if (!_goodMutation(out, data[i + 1])) {
                                 rollback(code);
                             }
                             clever = false;
                             break;
+                        } else {
+                            //
+                            // We need to mutate one more time, because
+                            // next iteration of the loop will be without
+                            // mutate() function call. This means, that
+                            // rollback() will be called for good mutation
+                            //
+                            mutate(code, varsLen, getCodeLen());
                         }
                     }
-                    // TODO:
-                    // We need to mutate our code only on case of some tests were failed
-                    //
-//                        if (!clever) {
-//                            mutate(code, varsLen, getCodeLen());
-//                        }
                 }
                 _printReport(data[d], data[d + 1], out, runAmount);
                 runAmount = 0;
-                //
-                // It's important to do a reset od mutations here,
-                // after success previous one. It's needed, because
-                // in next iteration of main loop last (good) mutation
-                // will be reverted by rollback() method.
-                //
-                //reset();
             }
 
             console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);

@@ -268,6 +268,7 @@ Evo.Mutator = (function () {
          * @param {Uint16Array} code Script code in binary format
          * @param {Array} varsLen Amount of variables
          * @param {Number} codeLen
+         * at the end of script
          */
         mutate: function (code, varsLen, codeLen) {
             var segs = _segs;
@@ -305,24 +306,21 @@ Evo.Mutator = (function () {
          * @param {Uint16Array} code Script code in binary format
          */
         rollback: function (code) {
-            //noinspection JSCheckFunctionSignatures
-            code.set(_lastLine, _lastIndex);
             //
-            // If last mutation was added at the end of binary code,
-            // then we need to decrease _codeLen
+            // We don't need to rollback new mutations,
+            // because script stacks.
             //
-            if (_isLast) {
-                _codeLen -= _segs;
+            if (!_isLast) {
+                //noinspection JSCheckFunctionSignatures
+                code.set(_lastLine, _lastIndex);
+                //
+                // If last mutation was added at the end of binary code,
+                // then we need to decrease _codeLen
+                //
+                if (_isLast) {
+                    _codeLen -= _segs;
+                }
             }
-        },
-        /**
-         * TODO: possible, that this method is unused
-         * Resets the Mutator. Next time rollback() method do nothing.
-         * Only after call mutate() it will be workable.
-         */
-        reset: function () {
-            _lastLine  = [];
-            _lastIndex = _codeLen;
         },
         /**
          * Returns amount of words (Uint16) in binary script
