@@ -159,25 +159,6 @@ Evo.Interpreter = (function () {
 
 
     /**
-     * Checks if current binary script line is empty.
-     * Empty means that all it's number are equal to zero.
-     * @param {Uint16Array} code Entire script array
-     * @param {Number} line Current script line index
-     * @returns {Boolean}
-     */
-    function _emptyLine(code, line) {
-        var i;
-        var l;
-
-        for (i = 0, l = _LINE_SEGMENTS; i < l; i++) {
-            if (code[line + i]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    /**
      * 'set' command handler. Initializes variable by specific value
      * Example: 0000 0001 0002 # set 0001 two
      *

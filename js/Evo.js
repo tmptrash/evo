@@ -46,5 +46,13 @@ window.Evo = {
     /**
      * {Number} Default padding for human readable scripts
      */
-    CODE_PADDING : 5
+    CODE_PADDING : 5,
+    /**
+     * {Number} Coefficient of new mutations. It means, that
+     * it directly affects on binary script growing. New mutation
+     * probability is: 1/(codeLen * _NEW_MUTATIONS_SPEED). So it
+     * depends on size of binary script and speed of client PC.
+     * As big this number is as slow the script is grow.
+     */
+    NEW_MUTATIONS_SPEED: 1000
 };

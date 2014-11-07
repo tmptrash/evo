@@ -24,6 +24,11 @@ Evo.Mutator = (function () {
      */
     var _MAX_NUMBER_PLUS_ONE = Evo.MAX_NUMBER + 1;
     /**
+     * {Number} Coefficient of new mutations. It means, that
+     * it directly affects on binary script growing.
+     */
+    var _NEW_MUTATIONS_SPEED = Evo.NEW_MUTATIONS_SPEED;
+    /**
      * {Function} Math.floor() method shortcut
      * @type {Function}
      * @private
@@ -278,7 +283,7 @@ Evo.Mutator = (function () {
             // one array by changing other one.
             //
             // TODO: we need to check if code array is full and reallocate it's size * 2
-            if (_floor(_rnd() * codeLen) === 1 || !codeLen) {
+            if (_floor(_rnd() * codeLen * _NEW_MUTATIONS_SPEED) === 1 || !codeLen) {
                 _isLast    = true;
                 _lastIndex = codeLen;
                 _lastLine  = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
@@ -310,7 +315,15 @@ Evo.Mutator = (function () {
                 _codeLen -= _segs;
             }
         },
-
+        /**
+         * TODO: possible, that this method is unused
+         * Resets the Mutator. Next time rollback() method do nothing.
+         * Only after call mutate() it will be workable.
+         */
+        reset: function () {
+            _lastLine  = [];
+            _lastIndex = _codeLen;
+        },
         /**
          * Returns amount of words (Uint16) in binary script
          * @returns {Number}

@@ -19,17 +19,38 @@ Evo.Organism = (function () {
      */
     var _out  = null;
 
+    // TODO: remove this
+    /**
+     * {Number} prevDist Distance of previous comparison
+     * by Damerau-Levenshtein of output and current data set
+     */
+    var _prevCommon = 0;
+    var _fromChCode = String.fromCharCode;
+
+    function _goodMutation(out, data) {
+        var outStr  = _fromChCode.apply(String, out);
+        var dataStr = _fromChCode.apply(String, data);
+        var common  = lcs(outStr, dataStr);
+        var result  = common >= _prevCommon;
+
+        if (_prevCommon < common) {
+            _prevCommon = common;
+        }
+
+        return result;
+    }
+
+
     /**
      * Returns amount of passed data sets.
      * @param {Array} out Output stream
      * @param {Array} data Data set
-     * @param {Number} i Index of current data set
      * @return {Boolean}
      * @private
      */
-    function _testPassed(out, data, i) {
+    function _testPassed(out, data) {
         var outStr  = ',' + out.join(',') + ',';
-        var dataStr = ',' + data[i + 1].join(',') + ',';
+        var dataStr = ',' + data.join(',') + ',';
 
         return outStr.indexOf(dataStr) !== -1;
     }
@@ -68,13 +89,12 @@ Evo.Organism = (function () {
             var code       = _code = new Uint16Array(maxNumber);
             var out        = _out  = [];
             var mutate     = evoMutator.mutate.bind(evoMutator);
+            var reset      = evoMutator.reset.bind(evoMutator);
             var rollback   = evoMutator.rollback.bind(evoMutator);
             var run        = evoInterpr.run.bind(evoInterpr);
             var getCodeLen = evoMutator.getCodeLen.bind(evoInterpr);
             var varsLen    = evoInterpr.VARS_AMOUNT;
             var data       = Evo.Data;
-            var floor      = Math.floor;
-            var rnd        = Math.random;
             var runAmount  = 0;
             var clever;
             var i;
@@ -96,6 +116,7 @@ Evo.Organism = (function () {
                     // Assume that after current mutation our organism is clever
                     //
                     clever = true;
+                    mutate(code, varsLen, getCodeLen());
                     //
                     // This loop checks all previous data sets. They should be passed.
                     //
@@ -111,29 +132,37 @@ Evo.Organism = (function () {
                         mem.set(data[i], 0);
                         run(code, mem, out, getCodeLen());
                         runAmount++;
-                        if (!_testPassed(out, data, i)) {
+                        if (!_testPassed(out, data[i + 1])) {
                             //
                             // This condition turns on a capability to 'forget'
                             // reverting of invalid mutations from time to time.
                             // It's a rarely process and needed for slowly script
                             // size increasing
                             //
-                            if (floor(rnd() * getCodeLen()) !== 1) {
+                            //if (floor(rnd() * getCodeLen()) !== 1) {
+                            if (!_goodMutation(out, data[i + 1])) {
                                 rollback(code);
                             }
                             clever = false;
                             break;
                         }
                     }
-                    //
+                    // TODO:
                     // We need to mutate our code only on case of some tests were failed
                     //
-                    if (!clever) {
-                        mutate(code, varsLen, getCodeLen());
-                    }
+//                        if (!clever) {
+//                            mutate(code, varsLen, getCodeLen());
+//                        }
                 }
                 _printReport(data[d], data[d + 1], out, runAmount);
                 runAmount = 0;
+                //
+                // It's important to do a reset od mutations here,
+                // after success previous one. It's needed, because
+                // in next iteration of main loop last (good) mutation
+                // will be reverted by rollback() method.
+                //
+                //reset();
             }
 
             console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);
