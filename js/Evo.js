@@ -54,5 +54,14 @@ window.Evo = {
      * depends on size of binary script and speed of client PC.
      * As big this number is as slow the script is grow.
      */
-    NEW_MUTATIONS_SPEED: 1000
+    NEW_MUTATIONS_SPEED: 1000,
+    /**
+     * {Number} Amount of non interruptable iterations between
+     * user commands from console. This parameter affects on
+     * speed of used command response time. If this parameter
+     * is big, then background calculations will be long and
+     * user commands processing will be delayed. It depends
+     * on current PC performance.
+     */
+    BLOCKING_ITERATIONS: 100000
 };

@@ -28,6 +28,12 @@ Evo.Organism = (function () {
      * performance issue.
      */
     var _fromChCode = String.fromCharCode;
+    /**
+     * {Boolean} true means that at this moment the organism is
+     * leaving. false means, that the organism is sleeping and
+     * the user may type some command from console.
+     */
+    var _leaving    = false;
 
 
     /**
@@ -106,23 +112,29 @@ Evo.Organism = (function () {
             var getCodeLen = evoMutator.getCodeLen.bind(evoInterpr);
             var varsLen    = evoInterpr.VARS_AMOUNT;
             var data       = Evo.Data;
+            var backAmount = Evo.BLOCKING_ITERATIONS;
             var runAmount  = 0;
+            var d          = 0;
+            var l          = data.length;
             var clever;
+            var b;
             var i;
-            var d;
-            var l;
 
-            //
-            // This loop checks if organism passes all data tests
-            //
-            for (d = 0, l = data.length; d < l; d += 2) {
+            /**
+             * TODO: describe background running technique
+             */
+            function doInBackground() {
+                //
+                // This loop checks if organism passes all data tests
+                //
                 clever = false;
+                b      = 0;
                 //
                 // This is a main loop. Here organism checks if
                 // last mutation do the job: generates correct
                 // output.
                 //
-                while (!clever) {
+                while (!clever && b++ < backAmount) {
                     //
                     // Assume that after current mutation our organism is clever
                     //
@@ -166,16 +178,35 @@ Evo.Organism = (function () {
                         }
                     }
                 }
-                _printReport(data[d], data[d + 1], out, runAmount);
-                runAmount = 0;
-            }
 
-            console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);
+                if (clever) {
+                    _printReport(data[d], data[d + 1], out, runAmount);
+                    runAmount = 0;
+                    //
+                    // This is how we simulate the loop though data sets
+                    //
+                    d += 2;
+                    //
+                    // If this condition is true, then all data sets have done
+                    //
+                    if (d >= l) {
+                        console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);
+                        //
+                        // This is how we finish running time measurement. See console.time()
+                        // call at the beginning of current method
+                        //
+                        console.timeEnd('running time');
+                        return;
+                    }
+                }
+                setTimeout(doInBackground, 0);
+            }
             //
-            // This is how we finish running time measurement. See console.time()
-            // call at the beginning of current method
+            // This is an entry point of living process.
+            // All other looping will be in background
+            // and used may type different commands
             //
-            console.timeEnd('running time');
+            setTimeout(doInBackground, 0);
         },
         /**
          * Returns organism's code in different formats. This method may contain unoptimized
