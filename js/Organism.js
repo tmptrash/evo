@@ -19,59 +19,26 @@ Evo.Organism = (function () {
      */
     var _out  = null;
     /**
-     * {Number} Coefficient of similarity. As bit this value is
-     * as much similar data set and output are.
+     * {Number} Value of similarity. As big this value is
+     * as much similar data set and output were.
      */
-    var _prevCommon = 0;
+    var _prevDistance = 0;
     /**
      * {Function} Just a shortcut for fromCharCode(). I used for
      * performance issue.
      */
     var _fromChCode = String.fromCharCode;
     /**
-     * {Boolean} true means that at this moment the organism is
-     * leaving. false means, that the organism is sleeping and
-     * the user may type some command from console.
+     * {Number} Amount of mutations for current data set. It is
+     * reset every time, then new data set has handled.
      */
-    var _leaving    = false;
-
-
+    var _curMutations = 0;
     /**
-     * This method checks if last mutation has some benefit instead
-     * previous one. It takes output buffer and current data set and
-     * converts them into strings. Comparing these string, it understands
-     * how they are similar.
-     * @param {Array} out Output buffer
-     * @param {Array} data Current data set
-     * @returns {boolean}
+     * {Number} Total amount of all mutations from the beginning
      */
-    function _goodMutation(out, data) {
-        var outStr  = _fromChCode.apply(String, out);
-        var dataStr = _fromChCode.apply(String, data);
-        var common  = lcs(outStr, dataStr);
-        var result  = common >= _prevCommon;
-
-        if (_prevCommon < common) {
-            _prevCommon = common;
-        }
-
-        return result;
-    }
+    var _allMutations = 0;
 
 
-    /**
-     * Returns amount of passed data sets.
-     * @param {Array} out Output stream
-     * @param {Array} data Data set
-     * @return {Boolean}
-     * @private
-     */
-    function _testPassed(out, data) {
-        var outStr  = ',' + out.join(',') + ',';
-        var dataStr = ',' + data.join(',') + ',';
-
-        return outStr.indexOf(dataStr) !== -1;
-    }
     /**
      * Prints a report about last mutations iteration. This report
      * means, that one more data set was processed and new script
@@ -80,11 +47,23 @@ Evo.Organism = (function () {
      * @param {Array} inData Input data for test
      * @param {Array} outData Output data for test
      * @param {Array} out Output stream of organism
-     * @param {Number} runAmount Amount of script run
      */
-    function _printReport(inData, outData, out, runAmount) {
-        console.log('%cin[%s] out[%s] runs[%d] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', runAmount, out + '');
+    function _printReport(inData, outData, out) {
+        console.log('%cin[%s] out[%s] runs[%d] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '');
         Evo.Organism.getCode('useConsole');
+    }
+    /**
+     * This method is used for reallocation of memory, which is used
+     * for binary code. After mutations script size is growing all the
+     * time, so we need to allocate more memory for it.
+     */
+    function _reallocateCode() {
+        var codeLen = Evo.Mutator.getCodeLen();
+        var code    = new Uint16Array(codeLen + codeLen);
+
+        code.set(_code, 0);
+        _code = code;
+        return codeLen + codeLen;
     }
 
 
@@ -113,20 +92,23 @@ Evo.Organism = (function () {
             var varsLen    = evoInterpr.VARS_AMOUNT;
             var data       = Evo.Data;
             var backAmount = Evo.BLOCKING_ITERATIONS;
-            var runAmount  = 0;
             var d          = 0;
             var l          = data.length;
+            var max;
+            var distance;
             var clever;
+            var len;
             var b;
             var i;
 
+
             /**
-             * TODO: describe background running technique
+             * This method calls as a background thread. As you know
+             * JavaScript doesn't support multithreading. So we need to
+             * use setTimeout() for this. As a result we may type different
+             * commands in console, while organism is leaving.
              */
             function doInBackground() {
-                //
-                // This loop checks if organism passes all data tests
-                //
                 clever = false;
                 b      = 0;
                 //
@@ -140,10 +122,22 @@ Evo.Organism = (function () {
                     //
                     clever = true;
                     mutate(code, varsLen, getCodeLen());
+                    _curMutations++;
+                    len = getCodeLen();
+                    //
+                    // When all allocated memory for binary script is reached, we need
+                    // to reallocate it new bigger size.
+                    //
+                    if (len === maxNumber) {
+                        maxNumber = _reallocateCode();
+                        code      = _code;
+                    }
                     //
                     // This loop checks all previous data sets. They should be passed.
+                    // If current mutation is better then previous, then distance will
+                    // be greater then _prevDistance.
                     //
-                    for (i = 0; i <= d; i += 2) {
+                    for (i = distance = max = 0; i <= d; i += 2) {
                         //
                         // Output stream should be cleared for every new data set
                         //
@@ -153,35 +147,32 @@ Evo.Organism = (function () {
                         // It should read this and put the result into the output stream.
                         //
                         mem.set(data[i], 0);
-                        run(code, mem, out, getCodeLen());
-                        runAmount++;
-                        if (!_testPassed(out, data[i + 1])) {
-                            //
-                            // This condition turns on a capability to 'forget'
-                            // reverting of invalid mutations from time to time.
-                            // It's a rarely process and needed for slowly script
-                            // size increasing
-                            //
-                            if (!_goodMutation(out, data[i + 1])) {
-                                rollback(code);
-                            }
-                            clever = false;
-                            break;
-                        } else {
-                            //
-                            // We need to mutate one more time, because
-                            // next iteration of the loop will be without
-                            // mutate() function call. This means, that
-                            // rollback() will be called for good mutation
-                            //
-                            mutate(code, varsLen, getCodeLen());
-                        }
+                        run(code, mem, out, len);
+                        distance += lcs(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
+                        max      += data[i + 1].length;
                     }
+                    //
+                    // All tests (data sets) were passed
+                    //
+                    if (distance === max) {
+                        break;
+                    }
+                    //
+                    // If previous mutation has passed more tests (data sets),
+                    // then we need to revert current one.
+                    //
+                    clever = false;
+                    if (_prevDistance > distance) {
+                        rollback(code);
+                        continue;
+                    }
+                    _prevDistance = distance;
                 }
 
                 if (clever) {
-                    _printReport(data[d], data[d + 1], out, runAmount);
-                    runAmount = 0;
+                    _printReport(data[d], data[d + 1], out);
+                    _allMutations += _curMutations;
+                    _curMutations = _prevDistance = 0;
                     //
                     // This is how we simulate the loop though data sets
                     //
@@ -201,6 +192,8 @@ Evo.Organism = (function () {
                 }
                 setTimeout(doInBackground, 0);
             }
+
+            _allMutations = _curMutations = 0;
             //
             // This is an entry point of living process.
             // All other looping will be in background
@@ -249,6 +242,23 @@ Evo.Organism = (function () {
          */
         getOutput: function () {
             return _out.slice(0);
+        },
+        /**
+         * Returns amount of mutations for current data set. This parameter is reset
+         * for every new data set in Evo.Data.
+         * @return {Number}
+         */
+        getMutations: function() {
+            return _curMutations;
+        },
+        /**
+         * Returns amount of all mutations of organism from the beginning of leaving.
+         * We need to add all mutations and current, because all mutations field is
+         * updated only between data sets.
+         * @return {Number}
+         */
+        getAllMutations: function() {
+            return _allMutations + _curMutations;
         }
     };
 })();
