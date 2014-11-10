@@ -1,4 +1,6 @@
 /**
+ * TODO: add functions support
+ *
  * Interpreter of evo language. Main goal of this interpreter is to run the
  * script as fast as possible. It interprets code line by line from up to the
  * bottom. This module doesn't have any checks (maybe only minimal) to increase
@@ -154,7 +156,16 @@ Evo.Interpreter = (function () {
         _jumpe,  // 11
         _jumpz,  // 12
         _jumpn,  // 13
-        _echo    // 14
+        _echo,   // 14
+        _or,     // 15
+        _and,    // 16
+        _xor,    // 17
+        _not,    // 18
+        _mul,    // 19
+        _div,    // 20
+        _rem,    // 21
+        _shl,    // 22
+        _shr     // 23
     ];
 
 
@@ -340,6 +351,115 @@ Evo.Interpreter = (function () {
      */
     function _echo(code, i, vars) {
         _out.push(vars[code[i + 1]]);
+    }
+    /**
+     * 'or' command handler. Does Bitwise OR.
+     * Example: 000F 0000 0001 # or one two. Result will be stored
+     * in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _or(code, i, vars) {
+        vars[code[i + 2]] |= vars[code[i + 1]];
+    }
+    /**
+     * 'and' command handler. Does Bitwise AND.
+     * Example: 0010 0000 0001 # and one two. Result will be stored
+     * in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _and(code, i, vars) {
+        vars[code[i + 2]] &= vars[code[i + 1]];
+    }
+    /**
+     * 'xor' command handler. Does Bitwise XOR.
+     * Example: 0011 0000 0001 # xor one two. Result will be stored
+     * in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _xor(code, i, vars) {
+        vars[code[i + 2]] ^= vars[code[i + 1]];
+    }
+    /**
+     * 'not' command handler. Does Bitwise NOT.
+     * Example: 0012 0000 0001 # not one two. Result will be stored
+     * in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _not(code, i, vars) {
+        vars[code[i + 2]] = ~vars[code[i + 1]];
+    }
+    /**
+     * 'mul' command handler. Does division.
+     * Example: 0013 0000 0001 # mul one two. Result will be stored
+     * in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _mul(code, i, vars) {
+        vars[code[i + 2]] *= vars[code[i + 1]];
+    }
+    /**
+     * 'mul' command handler. Does multiplication. In case of zero,
+     * it divides on one.
+     * Example: 0014 0000 0001 # div one two. Result will be stored
+     * in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _div(code, i, vars) {
+        vars[code[i + 2]] /= (vars[code[i + 1]] || 1);
+    }
+    /**
+     * 'rem' command handler. Calculates reminder from division.
+     * Example: 0015 0000 0001 # rem one two. Result
+     * will be stored in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _rem(code, i, vars) {
+        vars[code[i + 2]] %= vars[code[i + 1]];
+    }
+    /**
+     * 'shl' command handler. Bitwise left shift operator.
+     * Example: 0016 0000 0001 # shl one two. Result
+     * will be stored in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _shl(code, i, vars) {
+        vars[code[i + 2]] <<= vars[code[i + 1]];
+    }
+    /**
+     * 'shr' command handler. Bitwise right shift operator.
+     * Example: 0017 0000 0001 # sgr one two. Result
+     * will be stored in second variable
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _shr(code, i, vars) {
+        vars[code[i + 2]] >>= vars[code[i + 1]];
     }
 
 

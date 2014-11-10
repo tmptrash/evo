@@ -82,9 +82,9 @@ Evo.Organism = (function () {
             var maxNumber  = Evo.MAX_NUMBER;
             var evoMutator = Evo.Mutator;
             var evoInterpr = Evo.Interpreter;
-            var mem        = _mem  = new Uint16Array(maxNumber);
-            var code       = _code = new Uint16Array(maxNumber);
-            var out        = _out  = [];
+            var mem        = new Uint16Array(maxNumber);
+            var code       = new Uint16Array(maxNumber);
+            var out        = [];
             var mutate     = evoMutator.mutate.bind(evoMutator);
             var rollback   = evoMutator.rollback.bind(evoMutator);
             var run        = evoInterpr.run.bind(evoInterpr);
@@ -100,6 +100,10 @@ Evo.Organism = (function () {
             var len;
             var b;
             var i;
+
+            _mem  = mem;
+            _code = code;
+            _out  = out;
 
 
             /**
@@ -155,6 +159,7 @@ Evo.Organism = (function () {
                     // All tests (data sets) were passed
                     //
                     if (distance === max) {
+                        _prevDistance = distance;
                         break;
                     }
                     //
@@ -172,7 +177,7 @@ Evo.Organism = (function () {
                 if (clever) {
                     _printReport(data[d], data[d + 1], out);
                     _allMutations += _curMutations;
-                    _curMutations = _prevDistance = 0;
+                    _curMutations = 0;
                     //
                     // This is how we simulate the loop though data sets
                     //

@@ -83,7 +83,16 @@ Evo.Code2Text = (function () {
                 [ 'jumpe', v, v, l ],
                 [ 'jumpz', v, l    ],
                 [ 'jumpn', v, l    ],
-                [ 'echo',  v       ]
+                [ 'echo',  v       ],
+                [ 'or',    v, v    ],
+                [ 'and',   v, v    ],
+                [ 'xor',   v, v    ],
+                [ 'not',   v, v    ],
+                [ 'mul',   v, v    ],
+                [ 'div',   v, v    ],
+                [ 'rem',   v, v    ],
+                [ 'shl',   v, v    ],
+                [ 'shr',   v, v    ]
             ];
             var strCode = [];
             var line;

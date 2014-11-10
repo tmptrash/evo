@@ -61,7 +61,16 @@ Evo.Mutator = (function () {
         _jumpe, // 11
         _jumpz, // 12
         _jumpn, // 13
-        _echo   // 14
+        _echo,  // 14
+        _or,    // 15
+        _and,   // 16
+        _xor,   // 17
+        _not,   // 18
+        _mul,   // 19
+        _div,   // 20
+        _rem,   // 21
+        _shl,   // 22
+        _shr    // 23
     ];
     /**
      * {Number} Just amount of commands
@@ -259,6 +268,105 @@ Evo.Mutator = (function () {
         //noinspection JSCheckFunctionSignatures
         code.set([14, _floor(_rnd() * _varsLen), 0, 0], i);
     }
+    /**
+     * Generates command 'or' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _or(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([15, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'and' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _and(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([16, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'xor' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _xor(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([17, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'not' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _not(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([18, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'mul' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _mul(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([19, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'div' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _div(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([19, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'div' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _rem(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([20, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'shl' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _shl(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([21, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'shr' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _shr(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([22, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
 
 
     return {
@@ -283,7 +391,6 @@ Evo.Mutator = (function () {
             // returns not a copy, but reference to array part. So you may change
             // one array by changing other one.
             //
-            // TODO: we need to check if code array is full and reallocate it's size * 2
             if (_floor(_rnd() * codeLen * _NEW_MUTATIONS_SPEED) === 1 || !codeLen) {
                 _isLast    = true;
                 _lastIndex = codeLen;
