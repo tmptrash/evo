@@ -141,6 +141,8 @@ Evo.Organism = (function () {
                     // If current mutation is better then previous, then distance will
                     // be greater then _prevDistance.
                     //
+                    // TODO: this loop a little bit incorrect. It should
+                    // TODO: use order of sequence from every data set
                     for (i = distance = max = 0; i <= d; i += 2) {
                         //
                         // Output stream should be cleared for every new data set
