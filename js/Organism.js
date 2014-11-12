@@ -22,7 +22,7 @@ Evo.Organism = (function () {
      * {Number} Value of similarity. As big this value is
      * as much similar data set and output were.
      */
-    var _prevDistance = 0;
+    var _prevDistance = new Uint32Array(Evo.Data.length / 2);
     /**
      * {Function} Just a shortcut for fromCharCode(). I used for
      * performance issue.
@@ -94,12 +94,14 @@ Evo.Organism = (function () {
             var backAmount = Evo.BLOCKING_ITERATIONS;
             var d          = 0;
             var l          = data.length;
-            var max;
-            var distance;
+            var distance   = new Uint32Array(l / 2);
+            var zeroDist   = new Uint32Array(l / 2);
+            var passed     = 0;
             var clever;
             var len;
             var b;
             var i;
+            var i2;
 
             _mem  = mem;
             _code = code;
@@ -127,7 +129,8 @@ Evo.Organism = (function () {
                     clever = true;
                     mutate(code, varsLen, getCodeLen());
                     _curMutations++;
-                    len = getCodeLen();
+                    len    = getCodeLen();
+                    distance.set(zeroDist, 0);
                     //
                     // When all allocated memory for binary script is reached, we need
                     // to reallocate it new bigger size.
@@ -141,9 +144,7 @@ Evo.Organism = (function () {
                     // If current mutation is better then previous, then distance will
                     // be greater then _prevDistance.
                     //
-                    // TODO: this loop a little bit incorrect. It should
-                    // TODO: use order of sequence from every data set
-                    for (i = distance = max = 0; i <= d; i += 2) {
+                    for (i = i2 = passed = 0; i <= d; i += 2, i2++) {
                         //
                         // Output stream should be cleared for every new data set
                         //
@@ -154,26 +155,32 @@ Evo.Organism = (function () {
                         //
                         mem.set(data[i], 0);
                         run(code, mem, out, len);
-                        distance += lcs(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
-                        max      += data[i + 1].length;
+                        distance[i2] = lcs(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
+                        //
+                        // It was bad mutation and we need to revert it
+                        //
+                        if (distance[i2] < _prevDistance[i2]) {
+                            rollback(code);
+                            break;
+                        }
+                        //
+                        // This test was passed
+                        //
+                        else if (distance[i2] === data[i + 1].length) {passed++;}
+                        //
+                        // Last mutation was greater then previous
+                        //
+                        else if (distance[i2] > _prevDistance[i2]) {
+                            _prevDistance.set(distance, 0);
+                            break;
+                        }
                     }
-                    //
-                    // All tests (data sets) were passed
-                    //
-                    if (distance === max) {
-                        _prevDistance = distance;
+                    clever = false;
+                    if (passed === d / 2 + 1) {
+                        clever = true;
+                        _prevDistance.set(distance, 0);
                         break;
                     }
-                    //
-                    // If previous mutation has passed more tests (data sets),
-                    // then we need to revert current one.
-                    //
-                    clever = false;
-                    if (_prevDistance > distance) {
-                        rollback(code);
-                        continue;
-                    }
-                    _prevDistance = distance;
                 }
 
                 if (clever) {

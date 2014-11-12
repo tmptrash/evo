@@ -251,7 +251,7 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _read(code, i, vars) {
-        vars[code[i + 2]] = _mem[code[i + 1]];
+        vars[code[i + 2]] = _mem[vars[code[i + 1]]];
     }
     /**
      * 'write' command handler. Writes one number from variable
@@ -263,7 +263,7 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _write(code, i, vars) {
-        _mem[code[i + 1]] = vars[code[i + 2]];
+        _mem[vars[code[i + 1]]] = vars[code[i + 2]];
     }
     /**
      * 'jump' command handler. Jumps to specified line.
@@ -414,7 +414,7 @@ Evo.Interpreter = (function () {
     }
     /**
      * 'mul' command handler. Does multiplication. In case of zero,
-     * it divides on one.
+     * the result will be also zero. This is an ability of Uint16 type.
      * Example: 0014 0000 0001 # div one two. Result will be stored
      * in second variable
      *
@@ -423,7 +423,7 @@ Evo.Interpreter = (function () {
      * @param {Array} vars Array of variable values by index
      */
     function _div(code, i, vars) {
-        vars[code[i + 2]] /= (vars[code[i + 1]] || 1);
+        vars[code[i + 2]] /= vars[code[i + 1]];
     }
     /**
      * 'rem' command handler. Calculates reminder from division.
