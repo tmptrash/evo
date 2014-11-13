@@ -63,5 +63,9 @@ window.Evo = {
      * user commands processing will be delayed. It depends
      * on current PC performance.
      */
-    BLOCKING_ITERATIONS: 100000
+    BLOCKING_ITERATIONS: 100000,
+    /**
+     * {Number} Size of organism's memory in words (2 * MEMORY_SIZE bytes)
+     */
+    MEMORY_SIZE: 100
 };

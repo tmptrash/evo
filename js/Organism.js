@@ -10,15 +10,6 @@ Evo.Organism = (function () {
      */
     var _code = null;
     /**
-     * {Uint16Array} Organism's internal memory. We use this memory
-     * to set input data and check output in _out field.
-     */
-    var _mem  = null;
-    /**
-     * {Array} Output stream. Is used for output numbers from organism
-     */
-    var _out  = null;
-    /**
      * {Number} Value of similarity. As big this value is
      * as much similar data set and output were.
      */
@@ -37,6 +28,11 @@ Evo.Organism = (function () {
      * {Number} Total amount of all mutations from the beginning
      */
     var _allMutations = 0;
+    /**
+     * {Array} Reference to last data set, which was passed or not.
+     * It's used for obtaining memory, output and variables of organism.
+     */
+    var _lastData = null;
 
 
     /**
@@ -82,7 +78,8 @@ Evo.Organism = (function () {
             var maxNumber  = Evo.MAX_NUMBER;
             var evoMutator = Evo.Mutator;
             var evoInterpr = Evo.Interpreter;
-            var mem        = new Uint16Array(maxNumber);
+            var mem        = new Uint16Array(Evo.MEMORY_SIZE);
+            var zeroMem    = new Uint16Array(Evo.MEMORY_SIZE);
             var code       = new Uint16Array(maxNumber);
             var out        = [];
             var mutate     = evoMutator.mutate.bind(evoMutator);
@@ -103,9 +100,7 @@ Evo.Organism = (function () {
             var i;
             var i2;
 
-            _mem  = mem;
             _code = code;
-            _out  = out;
 
 
             /**
@@ -123,10 +118,6 @@ Evo.Organism = (function () {
                 // output.
                 //
                 while (!clever && b++ < backAmount) {
-                    //
-                    // Assume that after current mutation our organism is clever
-                    //
-                    clever = true;
                     mutate(code, varsLen, getCodeLen());
                     _curMutations++;
                     len    = getCodeLen();
@@ -149,11 +140,13 @@ Evo.Organism = (function () {
                         // Output stream should be cleared for every new data set
                         //
                         out.length = 0;
+                        _lastData  = data[i];
                         //
                         // This is how we set initial value to the organism's memory.
                         // It should read this and put the result into the output stream.
                         //
-                        mem.set(data[i], 0);
+                        mem.set(zeroMem, 0);
+                        mem.set(_lastData, 0);
                         run(code, mem, out, len);
                         distance[i2] = lcs(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
                         //
@@ -242,11 +235,17 @@ Evo.Organism = (function () {
             return c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('noLines') !== -1);
         },
         /**
-         * Returns memory dump of organism
+         * Returns memory dump of organism according to actual binary script.
          * @returns {Uint16Array}
          */
         getMemory: function () {
-            return new Uint16Array(_mem);
+            var mem = new Uint16Array(Evo.MAX_NUMBER);
+            var out = [];
+
+            mem.set(_lastData, 0);
+            Evo.Interpreter.run(_code, mem, out, Evo.Interpreter.getCodeLen());
+
+            return mem;
         },
         /**
          * Returns output stream of organism. It uses echo command for output.
@@ -255,7 +254,13 @@ Evo.Organism = (function () {
          * @returns {Array}
          */
         getOutput: function () {
-            return _out.slice(0);
+            var mem = new Uint16Array(Evo.MAX_NUMBER);
+            var out = [];
+
+            mem.set(_lastData, 0);
+            Evo.Interpreter.run(_code, mem, out, Evo.Interpreter.getCodeLen());
+
+            return out;
         },
         /**
          * Returns amount of mutations for current data set. This parameter is reset
