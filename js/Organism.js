@@ -55,7 +55,7 @@ Evo.Organism = (function () {
             s += (code[i] + (i < l1 ? ',' : ''));
         }
 
-        console.log('%cinp[%s]\nout[%s]\nrun[%d]\nout[%s]\nbin[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '', s);
+        console.log('%cinp[%s]\nout[%s]\nrun[%d]\nsay[%s]\nbin[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '', s);
         Evo.Organism.getCode('useConsole');
     }
     /**
