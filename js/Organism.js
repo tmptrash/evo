@@ -45,7 +45,17 @@ Evo.Organism = (function () {
      * @param {Array} out Output stream of organism
      */
     function _printReport(inData, outData, out) {
-        console.log('%cin[%s] out[%s] runs[%d] stream[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '');
+        var code = Evo.Organism.getCode();
+        var i;
+        var l;
+        var l1;
+        var s = '';
+
+        for (i = 0, l = code.length, l1 = l -1; i < l; i++) {
+            s += (code[i] + (i < l1 ? ',' : ''));
+        }
+
+        console.log('%cinp[%s]\nout[%s]\nrun[%d]\nout[%s]\nbin[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '', s);
         Evo.Organism.getCode('useConsole');
     }
     /**
