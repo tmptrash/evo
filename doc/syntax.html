@@ -28,6 +28,15 @@
     jumpz one label      # 000C 0001 0001      # jumps to the 'label' if 'one' is zero
     jumpn one label      # 000D 0001 0001      # jumps to the 'label' if 'one' is not a zero
     echo  one            # 000E 0001           # echoes variable 'one' value
+    or    one two        # 000F 0001 0002      # does bitwise OR. Result will be set into 'two' variable
+    and   one two        # 0010 0001 0002      # does bitwise AND. Result will be set into 'two' variable
+    xor   one two        # 0011 0001 0002      # does bitwise XOR. Result will be set into 'two' variable
+    not   one two        # 0012 0001 0002      # does bitwise NOT. Result will be set into 'two' variable
+    mul   one two        # 0013 0001 0002      # does multiplication. Result will be set into 'two' variable
+    div   one two        # 0014 0001 0002      # does division. Result will be set into 'two' variable
+    rem   one two        # 0015 0001 0002      # calculates reminder from division. Result will be set into 'two' variable
+    shl   one two        # 0016 0001 0002      # Bitwise left shift. Result will be set into 'two' variable
+    shr   one two        # 0017 0001 0002      # Bitwise right shift. Result will be set into 'two' variable
         </pre>
     </body>
 </html>

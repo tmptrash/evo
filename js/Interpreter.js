@@ -65,6 +65,11 @@
  * Should be read as 'Move value of "two" variable into "three" variable' and not
  * like 'Move value of "three" variable into "two" variable'.
  *
+ * Another important moment is interpreter direction. It's only from top to the
+ * bottom. So all jump commands (jump, jumpz, jumpe,...) may jump only deeper
+ * then current line (line with current jump command). It's needed for excluding
+ * infinite loops inside the script.
+ *
  * Dependencies:
  *     Core
  *

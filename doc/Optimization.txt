@@ -1,0 +1,27 @@
+This file contains optimization tips for future class Optimizator. The main
+purpose of this class is in reducing of binary code length and removing of
+unused and stupid commands.
+
+- All lines after last echo command may be removed. Example:
+
+  0: inc v1
+  1: echo v1       # last echo command
+  2: jumpz v1 l3
+
+  In this case jumpz command should be removed
+- If jump command hasn't any jump commands before it, then all this jump
+  related section should be removed. Example:
+
+  0: inc v1
+  1: jump l3
+  2: add v1 v2
+
+  In this case jump command just block line 2, so code from 1 to 2 line
+  is dead.
+
+  0: jump l2
+  1: jump l3
+  2: add v1 v2
+
+  In this case jump command shouldn't be removed, because this script
+  contains jumpz command, which jumps over the jump command.
