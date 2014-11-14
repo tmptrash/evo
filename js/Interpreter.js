@@ -476,8 +476,8 @@ Evo.Interpreter = (function () {
          * Runs an interpreter till last script code line will be finished.
          * @param {Uint16Array} code Lines of code in binary format
          * @param {Uint16Array} mem Memory for read and write commands
-         * @param {Array} out Output stream
-         * @param {Number=} codeLen Amount of words (Uint16) in binary script.
+         * @param {Array=} out Output stream
+         * @param {Number=} codeLen Amount of words (Uint16) in binary script
          * If is not set, then it will be set to code.length
          */
         run: function (code, mem, out, codeLen) {
@@ -495,7 +495,7 @@ Evo.Interpreter = (function () {
             //
             // Output stream (Array). Here organism must puts it's output numbers
             //
-            _out = out;
+            _out = out = out || [];
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
