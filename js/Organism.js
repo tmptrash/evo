@@ -101,6 +101,7 @@ Evo.Organism = (function () {
             var backAmount = Evo.BLOCKING_ITERATIONS;
             var d          = 0;
             var l          = data.length;
+            var similar    = lcs;
             var distance   = new Uint32Array(l / 2);
             var zeroDist   = new Uint32Array(l / 2);
             var passed     = 0;
@@ -158,7 +159,7 @@ Evo.Organism = (function () {
                         mem.set(zeroMem, 0);
                         mem.set(_lastData, 0);
                         run(code, mem, out, len);
-                        distance[i2] = lcs(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
+                        distance[i2] = similar(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
                         //
                         // It was bad mutation and we need to revert it
                         //
@@ -230,6 +231,12 @@ Evo.Organism = (function () {
          */
         getCode: function (skipFormat, padWidth) {
             var c2t  = Evo.Code2Text;
+            //
+            // We need to exclude an ability to create a reference to the
+            // binary code, because organism is leaving now and mutator
+            // is changing binary code right now. So our changing of this
+            // code here may affect it in organism.
+            //
             var code = new Uint16Array(_code.subarray(0, Evo.Interpreter.getCodeLen()));
 
             padWidth = padWidth || Evo.CODE_PADDING;
@@ -245,7 +252,8 @@ Evo.Organism = (function () {
             return c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('noLines') !== -1);
         },
         /**
-         * Returns memory dump of organism according to actual binary script.
+         * Returns memory dump of organism according to actual binary script. It's
+         * important, that we use a copy of the memory and not it's original one.
          * @returns {Uint16Array}
          */
         getMemory: function () {
@@ -283,7 +291,7 @@ Evo.Organism = (function () {
         /**
          * Returns amount of all mutations of organism from the beginning of leaving.
          * We need to add all mutations and current, because all mutations field is
-         * updated only between data sets.
+         * updated only between data sets are passed.
          * @return {Number}
          */
         getAllMutations: function() {

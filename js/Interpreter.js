@@ -500,7 +500,7 @@ Evo.Interpreter = (function () {
             //
             // Output stream (Array). Here organism must puts it's output numbers
             //
-            _out = out = out || [];
+            _out = out || [];
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
@@ -516,11 +516,7 @@ Evo.Interpreter = (function () {
             i = 0;
             while (i < codeLen) {
                 line = cmds[code[i]](code, i, vars);
-                if (line) {
-                    i = line;
-                } else {
-                    i += segs;
-                }
+                i = (line ? line : i + segs);
             }
         },
 

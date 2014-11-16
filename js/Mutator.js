@@ -9,9 +9,9 @@
  * create correct commands and they arguments. It doesn't
  * understand code's meaning, but understand code format. Also
  * Mutator produces one way code. It means that it doesn't
- * contains infinite loops. Every jump command may produce
+ * contain infinite loops. Every jump command may produce
  * destination lines greater then current. It's important,
- * because impossible to find infinite loops in the script.
+ * because impossible to resolve infinite loops in the script.
  *
  * Dependencies:
  *     Evo
