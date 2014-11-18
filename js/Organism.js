@@ -223,9 +223,9 @@ Evo.Organism = (function () {
          * Returns organism's code in different formats. This method may contain unoptimized
          * code, because it's used rare.
          * @param {String|Boolean=} skipFormat true to return formatted human readable code,
-         * false to return binary code. 'useConsole' to show code using console.log() and
-         * without return value. 'noLines' to show code without line numbers. It's possible
-         * to combine these parameters like this: 'useConsole, noLines'
+         * false to return binary code. 'text' to show code using console.log() and
+         * without return value. 'textNoLines' to show code without line numbers. It's possible
+         * to combine these parameters like this: 'text, textNoLines'
          * @param {Number=} padWidth Width in symbols for every code segment
          * @returns {Uint16Array|String} Final generated binary script of organism
          */
@@ -244,12 +244,12 @@ Evo.Organism = (function () {
             if (skipFormat === true || skipFormat === undefined) {
                 return code;
             }
-            if (skipFormat.indexOf('useConsole') !== -1) {
-                console.log('%c' + c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('noLines') !== -1), 'color: ' + Evo.COLOR_CODE);
+            if (skipFormat.indexOf('text') !== -1) {
+                console.log('%c' + c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + Evo.COLOR_CODE);
                 return undefined;
             }
 
-            return c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('noLines') !== -1);
+            return c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1);
         },
         /**
          * Returns memory dump of organism according to actual binary script. It's

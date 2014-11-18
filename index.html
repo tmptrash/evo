@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>Evo</title>
             <script type="text/javascript" src="js/lib/LongestCommonSubstring.js"></script>
+            <script type="text/javascript" src="js/lib/parallel.js"></script>
             <script type="text/javascript" src="js/Evo.js"></script>
             <script type="text/javascript" src="js/Interpreter.js"></script>
             <script type="text/javascript" src="js/Mutator.js"></script>
@@ -16,7 +17,19 @@
             //
             // Starts organism to mutate and develop itself
             //
-            Evo.Organism.live();
+            //Evo.Organism.live();
+            var p = new Parallel([40,40,40,40,40,40,40,40,40,40]);
+
+            // One gotcha: anonymous functions cannot be serialized
+            // If you want to do recursion, make sure the function
+            // is named appropriately
+            function fib(n) {
+                for (var i=0; i<n;i++) {}
+
+                return 1;
+            }
+
+            p.map(fib2).then(function () {console.log(arguments);})
         </script>
     </body>
 </html>

@@ -7,8 +7,9 @@ Ideas for Evo project
 - The world consists of particles. The particle has type and weight. The
   weight is amount of energy, which is in a particle.
 - Organisms consists of particles (body), interpreter and the script.
-- Every particle may be used like a sensor. It returns a value, which is
-  a sum of all other particles weights in special direction. For example:
+- Every particle may be used like a sensor (input). It returns a value,
+  which is a sum of all other particles weights in special direction.
+  For example:
 
   Organism tries to obtain an input from X particle
     X --------> o
@@ -35,9 +36,9 @@ Ideas for Evo project
 
     feel(X, 45) = [p1, w3]
 
-- Every particle may be used like a signal receiver. The type and weight of it
-  may be changed by organism. So, it's possible for other organism to 'see' the
-  type and weight of this particle
+- Every particle may be used like a signal receiver (output). The type and
+  weight of it may be changed by organism. So, it's possible for other
+  organism to 'see' the type and weight of this particle
 - The type of the particle may be visualized by color
 - Use workers for many instances of organisms
 - GPU support
