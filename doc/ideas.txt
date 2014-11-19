@@ -45,3 +45,9 @@ Ideas for Evo project
 - Create code optimizer
 - Text2Bin script class
 - Try profiler and mem leaks tools
+- Organism class should be implemented as classic class. We need to create
+  as many instance as many organisms we need. Every instance should work in
+  separate web worker. Very important issue here is performance. We need to
+  use timers in separate workers to lover CPU load. The same story like
+  Evo.BLOCKING_ITERATIONS.
+- All configs from Evo namespace should be changed from user console.
