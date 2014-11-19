@@ -18,7 +18,13 @@
             // Starts organism to mutate and develop itself
             //
             var organism = new Evo.Organism({
-                data: Evo.Data
+                data           : Evo.Data,
+                colorData      : Evo.COLOR_DATA,
+                colorCode      : Evo.COLOR_CODE,
+                maxNumber      : Evo.MAX_NUMBER,
+                blockIterations: Evo.BLOCKING_ITERATIONS,
+                memSize        : Evo.MEMORY_SIZE,
+                codePadding    : Evo.CODE_PADDING
             });
             organism.live();
         </script>

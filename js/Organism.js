@@ -1,13 +1,20 @@
 /**
  * TODO: describe how organism works: mutations, memory, input, output,...
- * TODO: move all Evo.XXX to config parameter
+ * TODO: Add default values for config parameters
  *
- * @param {Object} config Start configuration of the organism
- *        {Array}  data   Input and output data for organism
+ * @param {Object} config          Start configuration of the organism
+ *        {Array}  data            Input and output data for organism
+ *        {String} colorData       Color of text for obtained organism's output data
+ *        {String} colorCode       Color of the text script
+ *        {Number} maxNumber       Maximum available number in script
+ *        {Number} blockIterations Amount of iterations, which will be run in background without breaking
+ *        {Number} memSize         Organism's memory size in words (2 * memSize byte)
+ *        {Number} codePadding     Padding of text code for every column: command, arg1, arg2, arg3
  *
  * Dependencies:
  *     Evo
  *     Evo.Mutator
+ *     Evo.Code2Text
  *     Evo.Interpreter
  *
  * @author DeadbraiN
@@ -78,7 +85,7 @@ Evo.Organism = function (config) {
             s += (code[i] + (i < l1 ? ',' : ''));
         }
 
-        console.log('%cinp[%s]\nout[%s]\nrun[%d]\nsay[%s]\nbin[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '', s);
+        console.log('%cinp[%s]\nout[%s]\nrun[%d]\nsay[%s]\nbin[%s]', 'color: ' + config.colorData, inData + '', outData + '', _curMutations, out + '', s);
         _me.getCode('text');
     }
     /**
@@ -108,10 +115,10 @@ Evo.Organism = function (config) {
             //
             console.time('running time');
 
-            var maxNumber  = Evo.MAX_NUMBER;
-            var backAmount = Evo.BLOCKING_ITERATIONS;
-            var mem        = new Uint16Array(Evo.MEMORY_SIZE);
-            var zeroMem    = new Uint16Array(Evo.MEMORY_SIZE);
+            var maxNumber  = config.maxNumber;
+            var backAmount = config.blockIterations;
+            var mem        = new Uint16Array(config.memSize);
+            var zeroMem    = new Uint16Array(config.memSize);
             var code       = new Uint16Array(maxNumber);
             var out        = [];
             var varsLen    = _interpreter.VARS_AMOUNT;
@@ -255,13 +262,13 @@ Evo.Organism = function (config) {
             //
             var code = new Uint16Array(_code.subarray(0, _interpreter.getCodeLen()));
 
-            padWidth = padWidth || Evo.CODE_PADDING;
+            padWidth = padWidth || config.codePadding;
 
             if (skipFormat === true || skipFormat === undefined) {
                 return code;
             }
             if (skipFormat.indexOf('text') !== -1) {
-                console.log('%c' + c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + Evo.COLOR_CODE);
+                console.log('%c' + c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + config.colorCode);
                 return undefined;
             }
 
@@ -273,7 +280,7 @@ Evo.Organism = function (config) {
          * @returns {Uint16Array}
          */
         getMemory: function () {
-            var mem = new Uint16Array(Evo.MAX_NUMBER);
+            var mem = new Uint16Array(config.maxNumber);
             var out = [];
 
             mem.set(_lastData, 0);
@@ -288,7 +295,7 @@ Evo.Organism = function (config) {
          * @returns {Array}
          */
         getOutput: function () {
-            var mem = new Uint16Array(Evo.MAX_NUMBER);
+            var mem = new Uint16Array(config.maxNumber);
             var out = [];
 
             mem.set(_lastData, 0);

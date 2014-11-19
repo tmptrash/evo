@@ -51,3 +51,4 @@ Ideas for Evo project
   use timers in separate workers to lover CPU load. The same story like
   Evo.BLOCKING_ITERATIONS.
 - All configs from Evo namespace should be changed from user console.
+- Add config for mutation speed

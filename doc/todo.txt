@@ -1,0 +1,10 @@
+TODO list
+
+- Add worker class. Every worker should instantiate it's own organism (may be more).
+  Workers should use setTimeout to lover CPU load
+- Add Worker manager class. It should manages all workers, create new and remove dead
+- Add new commands in Evo language for input/output communication between organism and
+  it's particles (body)
+- Add new command for organism moving
+- Add canvas, world (with boundaries), energy particles
+- Add console commands for creating all of this (organisms, world, energy particles,...)
