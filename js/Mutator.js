@@ -18,16 +18,20 @@
  *
  * @author DeadbraiN
  */
-Evo.Mutator = (function () {
+Evo.Mutator = function () {
     /**
+     * @constant
      * {Number} Max word number + 1. + 1 is needed for randomizer.
      */
     var _MAX_NUMBER_PLUS_ONE = Evo.MAX_NUMBER + 1;
     /**
+     * @constant
      * {Number} Coefficient of new mutations. It means, that
      * it directly affects on binary script growing.
      */
     var _NEW_MUTATIONS_SPEED = Evo.NEW_MUTATIONS_SPEED;
+
+
     /**
      * {Function} Math.floor() method shortcut
      * @type {Function}
@@ -437,4 +441,4 @@ Evo.Mutator = (function () {
             return _codeLen;
         }
     };
-})();
+};

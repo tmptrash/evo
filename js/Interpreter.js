@@ -71,7 +71,7 @@
  * infinite loops inside the script.
  *
  * Dependencies:
- *     Core
+ *     Evo
  *
  * Example:
  *     //
@@ -90,11 +90,11 @@
  *     code[5]  = 0;  // zero var
  *     code[6]  = 1;  // one var
  *
- *     Evo.Interpreter.run(code);
+ *     (new Evo.Interpreter).run(code);
  *
  * @author DeadbraiN
  */
-Evo.Interpreter = (function () {
+Evo.Interpreter = function () {
     /**
      * @constant
      * {Number} Amount of segments (parts) in one script line: command, arg1, arg2, arg3.
@@ -537,4 +537,4 @@ Evo.Interpreter = (function () {
             return new Uint16Array(_vars);
         }
     };
-})();
+};

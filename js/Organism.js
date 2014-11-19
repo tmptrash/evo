@@ -1,9 +1,18 @@
 /**
  * TODO: describe how organism works: mutations, memory, input, output,...
+ * TODO: move all Evo.XXX to config parameter
+ *
+ * @param {Object} config Start configuration of the organism
+ *        {Array}  data   Input and output data for organism
+ *
+ * Dependencies:
+ *     Evo
+ *     Evo.Mutator
+ *     Evo.Interpreter
  *
  * @author DeadbraiN
  */
-Evo.Organism = (function () {
+Evo.Organism = function (config) {
     /**
      * {Uint16Array} Binary code of the organism. This code will be
      * changed by Mutator module.
@@ -13,7 +22,7 @@ Evo.Organism = (function () {
      * {Number} Value of similarity. As big this value is
      * as much similar data set and output were.
      */
-    var _prevDistance = new Uint32Array(Evo.Data.length / 2);
+    var _prevDistance = new Uint32Array(config.data.length / 2);
     /**
      * {Function} Just a shortcut for fromCharCode(). I used for
      * performance issue.
@@ -33,6 +42,20 @@ Evo.Organism = (function () {
      * It's used for obtaining memory, output and variables of organism.
      */
     var _lastData = null;
+    /**
+     * {Evo.Mutator} Personal mutator instance. It's uses for binary
+     * code mutation.
+     */
+    var _mutator = new Evo.Mutator();
+    /**
+     * {Evo.Interpreter} An interpreter for binary script
+     */
+    var _interpreter = new Evo.Interpreter();
+    /**
+     * {Evo.Organism} Is used in private methods, because this is
+     * points to the windows object.
+     */
+    var _me = null;
 
 
     /**
@@ -45,7 +68,7 @@ Evo.Organism = (function () {
      * @param {Array} out Output stream of organism
      */
     function _printReport(inData, outData, out) {
-        var code = Evo.Organism.getCode();
+        var code = _me.getCode();
         var i;
         var l;
         var l1;
@@ -56,7 +79,7 @@ Evo.Organism = (function () {
         }
 
         console.log('%cinp[%s]\nout[%s]\nrun[%d]\nsay[%s]\nbin[%s]', 'color: ' + Evo.COLOR_DATA, inData + '', outData + '', _curMutations, out + '', s);
-        Evo.Organism.getCode('useConsole');
+        _me.getCode('text');
     }
     /**
      * This method is used for reallocation of memory, which is used
@@ -64,7 +87,7 @@ Evo.Organism = (function () {
      * time, so we need to allocate more memory for it.
      */
     function _reallocateCode() {
-        var codeLen = Evo.Mutator.getCodeLen();
+        var codeLen = _mutator.getCodeLen();
         var code    = new Uint16Array(codeLen + codeLen);
 
         code.set(_code, 0);
@@ -73,7 +96,7 @@ Evo.Organism = (function () {
     }
 
 
-    return {
+    return (_me = {
         /**
          * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop
          * Starts organism to leave on. Live means pass all data sets (tests) by
@@ -86,19 +109,13 @@ Evo.Organism = (function () {
             console.time('running time');
 
             var maxNumber  = Evo.MAX_NUMBER;
-            var evoMutator = Evo.Mutator;
-            var evoInterpr = Evo.Interpreter;
+            var backAmount = Evo.BLOCKING_ITERATIONS;
             var mem        = new Uint16Array(Evo.MEMORY_SIZE);
             var zeroMem    = new Uint16Array(Evo.MEMORY_SIZE);
             var code       = new Uint16Array(maxNumber);
             var out        = [];
-            var mutate     = evoMutator.mutate.bind(evoMutator);
-            var rollback   = evoMutator.rollback.bind(evoMutator);
-            var run        = evoInterpr.run.bind(evoInterpr);
-            var getCodeLen = evoMutator.getCodeLen.bind(evoInterpr);
-            var varsLen    = evoInterpr.VARS_AMOUNT;
-            var data       = Evo.Data;
-            var backAmount = Evo.BLOCKING_ITERATIONS;
+            var varsLen    = _interpreter.VARS_AMOUNT;
+            var data       = config.data;
             var d          = 0;
             var l          = data.length;
             var similar    = lcs;
@@ -129,9 +146,9 @@ Evo.Organism = (function () {
                 // output.
                 //
                 while (!clever && b++ < backAmount) {
-                    mutate(code, varsLen, getCodeLen());
+                    _mutator.mutate(code, varsLen, _mutator.getCodeLen());
                     _curMutations++;
-                    len    = getCodeLen();
+                    len    = _mutator.getCodeLen();
                     distance.set(zeroDist, 0);
                     //
                     // When all allocated memory for binary script is reached, we need
@@ -158,13 +175,13 @@ Evo.Organism = (function () {
                         //
                         mem.set(zeroMem, 0);
                         mem.set(_lastData, 0);
-                        run(code, mem, out, len);
+                        _interpreter.run(code, mem, out, len);
                         distance[i2] = similar(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
                         //
                         // It was bad mutation and we need to revert it
                         //
                         if (distance[i2] < _prevDistance[i2]) {
-                            rollback(code);
+                            _mutator.rollback(code);
                             break;
                         }
                         //
@@ -199,7 +216,6 @@ Evo.Organism = (function () {
                     // If this condition is true, then all data sets have done
                     //
                     if (d >= l) {
-                        console.log('\n%cAll tests were done!', 'color: ' + Evo.COLOR_FINAL);
                         //
                         // This is how we finish running time measurement. See console.time()
                         // call at the beginning of current method
@@ -237,7 +253,7 @@ Evo.Organism = (function () {
             // is changing binary code right now. So our changing of this
             // code here may affect it in organism.
             //
-            var code = new Uint16Array(_code.subarray(0, Evo.Interpreter.getCodeLen()));
+            var code = new Uint16Array(_code.subarray(0, _interpreter.getCodeLen()));
 
             padWidth = padWidth || Evo.CODE_PADDING;
 
@@ -261,7 +277,7 @@ Evo.Organism = (function () {
             var out = [];
 
             mem.set(_lastData, 0);
-            Evo.Interpreter.run(_code, mem, out, Evo.Interpreter.getCodeLen());
+            _interpreter.run(_code, mem, out, _interpreter.getCodeLen());
 
             return mem;
         },
@@ -276,7 +292,7 @@ Evo.Organism = (function () {
             var out = [];
 
             mem.set(_lastData, 0);
-            Evo.Interpreter.run(_code, mem, out, Evo.Interpreter.getCodeLen());
+            _interpreter.run(_code, mem, out, _interpreter.getCodeLen());
 
             return out;
         },
@@ -297,5 +313,5 @@ Evo.Organism = (function () {
         getAllMutations: function() {
             return _allMutations + _curMutations;
         }
-    };
-})();
+    });
+};

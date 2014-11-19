@@ -17,19 +17,10 @@
             //
             // Starts organism to mutate and develop itself
             //
-            //Evo.Organism.live();
-            var p = new Parallel([40,40,40,40,40,40,40,40,40,40]);
-
-            // One gotcha: anonymous functions cannot be serialized
-            // If you want to do recursion, make sure the function
-            // is named appropriately
-            function fib(n) {
-                for (var i=0; i<n;i++) {}
-
-                return 1;
-            }
-
-            p.map(fib2).then(function () {console.log(arguments);})
+            var organism = new Evo.Organism({
+                data: Evo.Data
+            });
+            organism.live();
         </script>
     </body>
 </html>

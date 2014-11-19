@@ -40,10 +40,6 @@ window.Evo = {
      */
     COLOR_CODE   : '#707070',
     /**
-     * {String} Color of final done message
-     */
-    COLOR_FINAL  : '#00AA00',
-    /**
      * {Number} Default padding for human readable scripts
      */
     CODE_PADDING : 5,
