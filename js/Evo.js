@@ -1,98 +1,54 @@
 /**
- * This is main namespace for Evo application. Contains
- * general interface for communication with organisms and
- * entire world.
- *
- * TODO: update general idea of the application
+ * Global Evo configuration
  *
  * Dependencies:
- *     No
+ *     Evo
  *
  * @author DeadbraiN
  */
-window.Evo = function () {
+window.Evo = {
     /**
-     * {Array} Files, which are needed for organism. They
-     * will be packed into one blob object.
+     * {Number} Maximum number value for organism. This is a value,
+     * which our organism may proceed. It also understandable for
+     * Interpreter and Mutator.
      */
-    var _BLOB_FILES = [
-        'js/lib/lcs.js',
-        'js/Interpreter.js',
-        'js/Mutator.js',
-        'js/Code2Text.js',
-        'js/Organism.js'
-    ];
-
+    MAX_NUMBER: 65535,
     /**
-     * Map of organisms (Web workers) organized by id.
+     * {Number} Amount of segments in one binary script line:
+     * command arg1 arg2 arg3
      */
-    var _organisms = null;
+    LINE_SEGMENTS: 4,
     /**
-     * {String} An URL of the Blob object, which is contained
-     * all javascript dependencies for organism living.
+     * {String} The color of text of input and output data
      */
-    var _blobUrl = null;
+    COLOR_DATA: '#AA0000',
     /**
-     * {Boolean} It will be set to true, when Evo app will be
-     * ready. It means all asynchronous actions will be done.
+     * {String} The color of script
      */
-    var _ready = false;
-
-
+    COLOR_CODE: '#707070',
     /**
-     * Creates Blob object and set it's URL for future workers.
-     * @private
+     * {Number} Default padding for human readable scripts
      */
-    function _init() {
-        //
-        // $script library loads all script files asynchronously
-        //
-        $script(_BLOB_FILES, function() {
-            var scripts = $('scripts script');
-            var files   = '';
-            var fileRe  = /\/([a-zA-Z-\._0-9]+)\.js/;
-            var file;
-            var i;
-            var l;
-
-            for (i = 0, l = scripts.length; i < l; i++) {
-                //
-                // Only file name (without extension)
-                //
-                file = fileRe.exec(scripts[i].src)[1];
-                //
-                // Here we get inner function. Every file should
-                // contain a function inside. It must has the same
-                // name like file name.
-                //
-                files += (Evo[file] || window[file]).toString();
-            }
-
-            _ready   = true;
-            _blobUrl = window.URL.createObjectURL(new Blob([files]));
-
-            //
-            // Removes all dynamically added scripts
-            //
-            $('scripts').empty();
-        });
-    }
-
+    CODE_PADDING: 5,
     /**
-     * This is an entry point of application. All other public
-     * methods will be available a little bit later.
+     * {Number} Coefficient of new mutations. It means, that
+     * it directly affects on binary script growing. New mutation
+     * probability is: 1/(codeLen * _NEW_MUTATIONS_SPEED). So it
+     * depends on size of binary script and speed of client PC.
+     * As big this number is as slow the script is grow.
      */
-    _init();
-
-    return {
-        /**
-         * Creates new organism with parameters
-         * TODO:
-         */
-        create: function () {
-            if (!_ready) {
-                return 'Evo is not ready. Please wait a second and try again.';
-            }
-        }
-    };
+    NEW_MUTATIONS_SPEED: 1000,
+    /**
+     * {Number} Amount of non interruptable iterations between
+     * user commands from console. This parameter affects on
+     * speed of used command response time. If this parameter
+     * is big, then background calculations will be long and
+     * user commands processing will be delayed. It depends
+     * on current PC performance.
+     */
+    BLOCKING_ITERATIONS: 50000,
+    /**
+     * {Number} Size of organism's memory in words (2 * MEMORY_SIZE bytes)
+     */
+    MEMORY_SIZE: 100
 };
