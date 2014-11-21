@@ -2,7 +2,7 @@
  * Global Evo configuration
  *
  * Dependencies:
- *     Evo
+ *     No
  *
  * @author DeadbraiN
  */
