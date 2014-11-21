@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html>
     <head lang="en">
-        <meta charset="UTF-8">
+        <scripts></scripts>
+        <meta charset="UTF-8"/>
         <title>Evo</title>
-            <script type="text/javascript" src="js/lib/LongestCommonSubstring.js"></script>
-            <script type="text/javascript" src="js/lib/parallel.js"></script>
-            <script type="text/javascript" src="js/Evo.js"></script>
-            <script type="text/javascript" src="js/Interpreter.js"></script>
-            <script type="text/javascript" src="js/Mutator.js"></script>
-            <script type="text/javascript" src="js/Code2Text.js"></script>
-            <script type="text/javascript" src="js/Data.js"></script>
-            <script type="text/javascript" src="js/Organism.js"></script>
+        <script type="text/javascript" src="js/lib/script.js"></script>
+        <script type="text/javascript" src="js/Evo.js"></script>
+
+        <!--script type="text/javascript" src="js/lib/lcs.js"></script>
+        <script type="text/javascript" src="js/Evo.js"></script>
+        <script type="text/javascript" src="js/Interpreter.js"></script>
+        <script type="text/javascript" src="js/Mutator.js"></script>
+        <script type="text/javascript" src="js/Code2Text.js"></script>
+        <script type="text/javascript" src="js/Data.js"></script>
+        <script type="text/javascript" src="js/Organism.js"></script-->
     </head>
     <body>
         <script>
             //
             // Starts organism to mutate and develop itself
             //
-            var organism = new Evo.Organism({
-                data           : Evo.Data,
-                colorData      : Evo.COLOR_DATA,
-                colorCode      : Evo.COLOR_CODE,
-                maxNumber      : Evo.MAX_NUMBER,
-                blockIterations: Evo.BLOCKING_ITERATIONS,
-                memSize        : Evo.MEMORY_SIZE,
-                codePadding    : Evo.CODE_PADDING
-            });
-            organism.live();
+//            var organism = new Evo.Organism({
+//                data           : Evo.Data,
+//                colorData      : Evo.COLOR_DATA,
+//                colorCode      : Evo.COLOR_CODE,
+//                maxNumber      : Evo.MAX_NUMBER,
+//                blockIterations: Evo.BLOCKING_ITERATIONS,
+//                memSize        : Evo.MEMORY_SIZE,
+//                codePadding    : Evo.CODE_PADDING
+//            });
+//            organism.live();
+
+            var evo = new Evo();
         </script>
     </body>
 </html>

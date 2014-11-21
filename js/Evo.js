@@ -1,67 +1,93 @@
 /**
- * This is main namespace for Evo application. Contains main
- * definitions and configurations for entire application.
- * General idea of application is to develop an organism,
- * which is clever and may teach itself. Teaching is a result
- * of random mutations of the code. Eny new version of code
- * should pass current and all previous tests (see data sets
- * in Evo.Data). The idea is similar to biological evolution,
- * where organism may be changed by mutations and only it's
- * adopted versions will survive in some specific environment.
- * For us the organism is a program, which is written on
- * special assembler like language (Evo). This program looks
- * like a binary code. Special Mutator module may change this
- * code in a random way. If some version may pass all the tests,
- * then we think, that current organism is done.
+ * This is main namespace for Evo application. Contains
+ * general interface for communication with organisms and
+ * entire world.
+ *
+ * TODO: update general idea of the application
  *
  * Dependencies:
  *     No
  *
  * @author DeadbraiN
  */
-window.Evo = {
+window.Evo = function () {
     /**
-     * {Number} Maximum number value for organism. This is a value,
-     * which our organism may proceed. It also understandable for
-     * Interpreter and Mutator.
+     * {Array} Files, which are needed for organism. They
+     * will be packed into one blob object.
      */
-    MAX_NUMBER   : 65535,
+    var _BLOB_FILES = [
+        'js/lib/lcs.js',
+        'js/Interpreter.js',
+        'js/Mutator.js',
+        'js/Code2Text.js',
+        'js/Organism.js'
+    ];
+
     /**
-     * {Number} Amount of segments in one binary script line:
-     * command arg1 arg2 arg3
+     * Map of organisms (Web workers) organized by id.
      */
-    LINE_SEGMENTS: 4,
+    var _organisms = null;
     /**
-     * {String} The color of text of input and output data
+     * {String} An URL of the Blob object, which is contained
+     * all javascript dependencies for organism living.
      */
-    COLOR_DATA   : '#AA0000',
+    var _blobUrl = null;
     /**
-     * {String} The color of script
+     * {Boolean} It will be set to true, when Evo app will be
+     * ready. It means all asynchronous actions will be done.
      */
-    COLOR_CODE   : '#707070',
+    var _ready = false;
+
+
     /**
-     * {Number} Default padding for human readable scripts
+     * Creates Blob object and set it's URL for future workers.
+     * @private
      */
-    CODE_PADDING : 5,
+    function _init() {
+        //
+        // $script library loads all script files asynchronously
+        //
+        $script(_BLOB_FILES, function() {
+            var scripts = document.querySelectorAll('scripts script');
+            var files   = '';
+            var fileRe  = /\/([a-zA-Z-\._0-9]+)\.js/;
+            var file;
+            var i;
+            var l;
+
+            for (i = 0, l = scripts.length; i < l; i++) {
+                //
+                // Only file name (without extension)
+                //
+                file = fileRe.exec(scripts[i].src)[1];
+                //
+                // Here we get inner function. Every file should
+                // contain a function inside. It must has the same
+                // name like file name.
+                //
+                files += (Evo[file] || window[file]).toString();
+            }
+
+            _ready   = true;
+            _blobUrl = window.URL.createObjectURL(new Blob([files]));
+        });
+    }
+
     /**
-     * {Number} Coefficient of new mutations. It means, that
-     * it directly affects on binary script growing. New mutation
-     * probability is: 1/(codeLen * _NEW_MUTATIONS_SPEED). So it
-     * depends on size of binary script and speed of client PC.
-     * As big this number is as slow the script is grow.
+     * This is an entry point of application. All other public
+     * methods will be available a little bit later.
      */
-    NEW_MUTATIONS_SPEED: 1000,
-    /**
-     * {Number} Amount of non interruptable iterations between
-     * user commands from console. This parameter affects on
-     * speed of used command response time. If this parameter
-     * is big, then background calculations will be long and
-     * user commands processing will be delayed. It depends
-     * on current PC performance.
-     */
-    BLOCKING_ITERATIONS: 50000,
-    /**
-     * {Number} Size of organism's memory in words (2 * MEMORY_SIZE bytes)
-     */
-    MEMORY_SIZE: 100
+    _init();
+
+    return {
+        /**
+         * Creates new organism with parameters
+         * TODO:
+         */
+        create: function () {
+            if (!_ready) {
+                return 'Evo is not ready. Please wait a second and try again.';
+            }
+        }
+    };
 };

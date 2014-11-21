@@ -59,6 +59,11 @@ Evo.Organism = function (config) {
      */
     var _interpreter = new Evo.Interpreter();
     /**
+     * {Evo.Code2Text} Utility class for representing of binary code
+     * in human readable manner.
+     */
+    var _code2text  = new Evo.Code2Text();
+    /**
      * {Evo.Organism} Is used in private methods, because this is
      * points to the windows object.
      */
@@ -253,7 +258,6 @@ Evo.Organism = function (config) {
          * @returns {Uint16Array|String} Final generated binary script of organism
          */
         getCode: function (skipFormat, padWidth) {
-            var c2t  = Evo.Code2Text;
             //
             // We need to exclude an ability to create a reference to the
             // binary code, because organism is leaving now and mutator
@@ -268,11 +272,11 @@ Evo.Organism = function (config) {
                 return code;
             }
             if (skipFormat.indexOf('text') !== -1) {
-                console.log('%c' + c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + config.colorCode);
+                console.log('%c' + _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + config.colorCode);
                 return undefined;
             }
 
-            return c2t.format(c2t.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1);
+            return _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1);
         },
         /**
          * Returns memory dump of organism according to actual binary script. It's

@@ -25,7 +25,7 @@
  *
  * @author DeadbraiN
  */
-Evo.Code2Text = (function () {
+Evo.Code2Text = function () {
     /**
      * Adds spaces to s string if the length of this string
      * is less then width.
@@ -161,4 +161,4 @@ Evo.Code2Text = (function () {
             }).join(newLine);
         }
     };
-})();
+};
