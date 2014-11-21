@@ -117,7 +117,7 @@ Evo.Interpreter = function () {
      * {Array} Output stream. Here organism will add it's numbers (outputs). This
      * is an analogy of communication channel between organism and environment.
      */
-    var _out      = null;
+    var _output   = null;
     /**
      * {Number} Amount of numbers in binary script array. This is an amount of all
      * words. This is not an amount of code lines. You may calculate amount of
@@ -142,6 +142,29 @@ Evo.Interpreter = function () {
      * states, shouldn't affect to current running.
      */
     var _zeroVars = new Uint16Array(_VARS_AMOUNT);
+    /**
+     * {Function} Input command callback. Is set from outside in run() method and is called
+     * from in command. Should contain at least one parameter - another callback, which will
+     * be called when the answer will be obtained.
+     */
+    var _inCb = null;
+    /**
+     * {Function} The same like inCb, but without callback parameter.
+     */
+    var _outCb = null;
+    /**
+     * {Boolean} Means that now, script should be stopped
+     */
+    var _stopped = false;
+    /**
+     * {Evo.Interpreter} this shortcut
+     */
+    var _me = null;
+    /**
+     * {Number} Last index in binary script. If may be last one or index of command on which
+     * we were break the script.
+     */
+    var _lastIndex = 0;
     /**
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, otherwise all scripts may be broken.
@@ -170,7 +193,9 @@ Evo.Interpreter = function () {
         _div,    // 20
         _rem,    // 21
         _shl,    // 22
-        _shr     // 23
+        _shr,    // 23
+        _in,     // 24
+        _out     // 25
     ];
 
 
@@ -348,18 +373,18 @@ Evo.Interpreter = function () {
     }
     /**
      * 'echo' command handler. Echoes (outputs) a value of specified
-     * variable. Example: 000E 0000 # echo one
+     * variable. Example: 000E 0001 # echo one
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
     function _echo(code, i, vars) {
-        _out.push(vars[code[i + 1]]);
+        _output.push(vars[code[i + 1]]);
     }
     /**
      * 'or' command handler. Does Bitwise OR.
-     * Example: 000F 0000 0001 # or one two. Result will be stored
+     * Example: 000F 0001 0002 # or one two. Result will be stored
      * in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -371,7 +396,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'and' command handler. Does Bitwise AND.
-     * Example: 0010 0000 0001 # and one two. Result will be stored
+     * Example: 0010 0001 0002 # and one two. Result will be stored
      * in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -383,7 +408,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'xor' command handler. Does Bitwise XOR.
-     * Example: 0011 0000 0001 # xor one two. Result will be stored
+     * Example: 0011 0001 0002 # xor one two. Result will be stored
      * in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -395,7 +420,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'not' command handler. Does Bitwise NOT.
-     * Example: 0012 0000 0001 # not one two. Result will be stored
+     * Example: 0012 0001 0002 # not one two. Result will be stored
      * in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -407,7 +432,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'mul' command handler. Does division.
-     * Example: 0013 0000 0001 # mul one two. Result will be stored
+     * Example: 0013 0001 0002 # mul one two. Result will be stored
      * in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -420,7 +445,7 @@ Evo.Interpreter = function () {
     /**
      * 'mul' command handler. Does multiplication. In case of zero,
      * the result will be also zero. This is an ability of Uint16 type.
-     * Example: 0014 0000 0001 # div one two. Result will be stored
+     * Example: 0014 0001 0002 # div one two. Result will be stored
      * in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -432,7 +457,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'rem' command handler. Calculates reminder from division.
-     * Example: 0015 0000 0001 # rem one two. Result
+     * Example: 0015 0001 0002 # rem one two. Result
      * will be stored in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -444,7 +469,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'shl' command handler. Bitwise left shift operator.
-     * Example: 0016 0000 0001 # shl one two. Result
+     * Example: 0016 0001 0002 # shl one two. Result
      * will be stored in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -456,7 +481,7 @@ Evo.Interpreter = function () {
     }
     /**
      * 'shr' command handler. Bitwise right shift operator.
-     * Example: 0017 0000 0001 # sgr one two. Result
+     * Example: 0017 0001 0002 # shr one two. Result
      * will be stored in second variable
      *
      * @param {Uint16Array} code Script in binary representation
@@ -466,12 +491,49 @@ Evo.Interpreter = function () {
     function _shr(code, i, vars) {
         vars[code[i + 2]] >>= vars[code[i + 1]];
     }
+    /**
+     * 'in' command handler. Obtains input command from
+     * specified sensor.
+     * Example: 0018 0001 0002 # in one two. Result
+     * will be stored in second variable. This example
+     * means 'get word from 0001 sensor and store it
+     * into the 0002 variable'.
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _in(code, i, vars) {
+        _stopped = true;
+        _inCb(function (data) {
+            vars[code[i + 2]] = data;
+            _stopped = false;
+            _me.run({i: _lastIndex});
+        }, vars[code[i + 1]]);
+    }
+    /**
+     * 'out' command handler. Send command to  specified sensor.
+     * Example: 0019 0001 0002 # out one two. This example
+     * means 'put word from 0002 variable into 0001 sensor'
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _out(code, i, vars) {
+        _stopped = true;
+        _outCb(function (data) {
+            vars[code[i + 2]] = data;
+            _stopped = false;
+            _me.run({i: _lastIndex});
+        }, vars[code[i + 1]]);
+    }
 
 
     //
     // public section
     //
-    return {
+    return (_me = {
         /**
          * @constant
          * {Number} Amount of internal variables
@@ -479,45 +541,59 @@ Evo.Interpreter = function () {
         VARS_AMOUNT: _VARS_AMOUNT,
         /**
          * Runs an interpreter till last script code line will be finished.
-         * @param {Uint16Array} code Lines of code in binary format
-         * @param {Uint16Array} mem Memory for read and write commands
-         * @param {Array=} out Output stream
-         * @param {Number=} codeLen Amount of words (Uint16) in binary script
+         * @param {Object}      cfg     Configuration of interpreter
+         *        {Uint16Array} code    Lines of code in binary format
+         *        {Uint16Array} mem     Memory for read and write commands
+         *        {Function}    inCb    Input command callback. Is used for call
+         *                              of external code, which gets input data.
+         *                              External code may be asynchronous, so this
+         *                              callback should be called with another
+         *                              callback in first parameter. This second
+         *                              callback will be called by outside code,
+         *                              when the data from input sensor will be
+         *                              received.
+         *        {Function}    outCb   Output command callback. The same like
+         *                              input callback, but without parameter.
+         *        {Array=}      out     Output stream
+         *        {Number=}     codeLen Amount of words (Uint16) in binary script.
+         *        {Number=}     i       Start index in script. Default is zero.
+         *
          * If is not set, then it will be set to code.length
          */
-        run: function (code, mem, out, codeLen) {
-            var vars = _vars;
-            var segs = _LINE_SEGMENTS;
-            var cmds = _cmds;
-            var i;
+        run: function (cfg) {
+            var vars    = _vars;
+            var segs    = _LINE_SEGMENTS;
+            var cmds    = _cmds;
+            var codeLen = _codeLen || cfg.codeLen;
+            var code    = cfg.code;
+            var i       = cfg.i || 0;
             var line;
 
             //
             // Memory block, which is set from outside and
             // should be used by current script
             //
-            _mem = mem;
+            _mem = cfg.mem || _mem;
             //
             // Output stream (Array). Here organism must puts it's output numbers
             //
-            _out = out || [];
+            _output = cfg.out || _output || [];
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
             _codeLen = codeLen = (codeLen === undefined ? code.length : codeLen);
             //
-            // We need to clear all internal variables every time when new run is called
+            // We need to clear all internal variables every time when new run is called.
+            // If we continue execution then we need to skip this.
             //
-            _vars.set(_zeroVars);
-            //
-            // This is a main loop, where all commands are ran.
-            // i === 1, because we loop thought commands
-            //
-            i = 0;
-            while (i < codeLen) {
+            if (i === 0) {
+                _vars.set(_zeroVars);
+            }
+            while (i < codeLen && !_stopped) {
                 line = cmds[code[i]](code, i, vars);
                 i = (line ? line : i + segs);
             }
+            _lastIndex = i;
         },
 
         /**
@@ -536,5 +612,5 @@ Evo.Interpreter = function () {
         getVars: function () {
             return new Uint16Array(_vars);
         }
-    };
+    });
 };
