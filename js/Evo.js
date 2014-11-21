@@ -48,7 +48,7 @@ window.Evo = function () {
         // $script library loads all script files asynchronously
         //
         $script(_BLOB_FILES, function() {
-            var scripts = document.querySelectorAll('scripts script');
+            var scripts = $('scripts script');
             var files   = '';
             var fileRe  = /\/([a-zA-Z-\._0-9]+)\.js/;
             var file;
@@ -70,6 +70,11 @@ window.Evo = function () {
 
             _ready   = true;
             _blobUrl = window.URL.createObjectURL(new Blob([files]));
+
+            //
+            // Removes all dynamically added scripts
+            //
+            $('scripts').empty();
         });
     }
 
