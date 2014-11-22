@@ -52,3 +52,10 @@ Ideas for Evo project
   Evo.BLOCKING_ITERATIONS.
 - All configs from Evo namespace should be changed from user console.
 - Add config for mutation speed
+- Every organism has an energy value. This value is set from the scratch and
+  is decreased during it's life. It's possible to increase amount of energy
+  by grabbing it from nearest objects like other organisms or energy particles.
+  If amount of energy is increasing during some period, then the organism
+  has been mutating in a good direction. If amount of energy is near zero,
+  then the organism will die.
+- Add start amount of energy configuration

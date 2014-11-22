@@ -153,6 +153,22 @@ Evo.Interpreter = function () {
      */
     var _outCb = null;
     /**
+     * {Function} Callback, which is called when an organism is moving. It should be set from
+     * outside. Has one parameter - direction. There are four directions: 0 - up, 1 - right,
+     * 2 - bottom, 3 - left
+     */
+    var _stepCb = null;
+    /**
+     * {Function} Callback for eat command. It means that current organism eats one point of energy
+     * from the particle , which is near. It may be other organism or just a particle of the world.
+     */
+    var _eatCb = null;
+    /**
+     * {Function} Callback for echo command. It's called every time then organism generates some
+     * output information. This is an analog of saying something
+     */
+    var _echoCb = null;
+    /**
      * {Boolean} Means that now, script should be stopped
      */
     var _stopped = false;
@@ -195,11 +211,13 @@ Evo.Interpreter = function () {
         _shl,    // 22
         _shr,    // 23
         _in,     // 24
-        _out     // 25
+        _out,    // 25
+        _step,   // 26
+        _eat     // 27
     ];
 
 
-    /**
+    /*
      * 'set' command handler. Initializes variable by specific value
      * Example: 0000 0001 0002 # set 0001 two
      *
@@ -512,7 +530,7 @@ Evo.Interpreter = function () {
         }, vars[code[i + 1]]);
     }
     /**
-     * 'out' command handler. Send command to  specified sensor.
+     * 'out' command handler. Send command to specified sensor.
      * Example: 0019 0001 0002 # out one two. This example
      * means 'put word from 0002 variable into 0001 sensor'
      *
@@ -528,6 +546,34 @@ Evo.Interpreter = function () {
             _me.run({i: _lastIndex});
         }, vars[code[i + 1]]);
     }
+    /**
+     * 'step' command handler. Do one step with specified
+     * direction.
+     * Example: 001A 0001 # step one. This example means
+     * 'do one step in 0001 direction'. There are four
+     * directions: 0 - up, 1 - right, 2 - bottom, 3 - left
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _step(code, i, vars) {
+        _stepCb(vars[code[i + 1]]);
+    }
+    /**
+     * 'eat' command handler. Grabs an energy point from nearest
+     * particle.
+     * Example: 001B 0001 # eat one. This example means
+     * 'grab one energy point from 0001 direction'. There are four
+     * directions: 0 - up, 1 - right, 2 - bottom, 3 - left
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _eat(code, i, vars) {
+        _eatCb(vars[code[i + 1]]);
+    }
 
 
     //
@@ -540,7 +586,10 @@ Evo.Interpreter = function () {
          */
         VARS_AMOUNT: _VARS_AMOUNT,
         /**
-         * Runs an interpreter till last script code line will be finished.
+         * Runs an interpreter till last script code line will be finished. This
+         * method may be broken by some asynchronous command (e.g. in, out) and
+         * continued in future. For this, you should run it again with i parameter.
+         * Like this: interpreter.run({i: lastLineIndex})
          * @param {Object}      cfg     Configuration of interpreter
          *        {Uint16Array} code    Lines of code in binary format
          *        {Uint16Array} mem     Memory for read and write commands
@@ -554,6 +603,14 @@ Evo.Interpreter = function () {
          *                              received.
          *        {Function}    outCb   Output command callback. The same like
          *                              input callback, but without parameter.
+         *        {Function}    stepCb  Callback for step command. Is used for
+         *                              signalize some outside code about one
+         *                              single step of organism.
+         *        {Function}    eatCb   Callback for eat command. Is used for
+         *                              signalize of outside code about eating
+         *                              one point of energy.
+         *        {Function}    echoCb  Callback for echo. Signalizes outside code
+         *                              about new echo data.
          *        {Array=}      out     Output stream
          *        {Number=}     codeLen Amount of words (Uint16) in binary script.
          *        {Number=}     i       Start index in script. Default is zero.
@@ -569,6 +626,14 @@ Evo.Interpreter = function () {
             var i       = cfg.i || 0;
             var line;
 
+            //
+            // Callback methods for commands like in, out, step, eat...
+            //
+            _inCb   = cfg.inCb;
+            _outCb  = cfg.outCb;
+            _stepCb = cfg.stepCb;
+            _eatCb  = cfg.eatCb;
+            _echoCb = cfg.echoCb;
             //
             // Memory block, which is set from outside and
             // should be used by current script

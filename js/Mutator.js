@@ -339,7 +339,7 @@ Evo.Mutator = function () {
         code.set([19, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
-     * Generates command 'div' with random arguments. This command may
+     * Generates command 'rem' with random arguments. This command may
      * be added to the end or in any script position, removing
      * previous command at this position.
      * @param {Uint16Array} code Script code in binary format

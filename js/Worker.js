@@ -124,11 +124,11 @@ Evo.Worker = function (cfg) {
         /**
          * Creates new Web Worker with organism inside. All
          * required scripts are already inside worker.
-         * @return {Worker|null}
+         * @return {Worker|String}
          */
         create: function () {
             if (!_ready) {
-                return null;
+                return 'The worker is not ready';
             }
 
             return new Worker(_blobUrl);
