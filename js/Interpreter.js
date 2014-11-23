@@ -145,11 +145,14 @@ Evo.Interpreter = function () {
     /**
      * {Function} Input command callback. Is set from outside in run() method and is called
      * from in command. Should contain at least one parameter - another callback, which will
-     * be called when the answer will be obtained.
+     * be called when the answer will be obtained. This, second callback has ne parameter -
+     * obtained data. See run() method config.inCb description for details.
      */
     var _inCb = null;
     /**
-     * {Function} The same like inCb, but without callback parameter.
+     * {Function} The same like inCb, but without callback parameter. Callback has three
+     * custom parameters. You may use them what every you want. See run() method
+     * config.outCb description for details.
      */
     var _outCb = null;
     /**
@@ -160,12 +163,13 @@ Evo.Interpreter = function () {
     var _stepCb = null;
     /**
      * {Function} Callback for eat command. It means that current organism eats one point of energy
-     * from the particle , which is near. It may be other organism or just a particle of the world.
+     * from the particle, which is near. It may be other organism or just a particle of the world.
+     * Has one parameter - direction: 0 - up, 1 - right, 2 - bottom, 3 - left.
      */
     var _eatCb = null;
     /**
      * {Function} Callback for echo command. It's called every time then organism generates some
-     * output information. This is an analog of saying something
+     * output information. This is an analog of saying something. Has one parameter - output number.
      */
     var _echoCb = null;
     /**
@@ -512,10 +516,10 @@ Evo.Interpreter = function () {
     /**
      * 'in' command handler. Obtains input command from
      * specified sensor.
-     * Example: 0018 0001 0002 # in one two. Result
+     * Example: 0018 0001 0002 0003 # in one two. Result
      * will be stored in second variable. This example
-     * means 'get word from 0001 sensor and store it
-     * into the 0002 variable'.
+     * means 'get word from 0001 and 0002 sensor and store
+     * it in 0003 variable'.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -524,27 +528,22 @@ Evo.Interpreter = function () {
     function _in(code, i, vars) {
         _stopped = true;
         _inCb(function (data) {
-            vars[code[i + 2]] = data;
+            vars[code[i + 3]] = data;
             _stopped = false;
-            _me.run({i: _lastIndex});
-        }, vars[code[i + 1]]);
+            _me.run({i: _lastIndex, code: code});
+        }, vars[code[i + 1]], vars[code[i + 2]]);
     }
     /**
      * 'out' command handler. Send command to specified sensor.
-     * Example: 0019 0001 0002 # out one two. This example
-     * means 'put word from 0002 variable into 0001 sensor'
+     * Example: 0019 0001 0002 0003 # out one two. This example
+     * means 'put word from 0002 and 0003 variable into 0001 sensor'
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
     function _out(code, i, vars) {
-        _stopped = true;
-        _outCb(function (data) {
-            vars[code[i + 2]] = data;
-            _stopped = false;
-            _me.run({i: _lastIndex});
-        }, vars[code[i + 1]]);
+        _outCb(vars[code[i + 1]], vars[code[i + 2]], vars[code[i + 3]]);
     }
     /**
      * 'step' command handler. Do one step with specified
@@ -593,27 +592,75 @@ Evo.Interpreter = function () {
          * @param {Object}      cfg     Configuration of interpreter
          *        {Uint16Array} code    Lines of code in binary format
          *        {Uint16Array} mem     Memory for read and write commands
-         *        {Function}    inCb    Input command callback. Is used for call
-         *                              of external code, which gets input data.
-         *                              External code may be asynchronous, so this
-         *                              callback should be called with another
-         *                              callback in first parameter. This second
-         *                              callback will be called by outside code,
-         *                              when the data from input sensor will be
-         *                              received.
-         *        {Function}    outCb   Output command callback. The same like
-         *                              input callback, but without parameter.
-         *        {Function}    stepCb  Callback for step command. Is used for
-         *                              signalize some outside code about one
-         *                              single step of organism.
-         *        {Function}    eatCb   Callback for eat command. Is used for
-         *                              signalize of outside code about eating
-         *                              one point of energy.
-         *        {Function}    echoCb  Callback for echo. Signalizes outside code
-         *                              about new echo data.
          *        {Array=}      out     Output stream
          *        {Number=}     codeLen Amount of words (Uint16) in binary script.
          *        {Number=}     i       Start index in script. Default is zero.
+         *        {Function}    inCb    Input command callback. Is used for calls
+         *                              from external code, which gets any input
+         *                              data. External code may be asynchronous,
+         *                              so this callback should be called with
+         *                              another callback in first parameter. This
+         *                              second callback will be called by outside
+         *                              code, when the data will be received.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code: code,
+         *                                      inCb: function (finalCb) {
+         *                                          var data = this.getData();
+         *                                          ...
+         *                                          finalCb(data);
+         *                                      }
+         *                                  });
+         *        {Function}    outCb   Output command callback. The same like
+         *                              input callback, but without parameter.
+         *                              It has three custom parameters. They may
+         *                              address specific sensor in two first
+         *                              parameters and pass some value in the last.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code : code,
+         *                                      outCb: function (p1,p2,p3) {
+         *                                          // do something with parameters
+         *                                      }
+         *                                  });
+         *                              This command is synchronous.
+         *        {Function}    stepCb  Callback for step command. Is used for
+         *                              signalize some outside code about one
+         *                              single step of organism. Very similar to
+         *                              outCb, but with one parameter - direction
+         *                              of stepping: 0 - up, 1 - right, 2 - bottom,
+         *                              3 - left. It makes one step using this
+         *                              direction. This command is synchronous.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code  : code,
+         *                                      stepCb: function (direction) {
+         *                                          // do something with direction
+         *                                      }
+         *                                  });
+         *        {Function}    eatCb   Callback for eat command. Is used for
+         *                              signalize of outside code about eating
+         *                              one point of energy using specified direction:
+         *                              0 - upper particle, 1 - right particle, 2 -
+         *                              bottom particle, 3 - left particle. This
+         *                              command is synchronous.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code  : code,
+         *                                      stepCb: function (direction) {
+         *                                          // do something with direction
+         *                                      }
+         *                                  });
+         *        {Function}    echoCb  Callback for echo. Signalizes outside code
+         *                              about new echo data. This command is
+         *                              synchronous.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code  : code,
+         *                                      stepCb: function (direction) {
+         *                                          // do something with direction
+         *                                      }
+         *                                  });
          *
          * If is not set, then it will be set to code.length
          */
@@ -626,14 +673,6 @@ Evo.Interpreter = function () {
             var i       = cfg.i || 0;
             var line;
 
-            //
-            // Callback methods for commands like in, out, step, eat...
-            //
-            _inCb   = cfg.inCb;
-            _outCb  = cfg.outCb;
-            _stepCb = cfg.stepCb;
-            _eatCb  = cfg.eatCb;
-            _echoCb = cfg.echoCb;
             //
             // Memory block, which is set from outside and
             // should be used by current script
@@ -653,6 +692,14 @@ Evo.Interpreter = function () {
             //
             if (i === 0) {
                 _vars.set(_zeroVars);
+                //
+                // Callback methods for commands like in, out, step, eat...
+                //
+                _inCb   = cfg.inCb;
+                _outCb  = cfg.outCb;
+                _stepCb = cfg.stepCb;
+                _eatCb  = cfg.eatCb;
+                _echoCb = cfg.echoCb;
             }
             while (i < codeLen && !_stopped) {
                 line = cmds[code[i]](code, i, vars);
@@ -662,7 +709,7 @@ Evo.Interpreter = function () {
         },
 
         /**
-         * Returns length of code. The length of the code is not its
+         * Returns length of code. The length of the code is not it's
          * allocated size in array.
          * @return {Number}
          */
