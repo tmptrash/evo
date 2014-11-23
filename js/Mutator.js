@@ -74,7 +74,11 @@ Evo.Mutator = function () {
         _div,   // 20
         _rem,   // 21
         _shl,   // 22
-        _shr    // 23
+        _shr,   // 23
+        _in,    // 24
+        _out,   // 25
+        _step,  // 26
+        _eat    // 27
     ];
     /**
      * {Number} Just amount of commands
@@ -336,7 +340,7 @@ Evo.Mutator = function () {
      */
     function _div(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([19, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([20, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'rem' with random arguments. This command may
@@ -347,7 +351,7 @@ Evo.Mutator = function () {
      */
     function _rem(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([20, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([21, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'shl' with random arguments. This command may
@@ -358,7 +362,7 @@ Evo.Mutator = function () {
      */
     function _shl(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([21, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([22, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'shr' with random arguments. This command may
@@ -369,7 +373,51 @@ Evo.Mutator = function () {
      */
     function _shr(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([22, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+        code.set([23, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
+    }
+    /**
+     * Generates command 'in' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _in(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([24, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen)], i);
+    }
+    /**
+     * Generates command 'out' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _out(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([25, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen)], i);
+    }
+    /**
+     * Generates command 'step' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _step(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([26, _floor(_rnd() * _varsLen), 0, 0], i);
+    }
+    /**
+     * Generates command 'eat' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _eat(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([27, _floor(_rnd() * _varsLen), 0, 0], i);
     }
 
 

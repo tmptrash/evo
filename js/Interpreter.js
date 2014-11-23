@@ -525,6 +525,8 @@ Evo.Interpreter = function () {
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
+    // TODO: think about optimization of this code. It's very
+    // TODO: very slow, because of inter threading communication
     function _in(code, i, vars) {
         _stopped = true;
         _inCb(function (data) {
