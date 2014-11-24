@@ -25,7 +25,7 @@
  *
  * @author DeadbraiN
  */
-Evo.Code2Text = function () {
+Evo.Code2Text = function Code2Text() {
     /**
      * Adds spaces to s string if the length of this string
      * is less then width.

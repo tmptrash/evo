@@ -1,11 +1,10 @@
 /**
  * This module generates mutations for binary script of organism.
  * Mutations are random and accurate changes in code, which may
- * help it to pass the tests (see Evo.Data). If some mutation
- * doesn't help the organism, then it will be reverted. From
- * time to time (randomly) Mutator may produce some extra command.
- * This is how our binary code is growing. It's important, that
- * the Mutator should produce pretty accurate code. It should
+ * help it to pass the tests (see Evo.Data). From time to time
+ * (randomly) Mutator may produce some extra command. This is
+ * how our binary code is growing. It's important, that the
+ * Mutator should produce pretty accurate code. It should
  * create correct commands and they arguments. It doesn't
  * understand code's meaning, but understand code format. Also
  * Mutator produces one way code. It means that it doesn't
@@ -18,7 +17,7 @@
  *
  * @author DeadbraiN
  */
-Evo.Mutator = function () {
+Evo.Mutator = function Mutator() {
     /**
      * @constant
      * {Number} Max word number + 1. + 1 is needed for randomizer.
@@ -78,7 +77,8 @@ Evo.Mutator = function () {
         _in,    // 24
         _out,   // 25
         _step,  // 26
-        _eat    // 27
+        _eat,   // 27
+        _clone  // 28
     ];
     /**
      * {Number} Just amount of commands
@@ -89,23 +89,9 @@ Evo.Mutator = function () {
      */
     var _codeLen    = 0;
     /**
-     * {Array} Binary script code line, before mutation. It's
-     * used for reverting.
-     */
-    var _lastLine   = [];
-    /**
-     * {Number} Index of last mutated binary script line
-     */
-    var _lastIndex  = 0;
-    /**
      * {Number} Amount of one code line segments. Like command, arg1, arg2, arg3
      */
     var _segs       = Evo.LINE_SEGMENTS;
-    /**
-     * {Boolean} Flag, which shows if last mutation was an extra mutation. It means
-     * that last mutation was added new command at the end of binary script.
-     */
-    var _isLast     = false;
 
 
     /**
@@ -419,6 +405,17 @@ Evo.Mutator = function () {
         //noinspection JSCheckFunctionSignatures
         code.set([27, _floor(_rnd() * _varsLen), 0, 0], i);
     }
+    /**
+     * Generates command 'clone' with random arguments. This command may
+     * be added to the end or in any script position, removing
+     * previous command at this position.
+     * @param {Uint16Array} code Script code in binary format
+     * @param {Number} i Index of set command we need to mutate.
+     */
+    function _clone(code, i) {
+        //noinspection JSCheckFunctionSignatures
+        code.set([28, _floor(_rnd() * _varsLen), 0, 0], i);
+    }
 
 
     return {
@@ -444,41 +441,10 @@ Evo.Mutator = function () {
             // one array by changing other one.
             //
             if (_floor(_rnd() * codeLen * _NEW_MUTATIONS_SPEED) === 1 || !codeLen) {
-                _isLast    = true;
-                _lastIndex = codeLen;
-                _lastLine  = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
                 _cmds[_floor(_rnd() * _cmdsAmount)](code, codeLen);
                 _codeLen += segs;
             } else {
-                //
-                // Old binary script line should be saved in temp array _lastLine.
-                // It will be used for rollback.
-                //
-                _isLast    = false;
-                _lastIndex = _floor(_rnd() * (codeLen / segs)) * segs;
-                _lastLine  = new Uint16Array(code.subarray(_lastIndex, _lastIndex + segs));
-                _cmds[_floor(_rnd() * _cmdsAmount)](code, _lastIndex);
-            }
-        },
-        /**
-         * Rollbacks last mutation created by mutate() method.
-         * @param {Uint16Array} code Script code in binary format
-         */
-        rollback: function (code) {
-            //
-            // We don't need to rollback new mutations,
-            // because script stacks.
-            //
-            if (!_isLast) {
-                //noinspection JSCheckFunctionSignatures
-                code.set(_lastLine, _lastIndex);
-                //
-                // If last mutation was added at the end of binary code,
-                // then we need to decrease _codeLen
-                //
-                if (_isLast) {
-                    _codeLen -= _segs;
-                }
+                _cmds[_floor(_rnd() * _cmdsAmount)](code, _floor(_rnd() * (codeLen / segs)) * segs);
             }
         },
         /**

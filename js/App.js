@@ -19,6 +19,10 @@ Evo.App = function () {
      */
     var _n = 0;
     /**
+     * {Number} Unique message id. Is increased for every new message post.
+     */
+    var _msgId = 0;
+    /**
      * TODO:
      * {Object} Map of organisms (Web workers) organized by id.
      */
@@ -32,7 +36,7 @@ Evo.App = function () {
      * {Evo.Worker} Is used for Web Workers creation. Every
      * organism are in separate worker.
      */
-    var _worker = new Evo.Worker({cb: function () {_ready = true;}});
+    var _worker = new Evo.WorkerFactory({cb: function () {_ready = true;}});
 
 
     return {
@@ -75,7 +79,12 @@ Evo.App = function () {
                 return 'Invalid organism id';
             }
 
-            _organisms[id].postMessage('live', cfg);
+            // TODO: think about response handling
+            _organisms[id].postMessage({
+                cmd: 'live',
+                cfg: cfg,
+                id : ++_msgId
+            });
 
             return 'done';
         }

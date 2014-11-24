@@ -19,7 +19,7 @@
  *
  * @author DeadbraiN
  */
-Evo.Worker = function (cfg) {
+Evo.WorkerFactory = function WorkerFactory(cfg) {
     /**
      * @constant
      * {Array} Files, which are needed for organism. They
@@ -33,7 +33,6 @@ Evo.Worker = function (cfg) {
      * should somehow communicate with with Worker.
      */
     var _BLOB_FILES = [
-        'js/lib/lcs.js',
         'js/Interpreter.js',
         'js/Mutator.js',
         'js/Code2Text.js',
@@ -63,7 +62,7 @@ Evo.Worker = function (cfg) {
      * Creates initial script, which runs web worker.
      * @return {String} Script in string format
      */
-    function _getInitialScript() {
+    function _getFinalScript() {
         return 'var com = new Evo.Communicator();';
     }
     /**
@@ -77,9 +76,11 @@ Evo.Worker = function (cfg) {
         //
         // $script library loads all script files asynchronously
         //
+        // TODO: it should be rewritten with importScripts() method
+        // TODO: It will be shorter and without jQuery
         $script(_BLOB_FILES, function() {
             var scripts = $(_SCRIPTS_QUERY);
-            var files   = _getInitialScript();
+            var files   = '';
             var fileRe  = /\/([a-zA-Z-\._0-9]+)\.js/;
             var file;
             var i;
@@ -97,6 +98,7 @@ Evo.Worker = function (cfg) {
                 //
                 files += (Evo[file] || window[file]).toString();
             }
+            files += _getFinalScript();
             //
             // Old Blob object will be removed after page reload
             //
@@ -135,35 +137,3 @@ Evo.Worker = function (cfg) {
         }
     };
 };
-
-//// Worker code
-//self.addEventListener('message', function(e) {
-//  self.postMessage('ok');
-//}, false);
-//
-//function job() {
-//    setTimeout(job, 0);
-//	for (var i = 0, k = 0; i < 1000000000; i++) {
-//        k = i;
-//	}
-//}
-//job();
-//
-//
-//
-//// Main thread code
-//var worker = new Worker('js/Worker.js');
-//
-//worker.postMessage();
-//
-//setTimeout(function () {
-//    worker.addEventListener('message', function(e) {
-//        console.log((new Date()).getSeconds() + ' ' + e.data);
-//    }, false);
-//
-//    function f() {
-//        setTimeout(f, 2000);
-//        worker.postMessage('Hello World'); // Send data to our worker.
-//    }
-//    f();
-//}, 3000);

@@ -59,3 +59,5 @@ Ideas for Evo project
   has been mutating in a good direction. If amount of energy is near zero,
   then the organism will die.
 - Add start amount of energy configuration
+- Add decrease energy value config
+- Add start memory size config

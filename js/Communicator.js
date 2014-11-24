@@ -8,7 +8,7 @@
  *
  * @author DeadbraiN
  */
-Evo.Communicator = function () {
+Evo.Communicator = function Communicator() {
     /**
      * {Evo.Organism} Internal organism reference. Is used
      * for communicating between outside code and this worker.
@@ -21,16 +21,16 @@ Evo.Communicator = function () {
     /**
      * Main thread messages receiver. Runs commands on organism
      * and returns the the message.
-     * @param {String} cmd Command (name of the method) to run.
-     * @param {Object=} cfg Configuration for cmd
-     * @param {String} id Unique message id. Like transaction id.
+     * @param {Object}  cfg
+     *        {String}  cmd Command (name of the method) to run.
+     *        {Object=} cfg Configuration for cmd
+     *        {String}  id  Unique message id. Like transaction id.
      * @private
      */
-    function _onMessage(cmd, cfg, id) {
-        var msg = id + ': ' +
-            (typeof _organism[cmd] === 'function' ? _organism[cmd](cfg) : 'Invalid command "' + cmd + '"');
-
-        self.postMessage(msg);
+    function _onMessage(cfg) {
+        debugger;
+        var resp = typeof _organism[cfg.cmd] === 'function' ? _organism[cfg.cmd](cfg.cfg) : 'Invalid command "' + cfg.cmd + '"';
+        self.postMessage(resp, cfg.id);
     }
 
 

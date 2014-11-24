@@ -2,15 +2,6 @@
  * TODO: describe how organism works: mutations, memory, input, output,...
  * TODO: Add default values for config parameters
  *
- * @param {Object} config          Start configuration of the organism
- *        {Array}  data            Input and output data for organism
- *        {String} colorData       Color of text for obtained organism's output data
- *        {String} colorCode       Color of the text script
- *        {Number} maxNumber       Maximum available number in script
- *        {Number} blockIterations Amount of iterations, which will be run in background without breaking
- *        {Number} memSize         Organism's memory size in words (2 * memSize byte)
- *        {Number} codePadding     Padding of text code for every column: command, arg1, arg2, arg3
- *
  * Dependencies:
  *     Evo
  *     Evo.Mutator
@@ -19,22 +10,12 @@
  *
  * @author DeadbraiN
  */
-Evo.Organism = function (config) {
+Evo.Organism = function Organism() {
     /**
      * {Uint16Array} Binary code of the organism. This code will be
      * changed by Mutator module.
      */
     var _code = null;
-    /**
-     * {Number} Value of similarity. As big this value is
-     * as much similar data set and output were.
-     */
-    var _prevDistance = new Uint32Array(config.data.length / 2);
-    /**
-     * {Function} Just a shortcut for fromCharCode(). I used for
-     * performance issue.
-     */
-    var _fromChCode = String.fromCharCode;
     /**
      * {Number} Amount of mutations for current data set. It is
      * reset every time, then new data set has handled.
@@ -63,36 +44,8 @@ Evo.Organism = function (config) {
      * in human readable manner.
      */
     var _code2text  = new Evo.Code2Text();
-    /**
-     * {Evo.Organism} Is used in private methods, because this is
-     * points to the windows object.
-     */
-    var _me = null;
 
 
-    /**
-     * Prints a report about last mutations iteration. This report
-     * means, that one more data set was processed and new script
-     * was created for that. All previous data sets were also
-     * processed correctly.
-     * @param {Array} inData Input data for test
-     * @param {Array} outData Output data for test
-     * @param {Array} out Output stream of organism
-     */
-    function _printReport(inData, outData, out) {
-        var code = _me.getCode();
-        var i;
-        var l;
-        var l1;
-        var s = '';
-
-        for (i = 0, l = code.length, l1 = l -1; i < l; i++) {
-            s += (code[i] + (i < l1 ? ',' : ''));
-        }
-
-        console.log('%cinp[%s]\nout[%s]\nrun[%d]\nsay[%s]\nbin[%s]', 'color: ' + config.colorData, inData + '', outData + '', _curMutations, out + '', s);
-        _me.getCode('text');
-    }
     /**
      * This method is used for reallocation of memory, which is used
      * for binary code. After mutations script size is growing all the
@@ -108,40 +61,46 @@ Evo.Organism = function (config) {
     }
 
 
-    return (_me = {
+    return {
         /**
          * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop
          * Starts organism to leave on. Live means pass all data sets (tests) by
          * finding specific binary script obtained by mutations.
+         * @param {Object} config          Start configuration of the organism
+         *        {String} colorCode       Color of the text script
+         *        {Number} maxNumber       Maximum available number in script
+         *        {Number} blockIterations Amount of iterations, which will be run in background without breaking
+         *        {Number} memSize         Organism's memory size in words (2 * memSize byte)
+         *        {Number} codePadding     Padding of text code for every column: command, arg1, arg2, arg3
+         *        {Number} energy          Amount of energy which is inside the organism from the beginning
+         *        {Number} energyDecrease  Value, which is decrease an energy after every script run
+         *        {Number} mutationSpeed   Speed of new mutations: 1 - one mutation per one script run, 2  - 1
+         *                                 mutation per 2 script running and so on. As bigger this value is, as
+         *                                 slower the mutations are.
          */
-        live: function () {
+        live: function (config) {
             //
-            // This is how we start running time measurement
+            // All this section is only for run speed increasing,
+            // because local variables are faster, then global.
             //
-            console.time('running time');
-
             var maxNumber  = config.maxNumber;
             var backAmount = config.blockIterations;
             var mem        = new Uint16Array(config.memSize);
-            var zeroMem    = new Uint16Array(config.memSize);
             var code       = new Uint16Array(maxNumber);
             var out        = [];
             var varsLen    = _interpreter.VARS_AMOUNT;
-            var data       = config.data;
-            var d          = 0;
             var l          = data.length;
-            var similar    = lcs;
             var distance   = new Uint32Array(l / 2);
             var zeroDist   = new Uint32Array(l / 2);
-            var passed     = 0;
+            var energy     = config.energy;
+            var energyDec  = config.energyDecrease;
+            var mutSpeed   = config.mutationSpeed;
+            var m;
             var clever;
             var len;
             var b;
-            var i;
-            var i2;
 
             _code = code;
-
 
             /**
              * This method calls as a background thread. As you know
@@ -149,94 +108,61 @@ Evo.Organism = function (config) {
              * use setTimeout() for this. As a result we may type different
              * commands in console, while organism is leaving.
              */
-            function doInBackground() {
-                clever = false;
-                b      = 0;
+            function backgroundLive() {
+                b = 0;
+                m = mutSpeed;
                 //
                 // This is a main loop. Here organism checks if
                 // last mutation do the job: generates correct
                 // output.
                 //
                 while (!clever && b++ < backAmount) {
-                    _mutator.mutate(code, varsLen, _mutator.getCodeLen());
-                    _curMutations++;
-                    len    = _mutator.getCodeLen();
-                    distance.set(zeroDist, 0);
                     //
-                    // When all allocated memory for binary script is reached, we need
-                    // to reallocate it new bigger size.
+                    // This is how we control the mutations speed. As big
+                    // config.mutationSpeed as slow the mutations are.
                     //
-                    if (len === maxNumber) {
-                        maxNumber = _reallocateCode();
-                        code      = _code;
-                    }
-                    //
-                    // This loop checks all previous data sets. They should be passed.
-                    // If current mutation is better then previous, then distance will
-                    // be greater then _prevDistance.
-                    //
-                    for (i = i2 = passed = 0; i <= d; i += 2, i2++) {
+                    if (m-- < 1) {
+                        _mutator.mutate(code, varsLen, _mutator.getCodeLen());
+                        _curMutations++;
+                        len = _mutator.getCodeLen();
+                        distance.set(zeroDist, 0);
                         //
-                        // Output stream should be cleared for every new data set
+                        // When all allocated memory for binary script is reached, we need
+                        // to reallocate it new bigger size.
                         //
-                        out.length = 0;
-                        _lastData  = data[i];
-                        //
-                        // This is how we set initial value to the organism's memory.
-                        // It should read this and put the result into the output stream.
-                        //
-                        mem.set(zeroMem, 0);
-                        mem.set(_lastData, 0);
-                        _interpreter.run(code, mem, out, len);
-                        distance[i2] = similar(_fromChCode.apply(String, out), _fromChCode.apply(String, data[i + 1]));
-                        //
-                        // It was bad mutation and we need to revert it
-                        //
-                        if (distance[i2] < _prevDistance[i2]) {
-                            _mutator.rollback(code);
-                            break;
+                        if (len === maxNumber) {
+                            maxNumber = _reallocateCode();
+                            code = _code;
                         }
                         //
-                        // This test was passed
+                        // Mutations also decrease the energy resource
                         //
-                        else if (distance[i2] === data[i + 1].length) {passed++;}
-                        //
-                        // Last mutation was greater then previous
-                        //
-                        else if (distance[i2] > _prevDistance[i2]) {
-                            _prevDistance.set(distance, 0);
-                            break;
-                        }
+                        energy -= energyDec;
+                        m = mutSpeed;
                     }
-                    clever = false;
-                    if (passed === d / 2 + 1) {
-                        clever = true;
-                        _prevDistance.set(distance, 0);
-                        break;
-                    }
+                    //
+                    // We don't need to change memory between the iterations.
+                    // Organism should remember it's previous experience. Thw
+                    // same about output.
+                    //
+                    _interpreter.run(code, mem, out, len);
+                    //
+                    // After every script run, we need to decrease organism's energy.
+                    // As big the script is, as more the energy we need.
+                    //
+                    energy -= (energyDec * len);
                 }
-
-                if (clever) {
-                    _printReport(data[d], data[d + 1], out);
-                    _allMutations += _curMutations;
-                    _curMutations = 0;
-                    //
-                    // This is how we simulate the loop though data sets
-                    //
-                    d += 2;
-                    //
-                    // If this condition is true, then all data sets have done
-                    //
-                    if (d >= l) {
-                        //
-                        // This is how we finish running time measurement. See console.time()
-                        // call at the beginning of current method
-                        //
-                        console.timeEnd('running time');
-                        return;
-                    }
-                }
-                setTimeout(doInBackground, 0);
+                //
+                // Calculation of all mutations should be here, outside
+                // the loop, because of performance issue.
+                //
+                _allMutations += _curMutations;
+                _curMutations = 0;
+                //
+                // This line is very important, because it decrease CPU
+                // load and current thread works "silently"
+                //
+                setTimeout(backgroundLive, 0);
             }
 
             _allMutations = _curMutations = 0;
@@ -245,7 +171,7 @@ Evo.Organism = function (config) {
             // All other looping will be in background
             // and used may type different commands
             //
-            setTimeout(doInBackground, 0);
+            backgroundLive();
         },
         /**
          * Returns organism's code in different formats. This method may contain unoptimized
@@ -324,5 +250,5 @@ Evo.Organism = function (config) {
         getAllMutations: function() {
             return _allMutations + _curMutations;
         }
-    });
+    };
 };

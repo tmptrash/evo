@@ -94,7 +94,7 @@
  *
  * @author DeadbraiN
  */
-Evo.Interpreter = function () {
+Evo.Interpreter = function Interpreter() {
     /**
      * @constant
      * {Number} Amount of segments (parts) in one script line: command, arg1, arg2, arg3.
@@ -173,6 +173,11 @@ Evo.Interpreter = function () {
      */
     var _echoCb = null;
     /**
+     * {Function} Callback for clone command. Is called to inform outside code about cloning and
+     * amount of energy for new created child organism.
+     */
+    var _cloneCb = null;
+    /**
      * {Boolean} Means that now, script should be stopped
      */
     var _stopped = false;
@@ -217,7 +222,8 @@ Evo.Interpreter = function () {
         _in,     // 24
         _out,    // 25
         _step,   // 26
-        _eat     // 27
+        _eat,    // 27
+        _clone   // 28
     ];
 
 
@@ -575,6 +581,19 @@ Evo.Interpreter = function () {
     function _eat(code, i, vars) {
         _eatCb(vars[code[i + 1]]);
     }
+    /**
+     * 'clone' command handler. Clones current organism into current
+     * and child.
+     * Example: 001C 0001 # clone one. This example means
+     * 'clone organism and pass an energy from 0001 var into the child'.
+     *
+     * @param {Uint16Array} code Script in binary representation
+     * @param {Number} i Index of current code line
+     * @param {Array} vars Array of variable values by index
+     */
+    function _clone(code, i, vars) {
+        _cloneCb(vars[code[i + 1]]);
+    }
 
 
     //
@@ -663,6 +682,16 @@ Evo.Interpreter = function () {
          *                                          // do something with direction
          *                                      }
          *                                  });
+         *        {Function}    cloneCb Callback for clone. Signalizes outside code
+         *                              about new organism creation. This command is
+         *                              synchronous.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code  : code,
+         *                                      cloneCb: function () {
+         *                                          // do something
+         *                                      }
+         *                                  });
          *
          * If is not set, then it will be set to code.length
          */
@@ -697,11 +726,12 @@ Evo.Interpreter = function () {
                 //
                 // Callback methods for commands like in, out, step, eat...
                 //
-                _inCb   = cfg.inCb;
-                _outCb  = cfg.outCb;
-                _stepCb = cfg.stepCb;
-                _eatCb  = cfg.eatCb;
-                _echoCb = cfg.echoCb;
+                _inCb    = cfg.inCb;
+                _outCb   = cfg.outCb;
+                _stepCb  = cfg.stepCb;
+                _eatCb   = cfg.eatCb;
+                _echoCb  = cfg.echoCb;
+                _cloneCb = cfg.cloneCb;
             }
             while (i < codeLen && !_stopped) {
                 line = cmds[code[i]](code, i, vars);
