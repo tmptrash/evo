@@ -21,16 +21,19 @@ Evo.Communicator = function Communicator() {
     /**
      * Main thread messages receiver. Runs commands on organism
      * and returns the the message.
-     * @param {Object}  cfg
+     * @param {MessageEvent}  e
      *        {String}  cmd Command (name of the method) to run.
      *        {Object=} cfg Configuration for cmd
      *        {String}  id  Unique message id. Like transaction id.
      * @private
      */
-    function _onMessage(cfg) {
+    function _onMessage(e) {
+        var data = e.data;
         debugger;
-        var resp = typeof _organism[cfg.cmd] === 'function' ? _organism[cfg.cmd](cfg.cfg) : 'Invalid command "' + cfg.cmd + '"';
-        self.postMessage(resp, cfg.id);
+        if (data) {
+            var resp = typeof _organism[data.cmd] === 'function' ? _organism[data.cmd](data.cfg) : 'Invalid command "' + data.cmd + '"';
+            self.postMessage(resp, data.id);
+        }
     }
 
 

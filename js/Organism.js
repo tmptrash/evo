@@ -89,13 +89,10 @@ Evo.Organism = function Organism() {
             var code       = new Uint16Array(maxNumber);
             var out        = [];
             var varsLen    = _interpreter.VARS_AMOUNT;
-            var l          = data.length;
-            var distance   = new Uint32Array(l / 2);
-            var zeroDist   = new Uint32Array(l / 2);
             var energy     = config.energy;
             var energyDec  = config.energyDecrease;
             var mutSpeed   = config.mutationSpeed;
-            var m;
+            var m          = mutSpeed;
             var clever;
             var len;
             var b;
@@ -125,7 +122,6 @@ Evo.Organism = function Organism() {
                         _mutator.mutate(code, varsLen, _mutator.getCodeLen());
                         _curMutations++;
                         len = _mutator.getCodeLen();
-                        distance.set(zeroDist, 0);
                         //
                         // When all allocated memory for binary script is reached, we need
                         // to reallocate it new bigger size.

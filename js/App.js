@@ -38,6 +38,10 @@ Evo.App = function () {
             var id = _n++;
 
             _organisms[id] = new Worker('js/Loader.js');
+            //
+            // Starts worker immediately
+            //
+            _organisms[id].postMessage();
 
             return id;
         },

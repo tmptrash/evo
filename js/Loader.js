@@ -12,4 +12,5 @@
         'Organism.js',
         'Communicator.js'
     ]);
+    Evo.Communicator();
 })();
