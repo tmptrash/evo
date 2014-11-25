@@ -27,16 +27,6 @@ Evo.App = function () {
      * {Object} Map of organisms (Web workers) organized by id.
      */
     var _organisms = {};
-    /**
-     * {Boolean} It will be set to true, when Evo app will be
-     * ready. It means all asynchronous actions will be done.
-     */
-    var _ready = false;
-    /**
-     * {Evo.Worker} Is used for Web Workers creation. Every
-     * organism are in separate worker.
-     */
-    var _worker = new Evo.WorkerFactory({cb: function () {_ready = true;}});
 
 
     return {
@@ -47,10 +37,7 @@ Evo.App = function () {
         create: function () {
             var id = _n++;
 
-            if (!_ready) {
-                return 'Evo is not ready. Please wait a second and try again.';
-            }
-            _organisms[id] = _worker.create();
+            _organisms[id] = new Worker('js/Loader.js');
 
             return id;
         },
@@ -58,9 +45,6 @@ Evo.App = function () {
          * TODO:
          */
         remove: function (id) {
-            if (!_ready) {
-                return 'Evo is not ready. Please wait a second and try again.';
-            }
             if (!_organisms[id]) {
                 return 'Invalid organism id';
             }
@@ -72,9 +56,6 @@ Evo.App = function () {
          * TODO:
          */
         live: function (id, cfg) {
-            if (!_ready) {
-                return 'Evo is not ready. Please wait a second and try again.';
-            }
             if (!_organisms[id]) {
                 return 'Invalid organism id';
             }
