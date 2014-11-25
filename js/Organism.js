@@ -92,7 +92,7 @@ Evo.Organism = function Organism() {
             var energy     = config.energy;
             var energyDec  = config.energyDecrease;
             var mutSpeed   = config.mutationSpeed;
-            var m          = mutSpeed;
+            var m          = 0;
             var clever;
             var len;
             var b;
@@ -107,7 +107,6 @@ Evo.Organism = function Organism() {
              */
             function backgroundLive() {
                 b = 0;
-                m = mutSpeed;
                 //
                 // This is a main loop. Here organism checks if
                 // last mutation do the job: generates correct
