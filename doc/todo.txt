@@ -8,3 +8,4 @@ TODO list
 - Add new command for organism moving
 - Add canvas, world (with boundaries), energy particles
 - Add console commands for creating all of this (organisms, world, energy particles,...)
+- All console commands must be checked before run to exclude application crash

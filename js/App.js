@@ -17,7 +17,7 @@ Evo.App = function () {
      * {Number} Organism's unique number. Is used as an identifier
      * of organisms. You may use it in console commands.
      */
-    var _n = 0;
+    var _workerId = 0;
     /**
      * {Number} Unique message id. Is increased for every new message post.
      */
@@ -31,19 +31,13 @@ Evo.App = function () {
 
     return {
         /**
-         * Creates new organism with parameters
-         * TODO:
+         * Creates new organism with parameters in separate Web
+         * Worker and starts worker immediately.
+         * @return {Number} Unique worker id
          */
         create: function () {
-            var id = _n++;
-
-            _organisms[id] = new Worker('js/Loader.js');
-            //
-            // Starts worker immediately
-            //
-            _organisms[id].postMessage();
-
-            return id;
+            _organisms[_workerId] = new Worker('js/Loader.js');
+            return _workerId++;
         },
         /**
          * TODO:
@@ -53,6 +47,7 @@ Evo.App = function () {
                 return 'Invalid organism id';
             }
             _organisms[id].terminate();
+            delete _organisms[id];
 
             return 'done';
         },
@@ -66,6 +61,7 @@ Evo.App = function () {
 
             // TODO: think about response handling
             _organisms[id].postMessage({
+                // TODO: add all callback configs inCb, outCb,...
                 cmd: 'live',
                 cfg: cfg,
                 id : ++_msgId

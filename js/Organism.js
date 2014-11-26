@@ -17,6 +17,69 @@ Evo.Organism = function Organism() {
      */
     var _code = null;
     /**
+     * {Object} Configuration of current organism. If some properties
+     * will not be set, then default values will be used. Should contain
+     * default values from the scratch.
+     */
+    var _cfg  = {
+        /**
+         * {String} The color of script in the console
+         */
+        colorCode: '#707070',
+        /**
+         * {Number} Maximum number value for organism. This is a value,
+         * which our organism may proceed. It also understandable for
+         * Interpreter and Mutator
+         */
+        maxNumber: 65535,
+        /**
+         * {Number} Amount of non interruptable iterations between
+         * user commands from console. This parameter affects on
+         * speed of used command response time. If this parameter
+         * is big, then background calculations will be long and
+         * user commands processing will be delayed. It depends
+         * on current PC performance.
+         */
+        blockIterations: 50000,
+        /**
+         * {Number} Size of organism's memory in words (2 * MEMORY_SIZE bytes)
+         */
+        memSize: 100,
+        /**
+         * {Number} Default padding for human readable scripts
+         */
+        codePadding: 5,
+        /**
+         * {Number} Amount of energy for current organism. 0 means, that
+         * the organism is dead. > 0 means alive.
+         */
+        energy: 1000000
+        /*
+    *        {Number}   energyDecrease  Value, which is decrease an energy after every script run
+    *        {Number}   mutationSpeed   Speed of new mutations: 1 - one mutation per one script run, 2  - 1
+    *                                   mutation per 2 script running and so on. As bigger this value is, as
+    *                                   slower the mutations are.
+    *        {Function} inCb            'in' command callback. See Evo.Interpreter.inCb config for details.
+    *        {Function} outCb           'out' command callback. See Evo.Interpreter.outCb config for details.
+    *        {Function} stepCb          'step' command callback. See Evo.Interpreter.stepCb config for details.
+    *        {Function} eatCb           'eat' command callback. See Evo.Interpreter.eatCb config for details.
+    *        {Function} echoCb          'echo' command callback. See Evo.Interpreter.echoCb config for details.
+    *        {Function} cloneCb         'clone' command call
+    */
+    };
+    /**
+     * {Number} Minimal amount of energy, which is used to decrease
+     * it's value every time, the organism is run the script or
+     * do a mutation
+     */
+    var _energyDecrease = 0.0001;
+    /**
+     * {Number} Speed of new mutations: 1 - one mutation per one
+     * script run, 2 - 1 mutation per 2 script running and so on.
+     * As bigger this value is, as slower the mutations are.
+     */
+    var _mutationSpeed = 100;
+    /**
      * {Number} Amount of mutations for current data set. It is
      * reset every time, then new data set has handled.
      */
@@ -66,33 +129,39 @@ Evo.Organism = function Organism() {
          * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop
          * Starts organism to leave on. Live means pass all data sets (tests) by
          * finding specific binary script obtained by mutations.
-         * @param {Object} config          Start configuration of the organism
-         *        {String} colorCode       Color of the text script
-         *        {Number} maxNumber       Maximum available number in script
-         *        {Number} blockIterations Amount of iterations, which will be run in background without breaking
-         *        {Number} memSize         Organism's memory size in words (2 * memSize byte)
-         *        {Number} codePadding     Padding of text code for every column: command, arg1, arg2, arg3
-         *        {Number} energy          Amount of energy which is inside the organism from the beginning
-         *        {Number} energyDecrease  Value, which is decrease an energy after every script run
-         *        {Number} mutationSpeed   Speed of new mutations: 1 - one mutation per one script run, 2  - 1
-         *                                 mutation per 2 script running and so on. As bigger this value is, as
-         *                                 slower the mutations are.
+         * @param {Object} config            Start configuration of the organism
+         *        {String}   colorCode       Color of the text script
+         *        {Number}   maxNumber       Maximum available number in script
+         *        {Number}   blockIterations Amount of iterations, which will be run in background without breaking
+         *        {Number}   memSize         Organism's memory size in words (2 * memSize byte)
+         *        {Number}   codePadding     Padding of text code for every column: command, arg1, arg2, arg3
+         *        {Number}   energy          Amount of energy which is inside the organism from the beginning
+         *        {Number}   energyDecrease  Value, which is decrease an energy after every script run
+         *        {Number}   mutationSpeed   Speed of new mutations: 1 - one mutation per one script run, 2  - 1
+         *                                   mutation per 2 script running and so on. As bigger this value is, as
+         *                                   slower the mutations are.
+         *        {Function} inCb            'in' command callback. See Evo.Interpreter.inCb config for details.
+         *        {Function} outCb           'out' command callback. See Evo.Interpreter.outCb config for details.
+         *        {Function} stepCb          'step' command callback. See Evo.Interpreter.stepCb config for details.
+         *        {Function} eatCb           'eat' command callback. See Evo.Interpreter.eatCb config for details.
+         *        {Function} echoCb          'echo' command callback. See Evo.Interpreter.echoCb config for details.
+         *        {Function} cloneCb         'clone' command callback. See Evo.Interpreter.cloneCb config for details.
          */
         live: function (config) {
             //
             // All this section is only for run speed increasing,
             // because local variables are faster, then global.
             //
-            var maxNumber  = config.maxNumber;
-            var backAmount = config.blockIterations;
-            var mem        = new Uint16Array(config.memSize);
-            var code       = new Uint16Array(maxNumber);
-            var out        = [];
-            var varsLen    = _interpreter.VARS_AMOUNT;
-            var energy     = config.energy;
-            var energyDec  = config.energyDecrease;
-            var mutSpeed   = config.mutationSpeed;
-            var m          = 0;
+            var maxNumber      = config.maxNumber;
+            var backAmount     = config.blockIterations;
+            var mem            = new Uint16Array(config.memSize);
+            var code           = new Uint16Array(maxNumber);
+            var out            = [];
+            var varsLen        = _interpreter.VARS_AMOUNT;
+            var energyDec      = config.energyDecrease || _cfg.energyDecrease;
+            var mutSpeed       = config.mutationSpeed || _cfg.mutationSpeed;
+            var energy         = config.energy || _cfg.energy;
+            var m              = 0;
             var clever;
             var len;
             var b;
@@ -140,7 +209,12 @@ Evo.Organism = function Organism() {
                     // Organism should remember it's previous experience. Thw
                     // same about output.
                     //
-                    _interpreter.run(code, mem, out, len);
+                    _interpreter.run({
+                        code   : code,
+                        mem    : mem,
+                        out    : out,
+                        codeLen: len
+                    });
                     //
                     // After every script run, we need to decrease organism's energy.
                     // As big the script is, as more the energy we need.
@@ -161,6 +235,18 @@ Evo.Organism = function Organism() {
             }
 
             _allMutations = _curMutations = 0;
+            //
+            // We do it to setup default config values, which will
+            // be the same for every Evo.Interpreter.run() call
+            //
+            _interpreter.run({
+                inCb   : config.inCb,
+                outCb  : config.outCb,
+                stepCb : config.stepCb,
+                eatCb  : config.eatCb,
+                echoCb : config.echoCb,
+                cloneCb: config.cloneCb
+            });
             //
             // This is an entry point of living process.
             // All other looping will be in background
@@ -187,13 +273,14 @@ Evo.Organism = function Organism() {
             //
             var code = new Uint16Array(_code.subarray(0, _interpreter.getCodeLen()));
 
+            // TODO: config
             padWidth = padWidth || config.codePadding;
 
             if (skipFormat === true || skipFormat === undefined) {
                 return code;
             }
             if (skipFormat.indexOf('text') !== -1) {
-                console.log('%c' + _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + config.colorCode);
+                console.log('%c' + _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + _cfg.colorCode);
                 return undefined;
             }
 
@@ -205,7 +292,8 @@ Evo.Organism = function Organism() {
          * @returns {Uint16Array}
          */
         getMemory: function () {
-            var mem = new Uint16Array(config.maxNumber);
+            // TODO: config
+            var mem = new Uint16Array(_cfg.maxNumber);
             var out = [];
 
             mem.set(_lastData, 0);
@@ -220,7 +308,8 @@ Evo.Organism = function Organism() {
          * @returns {Array}
          */
         getOutput: function () {
-            var mem = new Uint16Array(config.maxNumber);
+            // TODO: config
+            var mem = new Uint16Array(_cfg.maxNumber);
             var out = [];
 
             mem.set(_lastData, 0);

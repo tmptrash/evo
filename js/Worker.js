@@ -1,27 +1,26 @@
 /**
- * This class is used for communicate between application
- * and specified Web Worker. As you know only messages
- * mechanism is supported. So it should support some kind
- * of remote procedures calls API. Also, please note, that
- * this class is created inside the worker and it has an
- * access to the organism instance.
+ * This module is used for communication between application
+ * and the Organism. As you know only messages mechanism is
+ * supported. So it should support some kind of remote
+ * procedures calls API. Also, please note, that this class
+ * is created inside the worker and it has an access to the
+ * organism instance.
+ * Don't forget that importScript() method is synchronous!
  *
  * @author DeadbraiN
  */
-Evo.Communicator = function Communicator() {
+Evo.Worker = function Worker() {
     /**
      * {Evo.Organism} Internal organism reference. Is used
      * for communicating between outside code and this worker.
-     * TODO: solve configuration issue. I think configuration
-     * TODO: should be passed in live() method, but not in
-     * TODO: the constructor.
+     * We used simple formula: one organism per one web worker.
      */
     var _organism = new Evo.Organism();
 
     /**
      * Main thread messages receiver. Runs commands on organism
      * and returns the the message.
-     * @param {MessageEvent}  e
+     * @param {MessageEvent} e
      *        {String}  cmd Command (name of the method) to run.
      *        {Object=} cfg Configuration for cmd
      *        {String}  id  Unique message id. Like transaction id.
@@ -38,7 +37,7 @@ Evo.Communicator = function Communicator() {
 
 
     //
-    // Entry point of this class
+    // Worker starts listening main thread
     //
     self.addEventListener('message', _onMessage, false);
 };
