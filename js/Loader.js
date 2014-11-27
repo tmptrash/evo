@@ -7,7 +7,6 @@
  *
  * @author DeadbraiN
  */
-debugger;
 importScripts.apply(null, [
     'Evo.js',
     'Interpreter.js',

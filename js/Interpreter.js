@@ -708,7 +708,7 @@ Evo.Interpreter = function Interpreter() {
             // Memory block, which is set from outside and
             // should be used by current script
             //
-            _mem = cfg.mem || _mem;
+            _mem = cfg.mem || _mem || new Uint16Array(Evo.MAX_NUMBER);
             //
             // Output stream (Array). Here organism must puts it's output numbers
             //
@@ -726,12 +726,12 @@ Evo.Interpreter = function Interpreter() {
                 //
                 // Callback methods for commands like in, out, step, eat...
                 //
-                _inCb    = cfg.inCb;
-                _outCb   = cfg.outCb;
-                _stepCb  = cfg.stepCb;
-                _eatCb   = cfg.eatCb;
-                _echoCb  = cfg.echoCb;
-                _cloneCb = cfg.cloneCb;
+                _inCb    = cfg.inCb || _inCb;
+                _outCb   = cfg.outCb || _outCb;
+                _stepCb  = cfg.stepCb || _stepCb;
+                _eatCb   = cfg.eatCb || _eatCb;
+                _echoCb  = cfg.echoCb || _echoCb;
+                _cloneCb = cfg.cloneCb || _cloneCb;
             }
             while (i < codeLen && !_stopped) {
                 line = cmds[code[i]](code, i, vars);

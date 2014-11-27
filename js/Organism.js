@@ -17,6 +17,10 @@ Evo.Organism = function Organism() {
      */
     var _code = null;
     /**
+     * {Function} For stubs
+     */
+    var _emptyFn = function () {};
+    /**
      * {Object} Configuration of current organism. If some properties
      * will not be set, then default values will be used. Should contain
      * default values from the scratch.
@@ -53,32 +57,50 @@ Evo.Organism = function Organism() {
          * {Number} Amount of energy for current organism. 0 means, that
          * the organism is dead. > 0 means alive.
          */
-        energy: 1000000
-        /*
-    *        {Number}   energyDecrease  Value, which is decrease an energy after every script run
-    *        {Number}   mutationSpeed   Speed of new mutations: 1 - one mutation per one script run, 2  - 1
-    *                                   mutation per 2 script running and so on. As bigger this value is, as
-    *                                   slower the mutations are.
-    *        {Function} inCb            'in' command callback. See Evo.Interpreter.inCb config for details.
-    *        {Function} outCb           'out' command callback. See Evo.Interpreter.outCb config for details.
-    *        {Function} stepCb          'step' command callback. See Evo.Interpreter.stepCb config for details.
-    *        {Function} eatCb           'eat' command callback. See Evo.Interpreter.eatCb config for details.
-    *        {Function} echoCb          'echo' command callback. See Evo.Interpreter.echoCb config for details.
-    *        {Function} cloneCb         'clone' command call
-    */
+        energy: 1000000,
+        /**
+         * {Number} Minimal amount of energy, which is used to decrease
+         * it's value every time, the organism is run the script or
+         * do a mutation
+         */
+        energyDecrease: 0.0001,
+        /**
+         * {Number} Speed of new mutations: 1 - one mutation per one
+         * script run, 2 - 1 mutation per 2 script running and so on.
+         * As bigger this value is, as slower the mutations are.
+         */
+        mutationSpeed: 100,
+        /**
+         * {Function} 'in' command callback. See Evo.Interpreter.inCb
+         * config for details.
+         */
+        inCb: _emptyFn,
+        /**
+         * {Function} 'out' command callback. See Evo.Interpreter.outCb
+         * config for details.
+         */
+        outCb: _emptyFn,
+        /**
+         * {Function} step' command callback. See Evo.Interpreter.stepCb
+         * config for details.
+         */
+        stepCb: _emptyFn,
+        /**
+         * {Function} 'eat' command callback. See Evo.Interpreter.eatCb
+         * config for details.
+         */
+        eatCb: _emptyFn,
+        /**
+         * {Function} 'echo' command callback. See Evo.Interpreter.echoCb
+         * config for details.
+         */
+        echoCb: _emptyFn,
+        /**
+         * {Function} 'clone' command callback. Evo.Interpreter.cloneCb
+         * config for details.
+         */
+        cloneCb: _emptyFn
     };
-    /**
-     * {Number} Minimal amount of energy, which is used to decrease
-     * it's value every time, the organism is run the script or
-     * do a mutation
-     */
-    var _energyDecrease = 0.0001;
-    /**
-     * {Number} Speed of new mutations: 1 - one mutation per one
-     * script run, 2 - 1 mutation per 2 script running and so on.
-     * As bigger this value is, as slower the mutations are.
-     */
-    var _mutationSpeed = 100;
     /**
      * {Number} Amount of mutations for current data set. It is
      * reset every time, then new data set has handled.
@@ -152,17 +174,16 @@ Evo.Organism = function Organism() {
             // All this section is only for run speed increasing,
             // because local variables are faster, then global.
             //
-            var maxNumber      = config.maxNumber;
-            var backAmount     = config.blockIterations;
-            var mem            = new Uint16Array(config.memSize);
-            var code           = new Uint16Array(maxNumber);
-            var out            = [];
-            var varsLen        = _interpreter.VARS_AMOUNT;
-            var energyDec      = config.energyDecrease || _cfg.energyDecrease;
-            var mutSpeed       = config.mutationSpeed || _cfg.mutationSpeed;
-            var energy         = config.energy || _cfg.energy;
-            var m              = 0;
-            var clever;
+            var maxNumber  = config.maxNumber || _cfg.maxNumber;
+            var backAmount = config.blockIterations || _cfg.blockIterations;
+            var mem        = new Uint16Array(config.memSize);
+            var code       = new Uint16Array(maxNumber);
+            var out        = [];
+            var varsLen    = _interpreter.VARS_AMOUNT;
+            var energyDec  = config.energyDecrease || _cfg.energyDecrease;
+            var mutSpeed   = config.mutationSpeed || _cfg.mutationSpeed;
+            var energy     = config.energy || _cfg.energy;
+            var m          = 0;
             var len;
             var b;
 
@@ -181,7 +202,7 @@ Evo.Organism = function Organism() {
                 // last mutation do the job: generates correct
                 // output.
                 //
-                while (!clever && b++ < backAmount) {
+                while (b++ < backAmount) {
                     //
                     // This is how we control the mutations speed. As big
                     // config.mutationSpeed as slow the mutations are.
@@ -240,12 +261,14 @@ Evo.Organism = function Organism() {
             // be the same for every Evo.Interpreter.run() call
             //
             _interpreter.run({
-                inCb   : config.inCb,
-                outCb  : config.outCb,
-                stepCb : config.stepCb,
-                eatCb  : config.eatCb,
-                echoCb : config.echoCb,
-                cloneCb: config.cloneCb
+                code   : code,
+                codeLen: 0,
+                inCb   : config.inCb || _cfg.inCb,
+                outCb  : config.outCb || _cfg.outCb,
+                stepCb : config.stepCb || _cfg.stepCb,
+                eatCb  : config.stepCb || _cfg.eatCb,
+                echoCb : config.echoCb || _cfg.echoCb,
+                cloneCb: config.cloneCb || _cfg.cloneCb
             });
             //
             // This is an entry point of living process.

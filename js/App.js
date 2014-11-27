@@ -86,7 +86,7 @@ Evo.App = function () {
             }
 
             _msgId++;
-            console.log(_msgId + ': cmd[' + cmd + '] cfg[' + JSON.stringify(cfg) + ']');
+            console.log(_msgId + ': ' + cmd + ' ' + JSON.stringify(cfg));
             _organisms[id].postMessage({
                 // TODO: add all callback configs inCb, outCb,...
                 cmd: cmd,
