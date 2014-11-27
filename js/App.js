@@ -28,15 +28,30 @@ Evo.App = function () {
      */
     var _organisms = {};
 
+    /**
+     * Handler of message event from Web Worker. Shows worker
+     * (organism) response in console.
+     * @param {MessageEvent} e.data
+     * @private
+     */
+    function _onWorkerMessage(e) {
+        var data = e.data;
+        console.log(data.id + ': ret[' + data.resp + ']');
+    }
+
 
     return {
         /**
          * Creates new organism with parameters in separate Web
-         * Worker and starts worker immediately.
+         * Worker. Returns unique worker/organism id, which is
+         * used for it's configuring and managing. By default
+         * Web Worker is in idle state. Any first message
+         * (postMessage) will wake it up.
          * @return {Number} Unique worker id
          */
         create: function () {
             _organisms[_workerId] = new Worker('js/Loader.js');
+            _organisms[_workerId].addEventListener('message', _onWorkerMessage.bind(this));
             return _workerId++;
         },
         /**
@@ -44,7 +59,7 @@ Evo.App = function () {
          */
         remove: function (id) {
             if (!_organisms[id]) {
-                return 'Invalid organism id';
+                return 'Invalid organism id ' + id;
             }
             _organisms[id].terminate();
             delete _organisms[id];
@@ -52,19 +67,31 @@ Evo.App = function () {
             return 'done';
         },
         /**
-         * TODO:
+         * Is used to run specified command for specified organism.
+         * @param {Number}  id  Unique organism/worker id
+         * @param {String}  cmd Command name (eg.: 'live')
+         * @param {Object=} cfg Configuration, which is passed to
+         * the organism as second parameter.
+         * @return {String} 'done' - all ok, error message if not
          */
-        live: function (id, cfg) {
+        cmd: function (id, cmd, cfg) {
             if (!_organisms[id]) {
-                return 'Invalid organism id';
+                return 'Invalid organism id ' + id;
+            }
+            if (typeof cmd !== 'string' && cmd.constructor !== String) {
+                return 'Invalid command ' + cmd;
+            }
+            if (typeof cfg !== 'object' && cfg !== undefined) {
+                return 'Invalid configuration. Object required.';
             }
 
-            // TODO: think about response handling
+            _msgId++;
+            console.log(_msgId + ': cmd[' + cmd + '] cfg[' + JSON.stringify(cfg) + ']');
             _organisms[id].postMessage({
                 // TODO: add all callback configs inCb, outCb,...
-                cmd: 'live',
+                cmd: cmd,
                 cfg: cfg,
-                id : ++_msgId
+                id : _msgId
             });
 
             return 'done';

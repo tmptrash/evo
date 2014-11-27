@@ -45,6 +45,7 @@ Ideas for Evo project
 - Create code optimizer
 - Text2Bin script class
 - Try profiler and mem leaks tools
+- Try JSHint, jsinspect, Flow (static type analyzer)
 - Organism class should be implemented as classic class. We need to create
   as many instance as many organisms we need. Every instance should work in
   separate web worker. Very important issue here is performance. We need to

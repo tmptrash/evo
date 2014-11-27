@@ -20,7 +20,7 @@ Evo.Worker = function Worker() {
     /**
      * Main thread messages receiver. Runs commands on organism
      * and returns the the message.
-     * @param {MessageEvent} e
+     * @param {MessageEvent} e.data
      *        {String}  cmd Command (name of the method) to run.
      *        {Object=} cfg Configuration for cmd
      *        {String}  id  Unique message id. Like transaction id.
@@ -31,7 +31,10 @@ Evo.Worker = function Worker() {
         debugger;
         if (data) {
             var resp = typeof _organism[data.cmd] === 'function' ? _organism[data.cmd](data.cfg) : 'Invalid command "' + data.cmd + '"';
-            self.postMessage(resp, data.id);
+            self.postMessage({
+                resp: resp,
+                id  : data.id
+            });
         }
     }
 
