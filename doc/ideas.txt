@@ -62,3 +62,5 @@ Ideas for Evo project
 - Add start amount of energy configuration
 - Add decrease energy value config
 - Add start memory size config
+- Mutations should appear only at the beginning of life of the organism. This
+  is a time just after cloning.

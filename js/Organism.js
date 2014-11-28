@@ -263,11 +263,11 @@ Evo.Organism = function Organism() {
             _interpreter.run({
                 code   : code,
                 codeLen: 0,
-                inCb   : config.inCb || _cfg.inCb,
-                outCb  : config.outCb || _cfg.outCb,
-                stepCb : config.stepCb || _cfg.stepCb,
-                eatCb  : config.stepCb || _cfg.eatCb,
-                echoCb : config.echoCb || _cfg.echoCb,
+                inCb   : config.inCb    || _cfg.inCb,
+                outCb  : config.outCb   || _cfg.outCb,
+                stepCb : config.stepCb  || _cfg.stepCb,
+                eatCb  : config.stepCb  || _cfg.eatCb,
+                echoCb : config.echoCb  || _cfg.echoCb,
                 cloneCb: config.cloneCb || _cfg.cloneCb
             });
             //
@@ -297,7 +297,7 @@ Evo.Organism = function Organism() {
             var code = new Uint16Array(_code.subarray(0, _interpreter.getCodeLen()));
 
             // TODO: config
-            padWidth = padWidth || config.codePadding;
+            padWidth = padWidth || _cfg.codePadding;
 
             if (skipFormat === true || skipFormat === undefined) {
                 return code;
