@@ -147,6 +147,14 @@ Evo.Organism = function Organism() {
 
 
     return {
+        // TODO:
+        init: function (cfg) {
+            for (var i in cfg) {
+                if (cfg.hasOwnProperty(i)) {
+                    _cfg[i] = cfg[i];
+                }
+            }
+        },
         /**
          * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop
          * Starts organism to leave on. Live means pass all data sets (tests) by

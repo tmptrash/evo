@@ -1,28 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head lang="en">
-        <!-- Placeholder for dynamic scripts -->
-        <scripts></scripts>
         <meta charset="UTF-8"/>
         <title>Evo</title>
+        <link rel="stylesheet" type="text/css" href="css/Main.css"/>
+
+        <script type="text/javascript" src="js/lib/jquery-2.1.1.js"></script>
         <script type="text/javascript" src="js/Evo.js"></script>
+        <script type="text/javascript" src="js/World.js"></script>
         <script type="text/javascript" src="js/Interpreter.js"></script>
         <script type="text/javascript" src="js/App.js"></script>
     </head>
     <body>
+        <canvas id="world"/>
         <script>
-            //
-            // Starts organism to mutate and develop itself
-            //
-//            var organism = new Evo.Organism({
-//                colorCode      : Evo.COLOR_CODE,
-//                maxNumber      : Evo.MAX_NUMBER,
-//                blockIterations: Evo.BLOCKING_ITERATIONS,
-//                memSize        : Evo.MEMORY_SIZE,
-//                codePadding    : Evo.CODE_PADDING
-//            });
-//            organism.live();
-
             var evo = new Evo.App();
         </script>
     </body>

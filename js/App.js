@@ -9,6 +9,7 @@
  * Dependencies:
  *     Evo
  *     Evo.Worker
+ *     Evo.World
  *
  * @author DeadbraiN
  */
@@ -27,6 +28,11 @@ Evo.App = function () {
      * {Object} Map of organisms (Web workers) organized by id.
      */
     var _organisms = {};
+    /**
+     * {Evo.World} World for all living organisms. In reality it
+     * a 2D HTML5 canvas.
+     */
+    var _world = new Evo.World();
 
     /**
      * Handler of message event from Web Worker. Shows worker
@@ -37,6 +43,40 @@ Evo.App = function () {
     function _onWorkerMessage(e) {
         var data = e.data;
         console.log(data.id + ': ret[' + data.resp + ']');
+    }
+
+    /**
+     * Send message to Worker (organism) and notify about result in console
+     * @param {Number}  wId Worker (organism) unique id
+     * @param {String}  cmd Remote organism's command
+     * @param {Object=} cfg Command configuration
+     * @returns {String}
+     * @private
+     */
+    function _sendMessage(wId, cmd, cfg) {
+        if (!_organisms[wId]) {
+            return 'Invalid organism wId ' + wId;
+        }
+        if (typeof cmd !== 'string' && cmd.constructor !== String) {
+            return 'Invalid command ' + cmd;
+        }
+        if (typeof cfg !== 'object' && cfg !== undefined) {
+            return 'Invalid configuration. Object required.';
+        }
+
+        _msgId++;
+        console.log(_msgId + ': ' + cmd + ' ' + JSON.stringify(cfg));
+        _organisms[wId].postMessage({
+            cmd: cmd,
+            cfg: cfg,
+            id : _msgId
+        });
+
+        return 'done';
+    }
+    // TODO:
+    function _inCb() {
+
     }
 
 
@@ -52,10 +92,15 @@ Evo.App = function () {
         create: function () {
             _organisms[_workerId] = new Worker('js/Loader.js');
             _organisms[_workerId].addEventListener('message', _onWorkerMessage.bind(this));
+            _sendMessage(_workerId, 'init', {
+                // TODO:
+                inCb: _inCb
+            });
+
             return _workerId++;
         },
         /**
-         * TODO:
+         * TODO: Add code for removing the organism's particle
          */
         remove: function (id) {
             if (!_organisms[id]) {
@@ -74,27 +119,6 @@ Evo.App = function () {
          * the organism as second parameter.
          * @return {String} 'done' - all ok, error message if not
          */
-        cmd: function (id, cmd, cfg) {
-            if (!_organisms[id]) {
-                return 'Invalid organism id ' + id;
-            }
-            if (typeof cmd !== 'string' && cmd.constructor !== String) {
-                return 'Invalid command ' + cmd;
-            }
-            if (typeof cfg !== 'object' && cfg !== undefined) {
-                return 'Invalid configuration. Object required.';
-            }
-
-            _msgId++;
-            console.log(_msgId + ': ' + cmd + ' ' + JSON.stringify(cfg));
-            _organisms[id].postMessage({
-                // TODO: add all callback configs inCb, outCb,...
-                cmd: cmd,
-                cfg: cfg,
-                id : _msgId
-            });
-
-            return 'done';
-        }
+        cmd: _sendMessage
     };
 };
