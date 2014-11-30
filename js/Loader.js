@@ -4,6 +4,9 @@
  * Remember, that this code works inside the worker. It doesn't
  * contain window object. Don't forget, that importScripts()
  * method is asynchronous!
+
+ * Dependencies:
+ *     Evo
  *
  * @author DeadbraiN
  */

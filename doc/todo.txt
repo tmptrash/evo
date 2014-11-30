@@ -9,3 +9,5 @@ TODO list
 - Add canvas, world (with boundaries), energy particles
 - Add console commands for creating all of this (organisms, world, energy particles,...)
 - All console commands must be checked before run to exclude application crash
+- Remove all Evo.XXX dependencies. They should be passed through configs
+- Check if all Evo.XXX configs are used in app

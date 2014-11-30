@@ -7,6 +7,10 @@
  * organism instance.
  * Don't forget that importScript() method is synchronous!
  *
+ * Dependencies:
+ *     Evo
+ *     Evo.Organism
+ *
  * @author DeadbraiN
  */
 Evo.Worker = function Worker() {

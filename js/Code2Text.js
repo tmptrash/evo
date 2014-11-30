@@ -2,7 +2,7 @@
  * Main idea of this module is to convert binary script to human
  * readable assembler like text. For example, code like this:
  *
- *     0001 0002 0003
+ *     0001 0002 0003 0000
  *
  * Will be converted to:
  *
@@ -92,7 +92,12 @@ Evo.Code2Text = function Code2Text() {
                 [ 'div',   v, v    ],
                 [ 'rem',   v, v    ],
                 [ 'shl',   v, v    ],
-                [ 'shr',   v, v    ]
+                [ 'shr',   v, v    ],
+                [ 'in',    v, v, v ],
+                [ 'out',   v, v, v ],
+                [ 'step',  v       ],
+                [ 'eat',   v       ],
+                [ 'clone', v       ]
             ];
             var strCode = [];
             var line;

@@ -1,23 +1,32 @@
 /**
  * The world for organisms. 2D canvas in a browser, where all organisms
  * are living. It handles coordinates, pixels and they colors on canvas.
+ * This class requires a canvas tag in a code
  *
  * Dependencies:
  *     jQuery
  *     Evo
  *
+ * @param {Object}   cfg          Class configuration
+ *        {Boolean=} noFullscreen If true, then canvas will be not stretched fullscreen
+ *        {String=}  query        Query to the canvas tag in DOM
+ *
  * @author DeadbraiN
  */
-// TODO: describe config parameter
-Evo.World = function World(config) {
+Evo.World = function World(cfg) {
     /**
-     * {String} Query to the canvas tag for our world
+     * {Object} Default class configuration. Will be overridden by user config
      */
-    var _CANVAS_QUERY = '#world';
+    var _cfg          = {
+        /**
+         * {String} Query to the canvas tag for our world
+         */
+        canvasQuery: '#world'
+    };
     /**
      * {HTMLElement} Canvas DOM element
      */
-    var _canvasEl     = $(_CANVAS_QUERY);
+    var _canvasEl     = $(cfg.canvasQuery || _cfg.canvasQuery);
     /**
      * {CanvasRenderingContext2D} Context of 2D canvas. It's needed for
      * pixels manipulations.
@@ -39,8 +48,17 @@ Evo.World = function World(config) {
      * @private
      */
     function _init() {
-        config = config || {};
-
+        //
+        // Apply user configuration into default config
+        //
+        for (var i in cfg) {
+            if (cfg.hasOwnProperty(i)) {
+                _cfg[i] = cfg[i];
+            }
+        }
+        //
+        // Bind events
+        //
         $(window).on('resize', _updateCanvasSize);
         _updateCanvasSize();
         //
@@ -60,7 +78,7 @@ Evo.World = function World(config) {
     function _updateCanvasSize() {
         var bodyEl = $('body');
 
-        if (!config.noFullscreen) {
+        if (!_cfg.noFullscreen) {
             _canvasEl.attr('width', bodyEl.width());
             _canvasEl.attr('height', bodyEl.height());
         }
