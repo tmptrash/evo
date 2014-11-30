@@ -74,7 +74,7 @@ Evo.World = function World(cfg) {
      */
     function _checkConfigs() {
         if (!_canvasEl.length) {
-            console.error('Canvas element hasn\'t found. Please fix World.query configuration.');
+            throw new Error('Canvas element hasn\'t found. Please fix World.query configuration.');
         }
     }
     /**
