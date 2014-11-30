@@ -21,7 +21,11 @@ Evo.World = function World(cfg) {
         /**
          * {String} Query to the canvas tag for our world
          */
-        canvasQuery: '#world'
+        canvasQuery : '#world',
+        /**
+         * {Boolean} By default canvas tag should be on full screen
+         */
+        noFullscreen: false
     };
     /**
      * {HTMLElement} Canvas DOM element
@@ -48,19 +52,41 @@ Evo.World = function World(cfg) {
      * @private
      */
     function _init() {
-        //
-        // Apply user configuration into default config
-        //
+        _applyConfigs();
+        _checkConfigs();
+        _bindEvents();
+        _updateCanvasSize();
+        _prepareCanvas();
+    }
+    /**
+     * Applies user configuration into default one. Final config
+     * is available in _cfg field.
+     */
+    function _applyConfigs() {
         for (var i in cfg) {
             if (cfg.hasOwnProperty(i)) {
                 _cfg[i] = cfg[i];
             }
         }
-        //
-        // Bind events
-        //
+    }
+    /**
+     * Checks initial configuration. In case of error shows it in the console
+     */
+    function _checkConfigs() {
+        if (!_canvasEl.length) {
+            console.error('Canvas element hasn\'t found. Please fix World.query configuration.');
+        }
+    }
+    /**
+     * Binds all class related events
+     */
+    function _bindEvents() {
         $(window).on('resize', _updateCanvasSize);
-        _updateCanvasSize();
+    }
+    /**
+     * Prepares canvas container and internal variables for drawing pixels
+     */
+    function _prepareCanvas() {
         //
         // This data will be used for pixels access
         //
