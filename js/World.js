@@ -7,7 +7,7 @@
  *     jQuery
  *     Evo
  *
- * @param {Object}   cfg          Class configuration
+ * @param {Object=}  cfg          Class configuration
  *        {Boolean=} noFullscreen If true, then canvas will be not stretched fullscreen
  *        {String=}  query        Query to the canvas tag in DOM
  *
@@ -129,25 +129,35 @@ Evo.World = function World(cfg) {
          * Returns a color of the pixel with specified coordinates.
          * By color i mean rgb combined number. For example: white
          * color #FFFFFF is 16777215 in decimal. Decimal value will
-         * be returned.
+         * be returned. In case of invalid coordinates 0 value for
+         * x and y will be used.
          * @param {Number} x X coordinate
          * @param {Number} y Y coordinate
          * @return {Number} Color for these coordinates
         */
         getPixel: function (x, y) {
+            x = +x || 0;
+            y = +y || 0;
             var data = _ctx.getImageData(x, y, 1, 1).data;
+
             return (data[0] << 16) + (data[1] << 8) + data[2];
         },
         /**
          * Sets pixel to specified color with specified coordinates.
          * Color should contain red, green and blue components in one
          * decimal number. For example: 16777215 is #FFFFFF - white.
+         * In case of invalid coordinates 0 value for x, c and y will
+         * be used.
          * @param {Number} x X coordinate
          * @param {Number} y Y coordinate
          * @param {Number} c Decimal color
          */
         setPixel: function (x, y, c) {
+            x = +x || 0;
+            y = +y || 0;
+            c = +c || 0;
             var data = _data;
+
             data[0] = (c >> 16) & 255;
             data[1] = (c >> 8) & 255;
             data[2] = c & 255;

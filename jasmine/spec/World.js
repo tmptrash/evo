@@ -67,11 +67,37 @@ describe("World", function() {
     expect(world.getPixel(1, 1)).toBe(5273850); // 0x5078FA
     worldEl.attr('width', 0).attr('height', 0);
   });
+  it('tests getPixel() method with invalid arguments', function() {
+    var world = new Evo.World();
+
+    world.setPixel(1, 1, 5273851);
+    expect(function () {
+      world.getPixel({}, {});
+      world.getPixel([], []);
+      world.getPixel(-1, -1);
+      world.getPixel('1', '1');
+      world.getPixel(null, null);
+      world.getPixel(NaN, NaN);
+    }).not.toThrow();
+    worldEl.attr('width', 0).attr('height', 0);
+  });
   it('tests setPixel() method', function() {
     var world   = new Evo.World();
 
     world.setPixel(1, 2, 5273850);
     expect(world.getPixel(1, 2)).toBe(5273850);
+    worldEl.attr('width', 0).attr('height', 0);
+  });
+  it('tests setPixel() method with invalid arguments', function() {
+    var world = new Evo.World();
+
+    expect(function () {
+      world.setPixel('1', '2', '12345');
+      world.setPixel({}, {}, {});
+      world.setPixel([], [], []);
+      world.setPixel(NaN, NaN, NaN);
+      world.setPixel(null, null, null);
+    }).not.toThrow();
     worldEl.attr('width', 0).attr('height', 0);
   });
 });
