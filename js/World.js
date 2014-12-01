@@ -30,7 +30,7 @@ Evo.World = function World(cfg) {
     /**
      * {HTMLElement} Canvas DOM element
      */
-    var _canvasEl     = $(cfg.canvasQuery || _cfg.canvasQuery);
+    var _canvasEl     = $(cfg && cfg.canvasQuery || _cfg.canvasQuery);
     /**
      * {CanvasRenderingContext2D} Context of 2D canvas. It's needed for
      * pixels manipulations.
@@ -74,7 +74,13 @@ Evo.World = function World(cfg) {
      */
     function _checkConfigs() {
         if (!_canvasEl.length) {
-            throw new Error('Canvas element hasn\'t found. Please fix World.query configuration.');
+            throw new Error('Canvas element hasn\'t found. Please fix World.canvasQuery configuration.');
+        }
+        if (!$.isFunction(_canvasEl[0].getContext)) {
+            throw new Error('Canvas element is invalid or your browser doesn\'t support it. Please fix World.canvasQuery configuration or change the browser to Google Chrome.');
+        }
+        if (_canvasEl.length > 1) {
+            console.info('There are many canvas tags on a page. Please fix World.canvasQuery configuration. First tag will be used.');
         }
     }
     /**
