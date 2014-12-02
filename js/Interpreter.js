@@ -143,48 +143,52 @@ Evo.Interpreter = function Interpreter() {
      */
     var _zeroVars = new Uint16Array(_VARS_AMOUNT);
     /**
+     * {Function} Default empty callback function for stubbing
+     */
+    var _emptyFn  = function () {};
+    /**
      * {Function} Input command callback. Is set from outside in run() method and is called
      * from in command. Should contain at least one parameter - another callback, which will
      * be called when the answer will be obtained. This, second callback has ne parameter -
      * obtained data. See run() method config.inCb description for details.
      */
-    var _inCb = null;
+    var _inCb      = _emptyFn;
     /**
      * {Function} The same like inCb, but without callback parameter. Callback has three
      * custom parameters. You may use them what every you want. See run() method
      * config.outCb description for details.
      */
-    var _outCb = null;
+    var _outCb     = _emptyFn;
     /**
      * {Function} Callback, which is called when an organism is moving. It should be set from
      * outside. Has one parameter - direction. There are four directions: 0 - up, 1 - right,
      * 2 - bottom, 3 - left
      */
-    var _stepCb = null;
+    var _stepCb    = _emptyFn;
     /**
      * {Function} Callback for eat command. It means that current organism eats one point of energy
      * from the particle, which is near. It may be other organism or just a particle of the world.
      * Has one parameter - direction: 0 - up, 1 - right, 2 - bottom, 3 - left.
      */
-    var _eatCb = null;
+    var _eatCb     = _emptyFn;
     /**
      * {Function} Callback for echo command. It's called every time then organism generates some
      * output information. This is an analog of saying something. Has one parameter - output number.
      */
-    var _echoCb = null;
+    var _echoCb    = _emptyFn;
     /**
      * {Function} Callback for clone command. Is called to inform outside code about cloning and
      * amount of energy for new created child organism.
      */
-    var _cloneCb = null;
+    var _cloneCb   = _emptyFn;
     /**
      * {Boolean} Means that now, script should be stopped
      */
-    var _stopped = false;
+    var _stopped   = false;
     /**
      * {Evo.Interpreter} this shortcut
      */
-    var _me = null;
+    var _me        = null;
     /**
      * {Number} Last index in binary script. If may be last one or index of command on which
      * we were break the script.
@@ -194,7 +198,7 @@ Evo.Interpreter = function Interpreter() {
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, otherwise all scripts may be broken.
      */
-    var _cmds     = [
+    var _cmds      = [
         _set,    // 0
         _move,   // 1
         _inc,    // 2
@@ -696,12 +700,13 @@ Evo.Interpreter = function Interpreter() {
          * If is not set, then it will be set to code.length
          */
         run: function (cfg) {
+            cfg         = cfg || {};
             var vars    = _vars;
             var segs    = _LINE_SEGMENTS;
             var cmds    = _cmds;
-            var codeLen = _codeLen || cfg.codeLen;
-            var code    = cfg.code;
+            var code    = cfg.code || [];
             var i       = cfg.i || 0;
+            var codeLen;
             var line;
 
             //
@@ -716,7 +721,7 @@ Evo.Interpreter = function Interpreter() {
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
-            _codeLen = codeLen = (codeLen === undefined ? code.length : codeLen);
+            _codeLen = codeLen = _codeLen || cfg.codeLen || code.length;
             //
             // We need to clear all internal variables every time when new run is called.
             // If we continue execution then we need to skip this.
@@ -726,11 +731,11 @@ Evo.Interpreter = function Interpreter() {
                 //
                 // Callback methods for commands like in, out, step, eat...
                 //
-                _inCb    = cfg.inCb || _inCb;
-                _outCb   = cfg.outCb || _outCb;
-                _stepCb  = cfg.stepCb || _stepCb;
-                _eatCb   = cfg.eatCb || _eatCb;
-                _echoCb  = cfg.echoCb || _echoCb;
+                _inCb    = cfg.inCb    || _inCb;
+                _outCb   = cfg.outCb   || _outCb;
+                _stepCb  = cfg.stepCb  || _stepCb;
+                _eatCb   = cfg.eatCb   || _eatCb;
+                _echoCb  = cfg.echoCb  || _echoCb;
                 _cloneCb = cfg.cloneCb || _cloneCb;
             }
             while (i < codeLen && !_stopped) {
@@ -739,7 +744,6 @@ Evo.Interpreter = function Interpreter() {
             }
             _lastIndex = i;
         },
-
         /**
          * Returns length of code. The length of the code is not it's
          * allocated size in array.
@@ -748,13 +752,19 @@ Evo.Interpreter = function Interpreter() {
         getCodeLen: function () {
             return _codeLen || 0;
         },
-
         /**
          * Returns variables array
          * @return {Uint16Array}
          */
         getVars: function () {
             return new Uint16Array(_vars);
+        },
+        /**
+         * Returns output stream
+         * @returns {Array}
+         */
+        getOutput: function () {
+            return _output;
         }
     });
 };
