@@ -129,7 +129,7 @@ Evo.Interpreter = function Interpreter() {
      * words. This is not an amount of code lines. You may calculate amount of
      * script words by formula: amountOfLines * _LINE_SEGMENTS .
      */
-    var _codeLen  = null;
+    var _codeLen  = 0;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
@@ -756,21 +756,21 @@ Evo.Interpreter = function Interpreter() {
          * @return {Number}
          */
         getCodeLen: function () {
-            return _codeLen || 0;
+            return _codeLen;
         },
         /**
-         * Returns variables array
+         * Returns variables array copy
          * @return {Uint16Array}
          */
         getVars: function () {
             return new Uint16Array(_vars);
         },
         /**
-         * Returns output stream
+         * Returns output stream copy
          * @returns {Array}
          */
         getOutput: function () {
-            return _output;
+            return _output.slice(0);
         }
     });
 };
