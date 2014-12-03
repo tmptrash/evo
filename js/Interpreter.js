@@ -100,12 +100,18 @@ Evo.Interpreter = function Interpreter() {
      * {Number} Amount of segments (parts) in one script line: command, arg1, arg2, arg3.
      * This variable it just a shortcut for performance interpreter issue.
      */
-    var _LINE_SEGMENTS = Evo.LINE_SEGMENTS;
+    var _LINE_SEGMENTS   = 4;
+    /**
+     * {Number} Maximum memory size in words. This value shouldn't be
+     * greater then word (65535), because commands like read and write
+     * may address only 65535 index in it.
+     */
+    var _MAX_MEMORY_SIZE = 65535;
     /**
      * @constant
      * {Number} Amount of internal variables
      */
-    var _VARS_AMOUNT   = 8;
+    var _VARS_AMOUNT     = 8;
 
     /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
@@ -713,7 +719,7 @@ Evo.Interpreter = function Interpreter() {
             // Memory block, which is set from outside and
             // should be used by current script
             //
-            _mem = cfg.mem || _mem || new Uint16Array(Evo.MAX_NUMBER);
+            _mem = cfg.mem || _mem || new Uint16Array(_MAX_MEMORY_SIZE);
             //
             // Output stream (Array). Here organism must puts it's output numbers
             //
@@ -721,7 +727,7 @@ Evo.Interpreter = function Interpreter() {
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
-            _codeLen = codeLen = _codeLen || cfg.codeLen || code.length;
+            _codeLen = codeLen = _codeLen || +cfg.codeLen || code.length;
             //
             // We need to clear all internal variables every time when new run is called.
             // If we continue execution then we need to skip this.
