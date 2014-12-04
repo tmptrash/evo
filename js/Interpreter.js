@@ -727,7 +727,7 @@ Evo.Interpreter = function Interpreter() {
             //
             // _codeLen field will be set to amount of numbers in binary script.
             //
-            _codeLen = codeLen = _codeLen || +cfg.codeLen || code.length;
+            _codeLen = codeLen = +cfg.codeLen || code.length || _codeLen;
             //
             // We need to clear all internal variables every time when new run is called.
             // If we continue execution then we need to skip this.
