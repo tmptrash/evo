@@ -74,9 +74,33 @@ Evo.App = function () {
      * by message sending/receiving.
      */
     // TODO:
-    var _api = {'in': function () {}};
+    var _api = {
+        'in'   : _in,
+        'out'  : _out,
+        'step' : _step
+    };
 
 
+    /**
+     * in command handler. Is called from the organism. See Interpreter.in
+     * command for details.
+     * @param {Number} x X coordinate
+     * @param {Number} y Y coordinate
+     * @return {Number} Result
+     */
+    function _in(x, y) {
+        return _world.getPixel(x, y);
+    }
+    /**
+     * out command handler. Is called from the organism. See Interpreter.out
+     * command for details.
+     * @param {Number} x X coordinate
+     * @param {Number} y Y coordinate
+     * @return {Number} Result
+     */
+    function _out(x, y, col) {
+        return _world.setPixel(x, y, col);
+    }
     /**
      * Handler of message event from Web Worker. Shows worker
      * (organism) response in console or runs specified method
@@ -102,7 +126,10 @@ Evo.App = function () {
         // This message is a request from Worker
         //
         } else if (uid) {
-            _api[data.cmd].apply(null, data.args);
+            _organisms[uid].postMessage({
+                uid : uid,
+                args: _api[data.cmd].apply(null, data.args)
+            });
         }
     }
     /**
