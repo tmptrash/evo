@@ -1,10 +1,35 @@
 /**
- * This is main namespace for Evo application. Contains
- * general interface for communication with organisms and
- * entire world.
+ * This is an application class of Evo. Evo is a shortcut of Evolution. It
+ * simulates biological evolution in a little bit different way. This class
+ * also a proxy between a user, who types commands in a console and all
+ * organisms in a system. User may control every organism and application
+ * in general using embedded Google Chrome console (Dev Tool) through evo
+ * object. Organism is a living creature, which has a "body" (one pixel),
+ * a memory and it's binary code (like DNA). This code is translated by
+ * special Interpreter (see Interpreter class), which is also embedded
+ * into the organism. There are many organisms in application. They all
+ * live in a special place - World. Technically it a canvas in DOM model
+ * with special size. Every organism is independent from other and has
+ * it's own binary code, which may be mutated while born. For now every
+ * organism lives in separate Web Worker. This is how we simulate
+ * independent living.
+ * To start using this World and organisms you need to create them with
+ * create() method. Like this:
  *
- * TODO: update general idea of the application: organism
- * TODO: worker, dynamic scripts loading
+ *     evo.create()
+ *
+ * This method returns created organism's unique identifier. You should
+ * use this id to access the organism. For example, if we need to get
+ * organism's output:
+ *
+ *     evo.cmd(0, 'getOutput')
+ *
+ * You need to remember, that all these communications are work between
+ * main thread and Web Workers. So, some small delay will be generated
+ * by the browser, because of communication reason.
+ *
+ * Example:
+ *     TODO: describe some real commands examples here
  *
  * Dependencies:
  *     Evo
