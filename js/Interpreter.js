@@ -114,6 +114,10 @@ Evo.Interpreter = function Interpreter() {
     var _VARS_AMOUNT     = 8;
 
     /**
+     * {Uint16Array} Reference to the binary code. Is saved between runs
+     */
+    var _code     = null;
+    /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command. Memory may be set from outside. It stores it's values between
      * script runs.
@@ -710,11 +714,16 @@ Evo.Interpreter = function Interpreter() {
             var vars    = _vars;
             var segs    = _LINE_SEGMENTS;
             var cmds    = _cmds;
-            var code    = cfg.code || [];
             var i       = cfg.i || 0;
+            var code;
             var codeLen;
             var line;
 
+            //
+            // Code is needed to understand that previous version
+            // was similar or not.
+            //
+            _code = code = cfg.code || _code || [];
             //
             // Memory block, which is set from outside and
             // should be used by current script
@@ -730,9 +739,10 @@ Evo.Interpreter = function Interpreter() {
             _codeLen = codeLen = +cfg.codeLen || code.length || _codeLen;
             //
             // We need to clear all internal variables every time when new run is called.
-            // If we continue execution then we need to skip this.
+            // If we continue execution then we need to skip this. This also works (run
+            // from scratch) if user set new code.
             //
-            if (i === 0) {
+            if (i === 0 || cfg.code !== _code) {
                 _vars.set(_zeroVars);
                 //
                 // Callback methods for commands like in, out, step, eat...

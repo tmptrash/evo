@@ -40,7 +40,7 @@ Evo.App = function () {
      * @param {MessageEvent} e.data
      * @private
      */
-    function _onWorkerMessage(e) {
+    function _onMessage(e) {
         var data = e.data;
         console.log(data.id + ': ret[' + data.resp + ']');
     }
@@ -65,10 +65,14 @@ Evo.App = function () {
         }
 
         _msgId++;
+        //
+        // Here, we should use simple JSON object to exclude
+        // functions in configuration
+        //
         console.log(_msgId + ': ' + cmd + ' ' + JSON.stringify(cfg));
         _organisms[wId].postMessage({
             cmd: cmd,
-            cfg: cfg,
+            cfg: cfg ? JSONfn.stringify(cfg) : cfg,
             id : _msgId
         });
 
@@ -91,7 +95,7 @@ Evo.App = function () {
          */
         create: function () {
             _organisms[_workerId] = new Worker('js/Loader.js');
-            _organisms[_workerId].addEventListener('message', _onWorkerMessage.bind(this));
+            _organisms[_workerId].addEventListener('message', _onMessage.bind(this));
             _sendMessage(_workerId, 'init', {
                 // TODO:
                 inCb: _inCb

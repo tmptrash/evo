@@ -11,6 +11,7 @@
  * @author DeadbraiN
  */
 importScripts.apply(null, [
+    'lib/jsonfn.js',
     'Evo.js',
     'Interpreter.js',
     'Mutator.js',
