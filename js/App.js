@@ -24,8 +24,9 @@ Evo.App = function () {
      */
     var _msgId = 0;
     /**
-     * TODO:
-     * {Object} Map of organisms (Web workers) organized by id.
+     * {Object} Map of organisms (Web workers) organized by id. It's used for
+     * different command typed by user in console. Key - Worker id, value -
+     * Worker instance.
      */
     var _organisms = {};
     /**
@@ -34,24 +35,51 @@ Evo.App = function () {
      */
     var _cmds = {};
     /**
+     * {Function} Stub for callbacks
+     */
+    var _emptyFn = function () {};
+    /**
      * {Evo.World} World for all living organisms. In reality it
      * a 2D HTML5 canvas.
      */
     var _world = new Evo.World();
+    /**
+     * {Object} API for current app and Web Workers. This map binds command
+     * names and they handlers. These command are called from Web Workers
+     * by message sending/receiving.
+     */
+    // TODO:
+    var _api = {'in': function () {}};
+
 
     /**
      * Handler of message event from Web Worker. Shows worker
-     * (organism) response in console.
+     * (organism) response in console or runs specified method
+     * in current application. Depending on type of message:
+     * answer or request.
+     * TODO: describe parameters: id, uid
      * @param {MessageEvent} e.data
      * @private
      */
     function _onMessage(e) {
+        debugger;
         var data = e.data;
         var id   = data.id;
-        console.log(id + ': ' + _cmds[id] + ':' + data.resp);
-        delete _cmds[id];
-    }
+        var uid  = data.uid;
 
+        //
+        // This message is an answer from Worker
+        //
+        if (id !== undefined) {
+            console.log(id + ': ' + _cmds[id] + (data.resp == '' ? '' : ':' + data.resp));
+            delete _cmds[id];
+        //
+        // This message is a request from Worker
+        //
+        } else if (uid) {
+            _api[data.cmd].apply(null, data.args);
+        }
+    }
     /**
      * Send message to Worker (organism) and notify about result in console
      * @param {Number}  wId Worker (organism) unique id
@@ -75,7 +103,7 @@ Evo.App = function () {
         // Here, we should use simple JSON object to exclude
         // functions in configuration.
         //
-        _cmds[_msgId] = cmd + '(' + JSON.stringify(cfg) + ')';
+        _cmds[_msgId] = cmd + '(' + (cfg === undefined ? '' : JSON.stringify(cfg)) + ')';
         _organisms[wId].postMessage({
             cmd: cmd,
             cfg: cfg ? JSONfn.stringify(cfg) : cfg,
@@ -85,9 +113,39 @@ Evo.App = function () {
 
         return 'done';
     }
-    // TODO:
-    function _inCb() {
+    /**
+     * TODO: update this comment
+     *
+     * @param {String} cmd Remote command
+     * @param {Function|Array} cb Callback, which is used for passing in value to
+     * the Worker (Organism). Contains one parameter - the value. In case of
+     * array this parameters is passed arguments.
+     * @param {Array=} args Custom parameters
+     */
+    function _remoteCb(cmd, cb, args) {
+        cb   = typeof cb === 'function' ? cb : _emptyFn;
+        args = args || [];
 
+        function answerFn(e) {
+            var data = e.data;
+            if (data && data.id === self.organismId) {
+                cb(data.resp);
+                self.removeEventListener('message', answerFn, false);
+            }
+        }
+
+        //
+        // Current command requires answer. We need to add temporary
+        // callback for this.
+        //
+        if (cb !== _emptyFn) {
+            self.addEventListener('message', answerFn, false);
+        }
+        self.postMessage({
+            cmd : cmd,
+            args: args,
+            uid : self.organismId
+        });
     }
 
 
@@ -104,11 +162,15 @@ Evo.App = function () {
             _organisms[_workerId] = new Worker('js/Loader.js');
             _organisms[_workerId].addEventListener('message', _onMessage.bind(this));
             _sendMessage(_workerId, 'init', {
-                // TODO:
-                inCb: _inCb
+                id     : _workerId,
+                inCb   : _remoteCb,
+                outCb  : _remoteCb,
+                stepCb : _remoteCb,
+                eatCb  : _remoteCb,
+                cloneCb: _remoteCb
             });
 
-            return _workerId++;
+            return 'Organism id: ' + _workerId++;
         },
         /**
          * TODO: Add code for removing the organism's particle

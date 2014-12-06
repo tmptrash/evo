@@ -5,7 +5,6 @@
  * procedures calls API. Also, please note, that this class
  * is created inside the worker and it has an access to the
  * organism instance.
- * Don't forget that importScript() method is synchronous!
  *
  * Dependencies:
  *     Evo
@@ -20,14 +19,16 @@ Evo.Worker = function Worker() {
      * We used simple formula: one organism per one web worker.
      */
     var _organism = new Evo.Organism();
-
     /**
      * Main thread messages receiver. Runs commands on organism
-     * and returns the the message.
+     * and returns answers through  postMessage(). Every message
+     * from outside the Worker should contain at least two arguments:
+     * command name and message id. Return command value will be
+     * passed through answer message in resp parameter.
      * @param {MessageEvent} e.data
-     *        {String}  cmd Command (name of the method) to run.
-     *        {Object=} cfg Configuration for cmd
-     *        {String}  id  Unique message id. Like transaction id.
+     *        {String}         cmd Command (name of the method) to run.
+     *        {Object|String=} cfg Configuration for cmd
+     *        {String}         id  Unique message id. Like transaction id.
      * @private
      */
     function _onMessage(e) {
@@ -37,15 +38,13 @@ Evo.Worker = function Worker() {
         var cfg;
 
         debugger;
-        if (data) {
-            cmd     = _organism[data.cmd];
-            validFn = typeof cmd === 'function';
-            cfg     = typeof data.cfg === 'object' ? data.cfg : JSONfn.parse(data.cfg);
-            self.postMessage({
-                resp: validFn ? cmd(cfg) : 'Invalid command "' + data.cmd + '"',
-                id  : data.id
-            });
-        }
+        cmd     = _organism[data.cmd];
+        validFn = typeof cmd === 'function';
+        cfg     = typeof data.cfg === 'string' ? JSONfn.parse(data.cfg) : data.cfg;
+        self.postMessage({
+            resp: validFn ? cmd(cfg) : 'Invalid command "' + data.cmd + '"',
+            id  : data.id
+        });
     }
 
 

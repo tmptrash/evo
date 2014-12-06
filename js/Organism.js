@@ -114,7 +114,7 @@ Evo.Organism = function Organism() {
      * {Array} Reference to last data set, which was passed or not.
      * It's used for obtaining memory, output and variables of organism.
      */
-    var _lastData = null;
+    var _lastData = [];
     /**
      * {Evo.Mutator} Personal mutator instance. It's uses for binary
      * code mutation.
@@ -147,13 +147,22 @@ Evo.Organism = function Organism() {
 
 
     return {
-        // TODO:
+        /**
+         * Initializes the organism. id property is required.
+         * @param {Object} cfg Organism configuration
+         * @returns {boolean}
+         */
         init: function (cfg) {
             for (var i in cfg) {
                 if (cfg.hasOwnProperty(i)) {
                     _cfg[i] = cfg[i];
                 }
             }
+            //
+            // This is how we mark the worker and organism. Every
+            // Worker/Organism has it's own unique identifier.
+            //
+            self.organismId = cfg.id;
 
             return true;
         },

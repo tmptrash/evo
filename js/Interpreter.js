@@ -537,7 +537,7 @@ Evo.Interpreter = function Interpreter() {
      * 'in' command handler. Obtains input command from
      * specified sensor.
      * Example: 0018 0001 0002 0003 # in one two. Result
-     * will be stored in second variable. This example
+     * will be stored in third variable. This example
      * means 'get word from 0001 and 0002 sensor and store
      * it in 0003 variable'.
      *
@@ -549,11 +549,11 @@ Evo.Interpreter = function Interpreter() {
     // TODO: very slow, because of inter threading communication
     function _in(code, i, vars) {
         _stopped = true;
-        _inCb(function (data) {
+        _inCb('in', function (data) {
             vars[code[i + 3]] = data;
             _stopped = false;
             _me.run({i: _lastIndex, code: code});
-        }, vars[code[i + 1]], vars[code[i + 2]]);
+        }, [vars[code[i + 1]], vars[code[i + 2]]]);
     }
     /**
      * 'out' command handler. Send command to specified sensor.
@@ -565,7 +565,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _out(code, i, vars) {
-        _outCb(vars[code[i + 1]], vars[code[i + 2]], vars[code[i + 3]]);
+        _outCb('out', [vars[code[i + 1]], vars[code[i + 2]], vars[code[i + 3]]]);
     }
     /**
      * 'step' command handler. Do one step with specified
@@ -579,7 +579,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _step(code, i, vars) {
-        _stepCb(vars[code[i + 1]]);
+        _stepCb('step', [vars[code[i + 1]]]);
     }
     /**
      * 'eat' command handler. Grabs an energy point from nearest
@@ -593,7 +593,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _eat(code, i, vars) {
-        _eatCb(vars[code[i + 1]]);
+        _eatCb('eat',[vars[code[i + 1]]]);
     }
     /**
      * 'clone' command handler. Clones current organism into current
@@ -606,7 +606,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _clone(code, i, vars) {
-        _cloneCb(vars[code[i + 1]]);
+        _cloneCb('clone', [vars[code[i + 1]]]);
     }
 
 
@@ -630,6 +630,7 @@ Evo.Interpreter = function Interpreter() {
          *        {Array=}      out     Output stream
          *        {Number=}     codeLen Amount of words (Uint16) in binary script.
          *        {Number=}     i       Start index in script. Default is zero.
+         *        TODO: update parameters for all callbacks
          *        {Function}    inCb    Input command callback. Is used for calls
          *                              from external code, which gets any input
          *                              data. External code may be asynchronous,
