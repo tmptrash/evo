@@ -32,11 +32,17 @@ Evo.Worker = function Worker() {
      */
     function _onMessage(e) {
         var data = e.data;
+        var cmd;
+        var validFn;
+        var cfg;
+
         debugger;
         if (data) {
-            var resp = typeof _organism[data.cmd] === 'function' ? _organism[data.cmd](data.cfg) : 'Invalid command "' + data.cmd + '"';
+            cmd     = _organism[data.cmd];
+            validFn = typeof cmd === 'function';
+            cfg     = typeof data.cfg === 'object' ? data.cfg : JSONfn.parse(data.cfg);
             self.postMessage({
-                resp: resp,
+                resp: validFn ? cmd(cfg) : 'Invalid command "' + data.cmd + '"',
                 id  : data.id
             });
         }

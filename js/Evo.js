@@ -6,7 +6,7 @@
  *
  * @author DeadbraiN
  */
-window.Evo = {
+this.Evo = {
     /**
      * {Number} Maximum number value for organism. This is a value,
      * which our organism may proceed. It also understandable for

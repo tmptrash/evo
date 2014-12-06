@@ -149,14 +149,13 @@ Evo.Organism = function Organism() {
     return {
         // TODO:
         init: function (cfg) {
-            if (typeof cfg === 'string') {
-                cfg = JSONfn.parse(cfg);
-            }
             for (var i in cfg) {
                 if (cfg.hasOwnProperty(i)) {
                     _cfg[i] = cfg[i];
                 }
             }
+
+            return true;
         },
         /**
          * TODO: describe logic about: mutation -> prev. data checks -> revert -> loop

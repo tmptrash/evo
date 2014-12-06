@@ -29,6 +29,11 @@ Evo.App = function () {
      */
     var _organisms = {};
     /**
+     * {Object} Remote commands map. It's used for join send command params
+     * and Worker answer value. After Worker answer specified record is deleted.
+     */
+    var _cmds = {};
+    /**
      * {Evo.World} World for all living organisms. In reality it
      * a 2D HTML5 canvas.
      */
@@ -42,7 +47,9 @@ Evo.App = function () {
      */
     function _onMessage(e) {
         var data = e.data;
-        console.log(data.id + ': ret[' + data.resp + ']');
+        var id   = data.id;
+        console.log(id + ': ' + _cmds[id] + ':' + data.resp);
+        delete _cmds[id];
     }
 
     /**
@@ -64,17 +71,17 @@ Evo.App = function () {
             return 'Invalid configuration. Object required.';
         }
 
-        _msgId++;
         //
         // Here, we should use simple JSON object to exclude
-        // functions in configuration
+        // functions in configuration.
         //
-        console.log(_msgId + ': ' + cmd + ' ' + JSON.stringify(cfg));
+        _cmds[_msgId] = cmd + '(' + JSON.stringify(cfg) + ')';
         _organisms[wId].postMessage({
             cmd: cmd,
             cfg: cfg ? JSONfn.stringify(cfg) : cfg,
             id : _msgId
         });
+        _msgId++;
 
         return 'done';
     }

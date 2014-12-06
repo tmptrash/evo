@@ -78,7 +78,6 @@
   exports.clone = function (obj, date2obj) {
     return exports.parse(exports.stringify(obj), date2obj);
   };
-
-}(typeof exports === 'undefined' ? (window.JSONfn = {}) : exports));
+}(typeof exports === 'undefined' ? ((typeof self === 'undefined' ? window : self).JSONfn = {}) : exports));
 
 
