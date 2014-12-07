@@ -20,6 +20,10 @@ Evo.Worker = function Worker() {
      */
     var _organism = new Evo.Organism();
     /**
+     * {Evo.Server} Server, which answers main thread requests
+     */
+    var _server = new Evo.Server(self);
+    /**
      * Main thread messages receiver. Runs commands on organism
      * and returns answers through  postMessage(). Every message
      * from outside the Worker should contain at least two arguments:
@@ -28,28 +32,20 @@ Evo.Worker = function Worker() {
      * @param {MessageEvent} e.data
      *        {String}         cmd Command (name of the method) to run.
      *        {Object|String=} cfg Configuration for cmd
-     *        {String}         id  Unique message id. Like transaction id.
+     *        {String}         id  Unique message id.
      * @private
      */
     function _onMessage(e) {
-        var data = e.data;
-        var cmd;
-        var validFn;
-        var cfg;
-
         debugger;
-        cmd     = _organism[data.cmd];
-        validFn = typeof cmd === 'function';
-        cfg     = typeof data.cfg === 'string' ? JSONfn.parse(data.cfg) : data.cfg;
-        self.postMessage({
-            resp: validFn ? cmd(cfg) : 'Invalid command "' + data.cmd + '"',
-            id  : data.id
-        });
+        var data    = e.data;
+        var cmd     = _organism[data.cmd];
+        var validFn = typeof cmd === 'function';
+
+        return validFn ? cmd(data.cfg) : 'Invalid command "' + data.cmd + '"';
     }
 
-
     //
-    // Worker starts listening main thread
+    // Server starts listening here
     //
-    self.addEventListener('message', _onMessage, false);
+    _server.listen(_onMessage);
 };

@@ -11,12 +11,13 @@
  * @author DeadbraiN
  */
 importScripts(
-    'lib/jsonfn.js',
     'Evo.js',
     'Interpreter.js',
     'Mutator.js',
     'Code2Text.js',
     'Organism.js',
+    'Client.js',
+    'Server.js',
     'Worker.js'
 );
 //

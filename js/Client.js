@@ -33,10 +33,11 @@ Evo.Connection = function Connection(worker) {
      * @param {MessageEvent} e
      */
     function _onMessage(e) {
+        debugger;
         var id = e.data.id;
 
         if (_resp[id]) {
-            _resp[id]();
+            _resp[id](e);
             delete _resp[id];
         }
     }
@@ -54,18 +55,12 @@ Evo.Connection = function Connection(worker) {
          * skipped if response is not needed.
          * @param {String} cmd Remote command name
          * @param {Object} cfg Request configuration
-         * @param {Function=} reqCb Callback for request. Will be
-         * called before request will be sent. Obtains one
-         * parameter - configuration of request.
          * @param {Function=} respCb Callback for response. First
          * parameter of cb will be data, received in response.
          */
-        send: function (cmd, cfg, reqCb, respCb) {
+        send: function (cmd, cfg, respCb) {
             if (respCb) {
                 _resp[_id] = respCb;
-            }
-            if (reqCb) {
-                reqCb(cfg);
             }
             worker.postMessage({
                 cmd: cmd,

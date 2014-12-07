@@ -3,8 +3,6 @@
  * TODO: Add default values for config parameters
  * TODO: Code2Text class should be moved from Organism. It should only contain
  * TODO: binary code. Code formatting is a task for App class
- * TODO: JSONfn should be removed from project, because we don't need to pass
- * TODO: functions between Worker and main thread
  *
  * Dependencies:
  *     Evo

@@ -32,12 +32,13 @@
  * by the browser, because of communication reason.
  *
  * Example:
- *     TODO: describe some real commands examples here
+ *     TODO: describe some real command examples here
  *
  * Dependencies:
  *     Evo
- *     Evo.Worker
  *     Evo.World
+ *     Evo.Worker
+ *     Evo.Connection
  *
  * @author DeadbraiN
  */
@@ -46,17 +47,13 @@ Evo.App = function () {
      * {Number} Organism's unique number. Is used as an identifier
      * of organisms. You may use it in console commands.
      */
-    var _workerId = 0;
-    /**
-     * {Number} Unique message id. Is increased for every new message post.
-     */
-    var _msgId = 0;
+    var _organismId = 0;
     /**
      * {Object} Map of organisms (Web workers) organized by id. It's used for
      * different command typed by user in console. Key - Worker id, value -
      * Worker instance.
      */
-    var _organisms = {};
+    var _connections = {};
     /**
      * {Evo.World} World for all living organisms. In reality it
      * a 2D HTML5 canvas.
@@ -76,27 +73,28 @@ Evo.App = function () {
         create: function () {
             var worker = new Worker('js/Loader.js');
 
-            _organisms[_workerId] = new Evo.Connection(worker);
-            _organisms[_workerId].send('init', null, null, function (e) {
+            _connections[_organismId] = new Evo.Connection(worker);
+            _connections[_organismId].send('init', {id: _organismId}, function (e) {
+                debugger;
                 var data = e.data;
                 var id   = data.id;
-                console.log(id + ': ' + 'init()' + ((data.resp + '') === '' ? '' : ':' + data.resp));
+                console.log(id + ': ' + 'init({id: ' + _organismId + '})' + ((data.resp + '') === '' ? '' : ':' + data.resp));
             });
 
-            return 'Organism id: ' + _workerId++;
+            return 'Organism id: ' + _organismId++;
         },
         /**
          * TODO: Add code for removing the organism's particle
          */
         remove: function (id) {
-            if (!_organisms[id]) {
+            if (!_connections[id]) {
                 return 'Invalid organism id ' + id;
             }
-            _organisms[id].terminate();
-            delete _organisms[id];
+            _connections[id].terminate();
+            delete _connections[id];
 
             return 'done';
-        }
+        },
         /**
          * Is used to run specified command for specified organism.
          * @param {Number}  id  Unique organism/worker id
@@ -105,7 +103,23 @@ Evo.App = function () {
          * the organism as second parameter.
          * @return {String} 'done' - all ok, error message if not
          */
-        // TODO:
-        //cmd: _sendMessage
+        cmd: function (id, cmd, cfg) {
+            if (typeof id !== 'string' && typeof id !== 'number' || !_connections[id]) {
+                return 'Invalid id "' + id + '"';
+            }
+            if (cmd === '' || typeof cmd !== 'string') {
+                return 'Command not set. Use camelCase command name.';
+            }
+
+            cfg = cfg || {};
+            cfg.id = id;
+            _connections[id].send(cmd, cfg, function (e) {
+                var data = e.data;
+                var id   = data.id;
+                console.log(id + ': ' + cmd + '(' + JSON.stringify(cfg) + ')' + ((data.resp + '') === '' ? '' : ':' + data.resp));
+            });
+
+            return 'done';
+        }
     };
 };
