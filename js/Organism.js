@@ -16,6 +16,11 @@
  */
 Evo.Organism = function Organism() {
     /**
+     * {Array} The body of the organism. The body is a set of particles.
+     * Every particle is an energy container (for us it's a color).
+     */
+    var _body = [];
+    /**
      * {Uint16Array} Binary code of the organism. This code will be
      * changed by Mutator module.
      */
@@ -120,6 +125,15 @@ Evo.Organism = function Organism() {
     }
 
     /**
+     * Sends one message and wait for answer. The message has it's unique
+     * identifier. This is how we catch exact answer from main thread.
+     * @param {Object} cfg Configuration, which will be passed in request.
+     * @param {String} id  Unique identifier of request
+     */
+    function _sendMessage(cfg) {
+
+    }
+    /**
      * in command handler. It gets a value from specified "sensor" in our case
      * the particle in the world and return it's value. Value in this case is
      * amount of energy in the particle.
@@ -129,7 +143,28 @@ Evo.Organism = function Organism() {
      * @param {Number} y Y coordinate of the sensor
      * @private
      */
-    function _in(cb, x, y) {}
+    function _in(cb, x, y) {
+        function answerFn(e) {
+            var data = e.data;
+            if (data && data.id === self.organismId) {
+                cb(data.resp);
+                self.removeEventListener('message', answerFn, false);
+            }
+        }
+
+        //
+        // Current command requires answer. We need to add temporary
+        // callback for this.
+        //
+        if (cb !== _emptyFn) {
+            self.addEventListener('message', answerFn, false);
+        }
+        self.postMessage({
+            cmd : cmd,
+            args: args,
+            uid : self.organismId
+        });
+    }
     function _out() {}
     function _step() {}
     function _eat() {}
@@ -153,6 +188,7 @@ Evo.Organism = function Organism() {
             // This is how we mark the worker and organism. Every
             // Worker/Organism has it's own unique identifier.
             //
+            // TODO: do we need this is?
             self.organismId = cfg.id;
 
             return true;
@@ -169,6 +205,7 @@ Evo.Organism = function Organism() {
          *        {Number}   codePadding     Padding of text code for every column: command, arg1, arg2, arg3
          *        {Number}   energy          Amount of energy which is inside the organism from the beginning
          *        {Number}   energyDecrease  Value, which is decrease an energy after every script run
+         *        {Array}    position        X and Y coordinates array of the body particles.
          *        {Number}   mutationSpeed   Speed of new mutations: 1 - one mutation per one script run, 2  - 1
          *                                   mutation per 2 script running and so on. As bigger this value is, as
          *                                   slower the mutations are.
