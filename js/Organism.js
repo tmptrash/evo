@@ -119,8 +119,17 @@ Evo.Organism = function Organism() {
         return codeLen + codeLen;
     }
 
-    // TODO:
-    function _in(cb, p1, p2) {}
+    /**
+     * in command handler. It gets a value from specified "sensor" in our case
+     * the particle in the world and return it's value. Value in this case is
+     * amount of energy in the particle.
+     * @param {Function} cb Callback, which will be called to pass the value
+     * back to the interpreter. This call is asynchronous.
+     * @param {Number} x X coordinate of the sensor
+     * @param {Number} y Y coordinate of the sensor
+     * @private
+     */
+    function _in(cb, x, y) {}
     function _out() {}
     function _step() {}
     function _eat() {}
