@@ -1,6 +1,10 @@
 /**
  * TODO: describe how organism works: mutations, memory, input, output,...
  * TODO: Add default values for config parameters
+ * TODO: Code2Text class should be moved from Organism. It should only contain
+ * TODO: binary code. Code formatting is a task for App class
+ * TODO: JSONfn should be removed from project, because we don't need to pass
+ * TODO: functions between Worker and main thread
  *
  * Dependencies:
  *     Evo
@@ -69,37 +73,7 @@ Evo.Organism = function Organism() {
          * script run, 2 - 1 mutation per 2 script running and so on.
          * As bigger this value is, as slower the mutations are.
          */
-        mutationSpeed: 100,
-        /**
-         * {Function} 'in' command callback. See Evo.Interpreter.inCb
-         * config for details.
-         */
-        inCb: _emptyFn,
-        /**
-         * {Function} 'out' command callback. See Evo.Interpreter.outCb
-         * config for details.
-         */
-        outCb: _emptyFn,
-        /**
-         * {Function} step' command callback. See Evo.Interpreter.stepCb
-         * config for details.
-         */
-        stepCb: _emptyFn,
-        /**
-         * {Function} 'eat' command callback. See Evo.Interpreter.eatCb
-         * config for details.
-         */
-        eatCb: _emptyFn,
-        /**
-         * {Function} 'echo' command callback. See Evo.Interpreter.echoCb
-         * config for details.
-         */
-        echoCb: _emptyFn,
-        /**
-         * {Function} 'clone' command callback. Evo.Interpreter.cloneCb
-         * config for details.
-         */
-        cloneCb: _emptyFn
+        mutationSpeed: 100
     };
     /**
      * {Number} Amount of mutations for current data set. It is
@@ -144,6 +118,14 @@ Evo.Organism = function Organism() {
         _code = code;
         return codeLen + codeLen;
     }
+
+    // TODO:
+    function _in(cb, p1, p2) {}
+    function _out() {}
+    function _step() {}
+    function _eat() {}
+    function _echo() {}
+    function _clone() {}
 
 
     return {
@@ -276,18 +258,18 @@ Evo.Organism = function Organism() {
 
             _allMutations = _curMutations = 0;
             //
-            // We do it to setup default config values, which will
+            // We do it to setup default callback methods, which will
             // be the same for every Evo.Interpreter.run() call
             //
             _interpreter.run({
                 code   : code,
                 codeLen: 0,
-                inCb   : config.inCb    || _cfg.inCb,
-                outCb  : config.outCb   || _cfg.outCb,
-                stepCb : config.stepCb  || _cfg.stepCb,
-                eatCb  : config.stepCb  || _cfg.eatCb,
-                echoCb : config.echoCb  || _cfg.echoCb,
-                cloneCb: config.cloneCb || _cfg.cloneCb
+                inCb   : _in,
+                outCb  : _out,
+                stepCb : _step,
+                eatCb  : _eat,
+                echoCb : _echo,
+                cloneCb: _clone
             });
             //
             // This is an entry point of living process.

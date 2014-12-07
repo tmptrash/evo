@@ -546,14 +546,14 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     // TODO: think about optimization of this code. It's very
-    // TODO: very slow, because of inter threading communication
+    // TODO: very slow, because of inter thread communication
     function _in(code, i, vars) {
         _stopped = true;
-        _inCb('in', function (data) {
+        _inCb(function (data) {
             vars[code[i + 3]] = data;
             _stopped = false;
             _me.run({i: _lastIndex, code: code});
-        }, [vars[code[i + 1]], vars[code[i + 2]]]);
+        }, vars[code[i + 1]], vars[code[i + 2]]);
     }
     /**
      * 'out' command handler. Send command to specified sensor.
@@ -565,7 +565,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _out(code, i, vars) {
-        _outCb('out', [vars[code[i + 1]], vars[code[i + 2]], vars[code[i + 3]]]);
+        _outCb(vars[code[i + 1]], vars[code[i + 2]], vars[code[i + 3]]);
     }
     /**
      * 'step' command handler. Do one step with specified
@@ -579,7 +579,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _step(code, i, vars) {
-        _stepCb('step', [vars[code[i + 1]]]);
+        _stepCb(vars[code[i + 1]]);
     }
     /**
      * 'eat' command handler. Grabs an energy point from nearest
@@ -593,7 +593,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _eat(code, i, vars) {
-        _eatCb('eat',[vars[code[i + 1]]]);
+        _eatCb(vars[code[i + 1]]);
     }
     /**
      * 'clone' command handler. Clones current organism into current
@@ -606,7 +606,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _clone(code, i, vars) {
-        _cloneCb('clone', [vars[code[i + 1]]]);
+        _cloneCb(vars[code[i + 1]]);
     }
 
 

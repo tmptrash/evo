@@ -1,4 +1,7 @@
 /**
+ * TODO: add help command to the console with examples and description for
+ * TODO: commands.
+ *
  * This is an application class of Evo. Evo is a shortcut of Evolution. It
  * simulates biological evolution in a little bit different way. This class
  * also a proxy between a user, who types commands in a console and all
@@ -73,7 +76,7 @@ Evo.App = function () {
      * names and they handlers. These command are called from Web Workers
      * by message sending/receiving.
      */
-    // TODO:
+    // TODO: will be moved to Organism class
     var _api = {
         'in'   : _in,
         'out'  : _out,
@@ -81,6 +84,7 @@ Evo.App = function () {
     };
 
 
+    // TODO: will be moved to Organism class
     /**
      * in command handler. Is called from the organism. See Interpreter.in
      * command for details.
@@ -91,6 +95,7 @@ Evo.App = function () {
     function _in(x, y) {
         return _world.getPixel(x, y);
     }
+    // TODO: will be moved to Organism class
     /**
      * out command handler. Is called from the organism. See Interpreter.out
      * command for details.
@@ -125,6 +130,7 @@ Evo.App = function () {
         //
         // This message is a request from Worker
         //
+        // TODO: will be moved to Organism class
         } else if (uid) {
             _organisms[uid].postMessage({
                 uid : uid,
@@ -174,6 +180,7 @@ Evo.App = function () {
      * array this parameters is passed arguments.
      * @param {Array=} args Custom parameters
      */
+    // TODO: will be moved to Organism class
     function _remoteCb(cmd, cb, args) {
         cb   = typeof cb === 'function' ? cb : _emptyFn;
         args = args || [];
