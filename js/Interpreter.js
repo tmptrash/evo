@@ -124,11 +124,6 @@ Evo.Interpreter = function Interpreter() {
      */
     var _mem      = null;
     /**
-     * {Array} Output stream. Here organism will add it's numbers (outputs). This
-     * is an analogy of communication channel between organism and environment.
-     */
-    var _output   = null;
-    /**
      * {Number} Amount of numbers in binary script array. This is an amount of all
      * words. This is not an amount of code lines. You may calculate amount of
      * script words by formula: amountOfLines * _LINE_SEGMENTS .
@@ -616,6 +611,12 @@ Evo.Interpreter = function Interpreter() {
     return (_me = {
         /**
          * @constant
+         * {Number} Amount of segments (parts) in one script line: command, arg1, arg2, arg3.
+         * This variable it just a shortcut for performance interpreter issue.
+         */
+        LINE_SEGMENTS: _LINE_SEGMENTS,
+        /**
+         * @constant
          * {Number} Amount of internal variables
          */
         VARS_AMOUNT: _VARS_AMOUNT,
@@ -731,12 +732,6 @@ Evo.Interpreter = function Interpreter() {
             //
             _mem = cfg.mem || _mem || new Uint16Array(_MAX_MEMORY_SIZE);
             //
-            // Output stream (Array). Here organism must puts it's output numbers
-            //
-            // TODO: should be removed from Interpreter, because this output
-            // TODO: is passed to the outside (to the World)
-            _output = cfg.out || _output || [];
-            //
             // _codeLen field will be set to amount of numbers in binary script.
             //
             _codeLen = codeLen = +cfg.codeLen || code.length || _codeLen;
@@ -777,13 +772,6 @@ Evo.Interpreter = function Interpreter() {
          */
         getVars: function () {
             return new Uint16Array(_vars);
-        },
-        /**
-         * Returns output stream copy
-         * @returns {Array}
-         */
-        getOutput: function () {
-            return _output.slice(0);
         }
     });
 };
