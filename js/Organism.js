@@ -134,8 +134,7 @@ Evo.Organism = function Organism() {
      * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
      */
     function _in(cb, dir) {
-        _client.send('in', [dir], function (e) {
-            debugger;
+        _client.send('in', [_body, dir], function (e) {
             cb(e.data.resp);
         });
     }
@@ -205,6 +204,7 @@ Evo.Organism = function Organism() {
     return {
         /**
          * Initializes the organism. id property is required.
+         * TODO: review these parameters. I think most of them may be removed
          * @param {Object}      cfg             Start configuration of the organism
          *        {Uint16Array} code            Start code
          *        {String}      colorCode       Color of the text script

@@ -32,6 +32,7 @@ Evo.Server = function Server(worker) {
      *        {String}         id  Unique message id.
      */
     function _onMessage(e) {
+        debugger;
         var value = _msgCb(e);
 
         if (value !== undefined) {

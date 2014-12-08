@@ -745,6 +745,8 @@ Evo.Interpreter = function Interpreter() {
                 //
                 // Callback methods for commands like in, out, step, eat...
                 //
+                // TODO: we don't need to call it again and again
+                // TODO: Organism has already set these callbacks
                 _inCb    = cfg.inCb    || _inCb;
                 _outCb   = cfg.outCb   || _outCb;
                 _stepCb  = cfg.stepCb  || _stepCb;

@@ -50,16 +50,50 @@ Evo.App = function () {
      */
     var _organismId = 1;
     /**
-     * {Object} Map of organisms (Web workers) organized by id. It's used for
-     * different command typed by user in console. Key - Worker id, value -
-     * Worker instance.
+     * {Object} Map of Worker Clients organized by id. It's used for
+     * communication between this, main thread and Web Workers(organisms).
+     * For case when main thread produce request for Workers and they
+     * (Server) produces responses.
      */
     var _clients = {};
+    /**
+     * {Object} Web Worker Servers. Is used for communication between
+     * Organism and this, main thread. For case, when request is generated
+     * on Organism size and the Server (response producer) is here.
+     */
+    var _servers = {};
     /**
      * {Evo.World} World for all living organisms. In reality it
      * a 2D HTML5 canvas.
      */
     var _world = new Evo.World();
+    // TODO: I'm here!!!
+    var _api = {
+        'in': _in
+    };
+
+
+    /**
+     * TODO:
+     * in command handler
+     */
+    function _in(body, dir) {}
+    /**
+     * Web Workers messages receiver. Handles requests from Organisms
+     * and sends answers back.
+     * @param {MessageEvent} e Message from Client (Organism)
+     * @return {Number} number, which will be returned to the organism
+     */
+    function _onMessage(e) {
+        var data = e.data;
+        var cmd  = data.cmd;
+
+        if (cmd && _api[cmd]) {
+            return _api[cmd].apply(null, data.cfg);
+        }
+
+        return 'Invalid command "' + cmd + '"';
+    }
 
 
     return {
@@ -73,16 +107,17 @@ Evo.App = function () {
          */
         create: function () {
             var worker = new Worker('js/Loader.js');
+            var id     = _organismId;
 
             //
             // '0' means main thread (this thread), All Workers start from 1
             //
-            _clients[_organismId] = new Evo.Client({worker: worker, id: '0->' + _organismId});
-            _clients[_organismId].send('init', {id: _organismId}, function (e) {
-                debugger;
+            _clients[id] = new Evo.Client({worker: worker, id: '0->' + id});
+            _servers[id] = new Evo.Server({worker: worker});
+            _servers[id].listen(_onMessage);
+            _clients[id].send('init', {id: id}, function (e) {
                 var data = e.data;
-                var id   = data.id;
-                console.log(id + ': ' + 'init()' + ((data.resp + '') === '' ? '' : ':' + data.resp));
+                console.log(data.id + ': ' + 'init()' + ((data.resp + '') === '' ? '' : ':' + data.resp));
             });
 
             return 'Organism id: ' + _organismId++;
@@ -123,6 +158,8 @@ Evo.App = function () {
             }
 
             _clients[id].destroy();
+            _servers[id].destroy();
+            delete _servers[id];
             delete _clients[id];
 
             return 'done';
