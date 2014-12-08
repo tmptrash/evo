@@ -45,15 +45,16 @@
 Evo.App = function () {
     /**
      * {Number} Organism's unique number. Is used as an identifier
-     * of organisms. You may use it in console commands.
+     * of organisms. You may use it in console commands. Should be
+     * started from 1, because 0 is a main thread.
      */
-    var _organismId = 0;
+    var _organismId = 1;
     /**
      * {Object} Map of organisms (Web workers) organized by id. It's used for
      * different command typed by user in console. Key - Worker id, value -
      * Worker instance.
      */
-    var _connections = {};
+    var _clients = {};
     /**
      * {Evo.World} World for all living organisms. In reality it
      * a 2D HTML5 canvas.
@@ -71,14 +72,17 @@ Evo.App = function () {
          * @return {Number} Unique worker id
          */
         create: function () {
-            var worker = new Worker('js/Loader.js');
+            var worker     = new Worker('js/Loader.js');
 
-            _connections[_organismId] = new Evo.Connection(worker);
-            _connections[_organismId].send('init', {id: _organismId}, function (e) {
+            //
+            // '0' means main thread (this thread), All Workers start from 1
+            //
+            _clients[_organismId] = new Evo.Client({worker: worker, id: _organismId});
+            _clients[_organismId].send('init', {id: _organismId}, function (e) {
                 debugger;
                 var data = e.data;
                 var id   = data.id;
-                console.log(id + ': ' + 'init({id: ' + _organismId + '})' + ((data.resp + '') === '' ? '' : ':' + data.resp));
+                console.log(id + ': ' + 'init({id: ' + id + '})' + ((data.resp + '') === '' ? '' : ':' + data.resp));
             });
 
             return 'Organism id: ' + _organismId++;
@@ -87,11 +91,11 @@ Evo.App = function () {
          * TODO: Add code for removing the organism's particle
          */
         remove: function (id) {
-            if (!_connections[id]) {
+            if (!_clients[id]) {
                 return 'Invalid organism id ' + id;
             }
-            _connections[id].terminate();
-            delete _connections[id];
+            _clients[id].terminate();
+            delete _clients[id];
 
             return 'done';
         },
@@ -104,7 +108,7 @@ Evo.App = function () {
          * @return {String} 'done' - all ok, error message if not
          */
         cmd: function (id, cmd, cfg) {
-            if (typeof id !== 'string' && typeof id !== 'number' || !_connections[id]) {
+            if (typeof id !== 'string' && typeof id !== 'number' || !_clients[id]) {
                 return 'Invalid id "' + id + '"';
             }
             if (cmd === '' || typeof cmd !== 'string') {
@@ -113,7 +117,7 @@ Evo.App = function () {
 
             cfg = cfg || {};
             cfg.id = id;
-            _connections[id].send(cmd, cfg, function (e) {
+            _clients[id].send(cmd, cfg, function (e) {
                 var data = e.data;
                 var id   = data.id;
                 console.log(id + ': ' + cmd + '(' + JSON.stringify(cfg) + ')' + ((data.resp + '') === '' ? '' : ':' + data.resp));

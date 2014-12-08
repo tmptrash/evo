@@ -10,16 +10,23 @@
  * Example:
  *     TODO:
  *
- * @cfg {Worker} worker Web Worker object, which will be used
- * for requests and catching on responses.
+ * @cfg {Object} config Worker configuration
+ *      {Worker} worker Web Worker object, which will be used
+ *      {String} id     String prefix for global unique request
+ *                      identification. Request id will consist
+ *                      of id-XX, where XX - is a number
  *
  * @author DeadbraiN
  */
-Evo.Connection = function Connection(worker) {
+Evo.Client = function Client(config) {
     /**
-     * {Number} Unique identifier for requests and responses.
+     * {String} Application wide unique string prefix
      */
-    var _id   = 0;
+    var _prefix = config.id + '-';
+    /**
+     * {Function} Just a shortcut
+     */
+    var _id = 0;
     /**
      * {Object} Requests map. Binds unique ids and response
      * callbacks. It's used for understanding which request
@@ -45,7 +52,7 @@ Evo.Connection = function Connection(worker) {
     //
     // Here we listen all responses.
     //
-    worker.addEventListener('message', _onMessage.bind(this), false);
+    config.worker.addEventListener('message', _onMessage.bind(this), false);
 
 
     return {
@@ -60,12 +67,12 @@ Evo.Connection = function Connection(worker) {
          */
         send: function (cmd, cfg, respCb) {
             if (respCb) {
-                _resp[_id] = respCb;
+                _resp[_prefix + _id] = respCb;
             }
-            worker.postMessage({
+            config.worker.postMessage({
                 cmd: cmd,
                 cfg: cfg,
-                id : _id++
+                id : _prefix + _id++
             });
         }
     }

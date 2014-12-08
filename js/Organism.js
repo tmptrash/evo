@@ -106,6 +106,11 @@ Evo.Organism = function Organism() {
      * in human readable manner.
      */
     var _code2text  = new Evo.Code2Text();
+    /**
+     * {Evo.Client} Client for main thread. Is used for communicating
+     * with the World and it's particles.
+     */
+    var _client = null;
 
 
     /**
@@ -121,7 +126,6 @@ Evo.Organism = function Organism() {
         _code = code;
         return codeLen + codeLen;
     }
-
     /**
      * Sends one message and wait for answer. The message has it's unique
      * identifier. This is how we catch exact answer from main thread.
@@ -142,25 +146,9 @@ Evo.Organism = function Organism() {
      * @private
      */
     function _in(cb, x, y) {
-        function answerFn(e) {
-            var data = e.data;
-            if (data && data.id === self.organismId) {
-                cb(data.resp);
-                self.removeEventListener('message', answerFn, false);
-            }
-        }
-
-        //
-        // Current command requires answer. We need to add temporary
-        // callback for this.
-        //
-        if (cb !== _emptyFn) {
-            self.addEventListener('message', answerFn, false);
-        }
-        self.postMessage({
-            cmd : cmd,
-            args: args,
-            uid : self.organismId
+        _client.send('in', {x: x, y: y}, function (e) {
+            debugger;
+            cb(e.data.resp);
         });
     }
     function _out() {}
@@ -186,8 +174,7 @@ Evo.Organism = function Organism() {
             // This is how we mark the worker and organism. Every
             // Worker/Organism has it's own unique identifier.
             //
-            // TODO: do we need this is?
-            self.organismId = cfg.id;
+            _client = new Evo.Client({worker: self, id: '0'});
 
             return true;
         },
