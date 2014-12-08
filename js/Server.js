@@ -55,6 +55,13 @@ Evo.Server = function Server(worker) {
         listen: function (msgCb) {
             _msgCb = msgCb;
             worker.addEventListener('message', _onMessage, false);
+        },
+        /**
+         * Destructor of the class
+         */
+        destroy: function () {
+            _msgCb = null;
+            worker.removeEventListener('message', _onMessage, false);
         }
     };
 };

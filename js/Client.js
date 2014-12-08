@@ -52,7 +52,7 @@ Evo.Client = function Client(config) {
     //
     // Here we listen all responses.
     //
-    config.worker.addEventListener('message', _onMessage.bind(this), false);
+    config.worker.addEventListener('message', _onMessage, false);
 
 
     return {
@@ -74,6 +74,14 @@ Evo.Client = function Client(config) {
                 cfg: cfg,
                 id : _prefix + _id++
             });
+        },
+        /**
+         * Destroys the instance and remove all data references to prevent
+         * memory leaks for multiple instances.
+         */
+        destroy: function () {
+            config.worker.removeEventListener('message', _onMessage, false);
+            config.worker.terminate();
         }
     }
 };

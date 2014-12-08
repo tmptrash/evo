@@ -31,14 +31,14 @@
  * main thread and Web Workers. So, some small delay will be generated
  * by the browser, because of communication reason.
  *
- * Example:
- *     TODO: describe some real command examples here
- *
  * Dependencies:
  *     Evo
  *     Evo.World
  *     Evo.Worker
  *     Evo.Connection
+ *
+ * Example:
+ *     TODO: describe some real command examples here
  *
  * @author DeadbraiN
  */
@@ -72,32 +72,20 @@ Evo.App = function () {
          * @return {Number} Unique worker id
          */
         create: function () {
-            var worker     = new Worker('js/Loader.js');
+            var worker = new Worker('js/Loader.js');
 
             //
             // '0' means main thread (this thread), All Workers start from 1
             //
-            _clients[_organismId] = new Evo.Client({worker: worker, id: _organismId});
+            _clients[_organismId] = new Evo.Client({worker: worker, id: '0->' + _organismId});
             _clients[_organismId].send('init', {id: _organismId}, function (e) {
                 debugger;
                 var data = e.data;
                 var id   = data.id;
-                console.log(id + ': ' + 'init({id: ' + id + '})' + ((data.resp + '') === '' ? '' : ':' + data.resp));
+                console.log(id + ': ' + 'init()' + ((data.resp + '') === '' ? '' : ':' + data.resp));
             });
 
             return 'Organism id: ' + _organismId++;
-        },
-        /**
-         * TODO: Add code for removing the organism's particle
-         */
-        remove: function (id) {
-            if (!_clients[id]) {
-                return 'Invalid organism id ' + id;
-            }
-            _clients[id].terminate();
-            delete _clients[id];
-
-            return 'done';
         },
         /**
          * Is used to run specified command for specified organism.
@@ -122,6 +110,20 @@ Evo.App = function () {
                 var id   = data.id;
                 console.log(id + ': ' + cmd + '(' + JSON.stringify(cfg) + ')' + ((data.resp + '') === '' ? '' : ':' + data.resp));
             });
+
+            return 'done';
+        },
+        /**
+         * TODO: Add code for removing the organism's particle. special message
+         * TODO: should be passed to the Worker.
+         */
+        remove: function (id) {
+            if (typeof id !== 'string' && typeof id !== 'number' || !_clients[id]) {
+                return 'Invalid id "' + id + '"';
+            }
+
+            _clients[id].destroy();
+            delete _clients[id];
 
             return 'done';
         }

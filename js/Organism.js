@@ -19,6 +19,11 @@ Evo.Organism = function Organism() {
      */
     var _body = [];
     /**
+     * {Boolean} false means that the organism has died and we need to kill it.
+     * All it's activities should be stopped.
+     */
+    var _alive = true;
+    /**
      * {Uint16Array} Binary code of the organism. This code will be
      * changed by Mutator module.
      */
@@ -127,35 +132,80 @@ Evo.Organism = function Organism() {
         return codeLen + codeLen;
     }
     /**
-     * Sends one message and wait for answer. The message has it's unique
-     * identifier. This is how we catch exact answer from main thread.
-     * @param {Object} cfg Configuration, which will be passed in request.
-     * @param {String} id  Unique identifier of request
-     */
-    function _sendMessage(cfg) {
-
-    }
-    /**
      * in command handler. It gets a value from specified "sensor" in our case
      * the particle in the world and return it's value. Value in this case is
      * amount of energy in the particle.
      * @param {Function} cb Callback, which will be called to pass the value
      * back to the interpreter. This call is asynchronous.
-     * @param {Number} x X coordinate of the sensor
-     * @param {Number} y Y coordinate of the sensor
-     * @private
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
      */
-    function _in(cb, x, y) {
-        _client.send('in', {x: x, y: y}, function (e) {
+    function _in(cb, dir) {
+        _client.send('in', [dir], function (e) {
             debugger;
             cb(e.data.resp);
         });
     }
-    function _out() {}
-    function _step() {}
-    function _eat() {}
-    function _echo() {}
-    function _clone() {}
+    /**
+     * out command handler. Just send some value by specified coordinates
+     * x and y. It may be interpret like some kind of communication between
+     * the organism and the particle. The meaning of this passing is interpreted
+     * by the World or application so it may be changed depending on World rules.
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @param {Number} val Energy value
+     * @private
+     */
+    function _out(dir, val) {
+        _client.send('out', [dir, val], function (res) {
+            //
+            // true means, that out command was successful and energy value
+            // was applied into the particle. So we need to decrease organism's
+            // energy
+            //
+            if (res) {
+                _cfg.energy -= val;
+            }
+        });
+    }
+    /**
+     * Makes one step (1 pixel) by the organism with specified direction.
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     */
+    function _step(dir) {
+        _client.send('step', [dir]);
+    }
+    /**
+     * Grabs one energy point from nearest particle.
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     */
+    function _eat(dir) {
+        _client.send('eat', [dir], function (energy) {
+            _cfg.energy += energy;
+        });
+    }
+    /**
+     * Echoes some number. Analog of speaking.
+     * @param {Number} val Output number.
+     */
+    function _echo(val) {
+        _client.send('echo', [val]);
+    }
+    /**
+     * Organisms cloning command handler. This is how it they increase a population.
+     * The direction of cloning is a new place (x,y coordinates) for new organism.
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     */
+    function _clone(dir) {
+        _client.send('clone', [dir, _cfg.energy], function (resp) {
+            //
+            // resp format: {ok: Boolean, energy: Number}. Where: ok - result of
+            // cloning. energy - amount of energy, which should be grabbed from
+            // organism.
+            //
+            if (resp.ok) {
+                _cfg.energy -= resp.energy;
+            }
+        });
+    }
 
 
     return {
@@ -174,7 +224,21 @@ Evo.Organism = function Organism() {
             // This is how we mark the worker and organism. Every
             // Worker/Organism has it's own unique identifier.
             //
-            _client = new Evo.Client({worker: self, id: '0'});
+            _client = new Evo.Client({worker: self, id: _cfg.id + '->0'});
+            //
+            // We do it to setup default callback methods, which will
+            // be the same for every Evo.Interpreter.run() call
+            //
+            _interpreter.run({
+                code   : [],
+                codeLen: 0,
+                inCb   : _in,
+                outCb  : _out,
+                stepCb : _step,
+                eatCb  : _eat,
+                echoCb : _echo,
+                cloneCb: _clone
+            });
 
             return true;
         },
@@ -234,7 +298,7 @@ Evo.Organism = function Organism() {
                 // last mutation do the job: generates correct
                 // output.
                 //
-                while (b++ < backAmount) {
+                while (b++ < backAmount && _alive) {
                     //
                     // This is how we control the mutations speed. As big
                     // config.mutationSpeed as slow the mutations are.
@@ -273,6 +337,12 @@ Evo.Organism = function Organism() {
                     // As big the script is, as more the energy we need.
                     //
                     energy -= (energyDec * len);
+                    //
+                    // This is how organism dies :(
+                    //
+                    if (energy < 1) {
+                        _alive = false;
+                    }
                 }
                 //
                 // Calculation of all mutations should be here, outside
@@ -284,24 +354,12 @@ Evo.Organism = function Organism() {
                 // This line is very important, because it decrease CPU
                 // load and current thread works "silently"
                 //
-                setTimeout(backgroundLive, 0);
+                if (_alive) {
+                    setTimeout(backgroundLive, 0);
+                }
             }
 
             _allMutations = _curMutations = 0;
-            //
-            // We do it to setup default callback methods, which will
-            // be the same for every Evo.Interpreter.run() call
-            //
-            _interpreter.run({
-                code   : code,
-                codeLen: 0,
-                inCb   : _in,
-                outCb  : _out,
-                stepCb : _step,
-                eatCb  : _eat,
-                echoCb : _echo,
-                cloneCb: _clone
-            });
             //
             // This is an entry point of living process.
             // All other looping will be in background

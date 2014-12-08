@@ -11,3 +11,4 @@ TODO list
 - All console commands must be checked before run to exclude application crash
 - Remove all Evo.XXX dependencies. They should be passed through configs
 - Check if all Evo.XXX configs are used in app
+- Add destroy() method to all classes to prevent memory leaks

@@ -370,7 +370,7 @@ Evo.Mutator = function Mutator() {
      */
     function _in(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([24, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen)], i);
+        code.set([24, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'out' with random arguments. This command may
@@ -381,7 +381,7 @@ Evo.Mutator = function Mutator() {
      */
     function _out(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([25, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen)], i);
+        code.set([25, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'step' with random arguments. This command may

@@ -422,7 +422,7 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _echo(code, i, vars) {
-        _output.push(vars[code[i + 1]]);
+        _echoCb(vars[code[i + 1]]);
     }
     /**
      * 'or' command handler. Does Bitwise OR.
@@ -536,10 +536,10 @@ Evo.Interpreter = function Interpreter() {
     /**
      * 'in' command handler. Obtains input command from
      * specified sensor.
-     * Example: 0018 0001 0002 0003 # in one two. Result
-     * will be stored in third variable. This example
-     * means 'get word from 0001 and 0002 sensor and store
-     * it in 0003 variable'.
+     * Example: 0018 0001 0002 # in one two. Result
+     * will be stored in second variable. This example
+     * means 'get word from 0001 sensor and store it in
+     * 0002 variable'.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -553,19 +553,19 @@ Evo.Interpreter = function Interpreter() {
             vars[code[i + 3]] = data;
             _stopped = false;
             _me.run({i: _lastIndex, code: code});
-        }, vars[code[i + 1]], vars[code[i + 2]]);
+        }, vars[code[i + 1]]);
     }
     /**
      * 'out' command handler. Send command to specified sensor.
-     * Example: 0019 0001 0002 0003 # out one two. This example
-     * means 'put word from 0002 and 0003 variable into 0001 sensor'
+     * Example: 0019 0001 0002 # out one two. This example
+     * means 'put word from 0002 variable into 0001 sensor'
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
     function _out(code, i, vars) {
-        _outCb(vars[code[i + 1]], vars[code[i + 2]], vars[code[i + 3]]);
+        _outCb(vars[code[i + 1]], vars[code[i + 2]]);
     }
     /**
      * 'step' command handler. Do one step with specified
@@ -733,6 +733,8 @@ Evo.Interpreter = function Interpreter() {
             //
             // Output stream (Array). Here organism must puts it's output numbers
             //
+            // TODO: should be removed from Interpreter, because this output
+            // TODO: is passed to the outside (to the World)
             _output = cfg.out || _output || [];
             //
             // _codeLen field will be set to amount of numbers in binary script.
