@@ -17,7 +17,7 @@ Evo.Organism = function Organism() {
      * {Array} The body of the organism. The body is a set of particles.
      * Every particle is an energy container (for us it's a color).
      */
-    var _body = [];
+    var _body = null;
     /**
      * {Boolean} false means that the organism has died and we need to kill it.
      * All it's activities should be stopped.
@@ -29,9 +29,9 @@ Evo.Organism = function Organism() {
      */
     var _code = null;
     /**
-     * {Function} For stubs
+     * {Number} Amount of energy of the organism
      */
-    var _emptyFn = function () {};
+    var _energy = function () {};
     /**
      * {Object} Configuration of current organism. If some properties
      * will not be set, then default values will be used. Should contain
@@ -80,7 +80,13 @@ Evo.Organism = function Organism() {
          * {Number} Amount of mutations for current organism. Mutations
          * applies only after cloning (creation).
          */
-        mutations: 100
+        mutations: 100,
+        /**
+         * {Array} Coordinates of the organism, where it will be created
+         * in a World (in canvas). If this parameter will be skipped, then
+         * random coordinates will be generated.
+         */
+        coordinates: null
     };
     /**
      * {Array} Reference to last data set, which was passed or not.
@@ -207,6 +213,7 @@ Evo.Organism = function Organism() {
          * TODO: review these parameters. I think most of them may be removed
          * @param {Object}      cfg             Start configuration of the organism
          *        {Uint16Array} code            Start code
+         *        {Array}       coordinates     Array of two items: [x, y] coordinates of the organism
          *        {String}      colorCode       Color of the text script
          *        {Number}      maxNumber       Maximum available number in script
          *        {Number}      busyCounter     Amount of iterations, which will be run in background without breaking
@@ -216,14 +223,25 @@ Evo.Organism = function Organism() {
          *        {Number}      energyDecrease  Value, which is decrease an energy after every script run
          *        {Array}       position        X and Y coordinates array of the body particles.
          *        {Number}      mutations       Amount of mutations which are applied after organism cloning.
-         * @returns {boolean}
+         * @returns {Boolean|String} true or error message
          */
         init: function (cfg) {
+            //
+            // All required parameters should be checked here
+            //
+            if (!cfg.coordinates || cfg.coordinates.length < 2) {
+                return 'Organism coordinates were not set. Use format: [x,y]';
+            }
+
             for (var i in cfg) {
                 if (cfg.hasOwnProperty(i)) {
                     _cfg[i] = cfg[i];
                 }
             }
+            //
+            // Organism start position in the World (canvas)
+            //
+            _body = _cfg.coordinates;
             //
             // This is how we mark the worker and organism. Every
             // Worker/Organism has it's own unique identifier.
@@ -261,7 +279,6 @@ Evo.Organism = function Organism() {
             var code        = _cfg.code || new Uint16Array(mutations * _interpreter.LINE_SEGMENTS);
             var out         = [];
             var energyDec   = _cfg.energyDecrease;
-            var energy      = _cfg.energy;
             var len         = _cfg.code ? code.length : 0;
             var b;
             /**
@@ -293,11 +310,11 @@ Evo.Organism = function Organism() {
                     // After every script run, we need to decrease organism's energy.
                     // As big the script is, as more the energy we need.
                     //
-                    energy -= (energyDec * len);
+                    _energy -= (energyDec * len);
                     //
                     // This is how organism dies :(
                     //
-                    if (energy < 1) {
+                    if (_energy < 1) {
                         _alive = false;
                     }
                 }
@@ -311,6 +328,7 @@ Evo.Organism = function Organism() {
             }
 
 
+            _energy = _cfg.energy;
             _code = code;
             //
             // Right after born, organism should mutate itself
@@ -324,6 +342,16 @@ Evo.Organism = function Organism() {
             setTimeout(backgroundLive, 0);
 
             return true;
+        },
+        /**
+         * Decreases amount of energy from organism
+         * @param {Number} energy Energy we need to decrease
+         */
+        grabEnergy: function (energy) {
+            _energy -= energy;
+            if (_energy < 1) {
+                _alive = false;
+            }
         },
         /**
          * Returns organism's code in different formats. This method may contain unoptimized

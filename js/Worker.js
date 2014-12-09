@@ -22,7 +22,7 @@ Evo.Worker = function Worker() {
     /**
      * {Evo.Server} Server, which answers main thread requests
      */
-    var _server = new Evo.Server(self);
+    var _server = new Evo.Server({worker: self});
     /**
      * Main thread messages receiver. Runs commands on organism
      * and returns answers through  postMessage(). Every message

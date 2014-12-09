@@ -26,7 +26,7 @@ Evo.Client = function Client(config) {
     /**
      * {Function} Just a shortcut
      */
-    var _id = 0;
+    var _id = -1;
     /**
      * {Object} Requests map. Binds unique ids and response
      * callbacks. It's used for understanding which request
@@ -36,12 +36,14 @@ Evo.Client = function Client(config) {
 
     /**
      * Handlers of responses. Calls specified callback if it
-     * was specified in send() method.
+     * was specified in send() method. If client catches an
+     * answer from other server, then it should be skipped.
      * @param {MessageEvent} e
      */
     function _onMessage(e) {
         debugger;
         var id = e.data.id;
+        if (id !== _prefix + _id) {return;}
 
         if (_resp[id]) {
             _resp[id](e);
@@ -66,13 +68,15 @@ Evo.Client = function Client(config) {
          * parameter of cb will be data, received in response.
          */
         send: function (cmd, cfg, respCb) {
+            _id++;
             if (respCb) {
                 _resp[_prefix + _id] = respCb;
             }
             config.worker.postMessage({
                 cmd: cmd,
                 cfg: cfg,
-                id : _prefix + _id++
+                req: true,
+                id : _prefix + _id
             });
         },
         /**

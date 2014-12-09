@@ -17,7 +17,7 @@ Evo.World = function World(cfg) {
     /**
      * {Object} Default class configuration. Will be overridden by user config
      */
-    var _cfg          = {
+    var _cfg      = {
         /**
          * {String} Query to the canvas tag for our world
          */
@@ -30,21 +30,21 @@ Evo.World = function World(cfg) {
     /**
      * {HTMLElement} Canvas DOM element
      */
-    var _canvasEl     = $(cfg && cfg.canvasQuery || _cfg.canvasQuery);
+    var _canvasEl = $(cfg && cfg.canvasQuery || _cfg.canvasQuery);
     /**
      * {CanvasRenderingContext2D} Context of 2D canvas. It's needed for
      * pixels manipulations.
      */
-    var _ctx          = null;
+    var _ctx      = null;
     /**
      * {ImageData} Special object, which is used for one pixel
      * manipulations like getPixel()/setPixel() methods call.
      */
-    var _imgData      = null;
+    var _imgData  = null;
     /**
      * {Array} Reference to ImageData.data for performance issue
      */
-    var _data         = null;
+    var _data     = null;
 
 
     /**
@@ -54,8 +54,6 @@ Evo.World = function World(cfg) {
     function _init() {
         _applyConfigs();
         _checkConfigs();
-        _bindEvents();
-        _updateCanvasSize();
         _prepareCanvas();
     }
     /**
@@ -84,15 +82,25 @@ Evo.World = function World(cfg) {
         }
     }
     /**
-     * Binds all class related events
-     */
-    function _bindEvents() {
-        $(window).on('resize', _updateCanvasSize);
-    }
-    /**
      * Prepares canvas container and internal variables for drawing pixels
      */
     function _prepareCanvas() {
+        var bodyEl = $('body');
+
+        //
+        // Initially, we set canvas to body width/height
+        //
+        if (!_cfg.noFullscreen) {
+            _canvasEl.attr('width', bodyEl.width());
+            _canvasEl.attr('height', bodyEl.height());
+        }
+        _ctx = _canvasEl[0].getContext('2d');
+        //
+        // Fills all canvas by black color
+        //
+        _ctx.rect(0, 0, _canvasEl.width(), _canvasEl.height());
+        _ctx.fillStyle='#000000';
+        _ctx.fill();
         //
         // This data will be used for pixels access
         //
@@ -102,19 +110,6 @@ Evo.World = function World(cfg) {
         // Alpha channel should be in maximum value
         //
         _data[3] = 255;
-    }
-    /**
-     * Updates canvas size depending of browser width and height
-     * @private
-     */
-    function _updateCanvasSize() {
-        var bodyEl = $('body');
-
-        if (!_cfg.noFullscreen) {
-            _canvasEl.attr('width', bodyEl.width());
-            _canvasEl.attr('height', bodyEl.height());
-        }
-        _ctx = _canvasEl[0].getContext('2d');
     }
 
 
@@ -162,6 +157,20 @@ Evo.World = function World(cfg) {
             data[1] = (c >> 8) & 255;
             data[2] = c & 255;
             _ctx.putImageData(_imgData, x, y);
+        },
+        /**
+         * Returns width of the canvas in pixels
+         * @return {Number}
+         */
+        getWidth: function () {
+            return _canvasEl.width();
+        },
+        /**
+         * Returns height of the canvas in pixels
+         * @return {Number}
+         */
+        getHeight: function () {
+            return _canvasEl.height();
         }
     };
 };

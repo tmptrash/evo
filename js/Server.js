@@ -11,11 +11,12 @@
  * Example:
  *     TODO:
  *
- * @cfg {Worker} worker Web Worker object we are working with
+ * @cfg {Object} cfg    Web Worker configuration
+ *      {Worker} worker Web Worker object we are working with
  *
  * @author DeadbraiN
  */
-Evo.Server = function Server(worker) {
+Evo.Server = function Server(cfg) {
     /**
      * {Function} Callback, which is called on message receive.
      */
@@ -25,7 +26,10 @@ Evo.Server = function Server(worker) {
      * and returns answers through  postMessage(). Every message
      * from outside the Worker should contain at least two arguments:
      * command name and message id. Return command value will be
-     * passed through answer message in resp parameter.
+     * passed through answer message in resp parameter. If server
+     * catches an answer from client, then this message should be
+     * skipped. We understands it by req parameter. It should be
+     * true. It means that this is a request for a server.
      * @param {MessageEvent} e.data
      *        {String}         cmd Command (name of the method) to run.
      *        {Object|String=} cfg Configuration for cmd
@@ -33,11 +37,13 @@ Evo.Server = function Server(worker) {
      */
     function _onMessage(e) {
         debugger;
+        if (!e.data.req) {return;}
         var value = _msgCb(e);
 
         if (value !== undefined) {
-            worker.postMessage({
+            cfg.worker.postMessage({
                 resp: value,
+                req : false,
                 id  : e.data.id
             });
         }
@@ -55,14 +61,14 @@ Evo.Server = function Server(worker) {
          */
         listen: function (msgCb) {
             _msgCb = msgCb;
-            worker.addEventListener('message', _onMessage, false);
+            cfg.worker.addEventListener('message', _onMessage, false);
         },
         /**
          * Destructor of the class
          */
         destroy: function () {
             _msgCb = null;
-            worker.removeEventListener('message', _onMessage, false);
+            cfg.worker.removeEventListener('message', _onMessage, false);
         }
     };
 };
