@@ -80,7 +80,7 @@ Evo.Organism = function Organism() {
          * {Number} Amount of mutations for current organism. Mutations
          * applies only after cloning (creation).
          */
-        mutations: 100,
+        mutations: 1000,
         /**
          * {Array} Coordinates of the organism, where it will be created
          * in a World (in canvas). If this parameter will be skipped, then
