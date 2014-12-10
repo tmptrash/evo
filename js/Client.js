@@ -41,7 +41,6 @@ Evo.Client = function Client(config) {
      * @param {MessageEvent} e
      */
     function _onMessage(e) {
-        debugger;
         var id = e.data.id;
         if (id !== _prefix + _id) {return;}
 

@@ -574,21 +574,25 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _step(code, i, vars) {
-        _stepCb(vars[code[i + 1]]);
+        _stopped = true;
+        _stepCb(function () {
+            _stopped = false;
+            _me.run({i: _lastIndex, code: code});
+        }, vars[code[i + 1]]);
     }
     /**
      * 'eat' command handler. Grabs an energy point from nearest
      * particle.
-     * Example: 001B 0001 # eat one. This example means
-     * 'grab one energy point from 0001 direction'. There are four
-     * directions: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * Example: 001B 0001 0002 # eat one two. This example means
+     * 'grab energy from 0001 direction with amount of 0002'.
+     * There are four directions: 0 - up, 1 - right, 2 - bottom, 3 - left
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
     function _eat(code, i, vars) {
-        _eatCb(vars[code[i + 1]]);
+        _eatCb(vars[code[i + 1]], vars[code[i + 2]]);
     }
     /**
      * 'clone' command handler. Clones current organism into current

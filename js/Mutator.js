@@ -403,7 +403,7 @@ Evo.Mutator = function Mutator() {
      */
     function _eat(code, i) {
         //noinspection JSCheckFunctionSignatures
-        code.set([27, _floor(_rnd() * _varsLen), 0, 0], i);
+        code.set([27, _floor(_rnd() * _varsLen), _floor(_rnd() * _varsLen), 0], i);
     }
     /**
      * Generates command 'clone' with random arguments. This command may

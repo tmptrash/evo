@@ -36,7 +36,6 @@ Evo.Worker = function Worker() {
      * @private
      */
     function _onMessage(e) {
-        debugger;
         var data    = e.data;
         var cmd     = _organism[data.cmd];
         var validFn = typeof cmd === 'function';

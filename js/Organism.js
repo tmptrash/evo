@@ -154,7 +154,7 @@ Evo.Organism = function Organism() {
      * @private
      */
     function _out(dir, val) {
-        _client.send('out', [dir, val], function (res) {
+        _client.send('out', [_body, dir, val], function (res) {
             //
             // true means, that out command was successful and energy value
             // was applied into the particle. So we need to decrease organism's
@@ -167,17 +167,25 @@ Evo.Organism = function Organism() {
     }
     /**
      * Makes one step (1 pixel) by the organism with specified direction.
+     * @param {Function} cb Callback, which should be called on response
      * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
      */
-    function _step(dir) {
-        _client.send('step', [dir]);
+    function _step(cb, dir) {
+        _client.send('step', [_body, dir], function (e) {
+            //
+            // New body position
+            //
+            _body = e.data.resp;
+            cb();
+        });
     }
     /**
      * Grabs one energy point from nearest particle.
      * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @param {Number} energy Amount of energy, the organism wants to eat
      */
-    function _eat(dir) {
-        _client.send('eat', [dir], function (energy) {
+    function _eat(dir, energy) {
+        _client.send('eat', [_body, dir, energy], function (energy) {
             _cfg.energy += energy;
         });
     }
@@ -194,7 +202,7 @@ Evo.Organism = function Organism() {
      * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
      */
     function _clone(dir) {
-        _client.send('clone', [dir, _cfg.energy, Evo.Organism.getCode()], function (resp) {
+        _client.send('clone', [dir, _cfg.energy, _code], function (resp) {
             //
             // resp format: {ok: Boolean, energy: Number}. Where: ok - result of
             // cloning. energy - amount of energy, which should be grabbed from

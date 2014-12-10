@@ -50,7 +50,11 @@ Evo.App = function () {
         /**
          * {Number} Color of the organism's body (0xFF0000 - Red).
          */
-        organismColor: 16711680
+        organismColor: 16711680,
+        /**
+         * {Number} Default color of energy particle (0x00FF00 - Green)
+         */
+        energyColor  : 65280
     };
     /**
      * {Number} Organism's unique number. Is used as an identifier
@@ -94,10 +98,33 @@ Evo.App = function () {
      * need to ask main thread.
      */
     var _api = {
-        'in': _in
+        'in'  : _in,
+        'out' : _out,
+        'step': _step,
+        'eat' : _eat
     };
 
 
+    /**
+     * Converts direction to x coordinate. e.g.: if dir === 1 and x === 2,
+     * then return value will be 2 + 1 === 3
+     * @param {Number} x Start x coordinate
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @returns {Number} New coordinate
+     */
+    function _dir2x(x, dir) {
+        return x + (dir === 1 ?  1 : (dir === 3 ? -1 : 0));
+    }
+    /**
+     * Converts direction to y coordinate. e.g.: if dir === 0 and y === 2,
+     * then return value will be 2 - 1 === 1
+     * @param {Number} y Start y coordinate
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @returns {Number} New coordinate
+     */
+    function _dir2y(y, dir) {
+        return y + (dir === 0 ? -1 : (dir === 2 ?  1 : 0));
+    }
     /**
      * Outputs results of Evo.Client.send() command in a console
      * @param {MessageEvent} e Obtained event
@@ -112,9 +139,7 @@ Evo.App = function () {
     /**
      * in command handler. in command means checking of specified sensor
      * (particle) near the organism. It's coordinates are in body parameter
-     * in format [x,y]. This method grabs one energy block from the particle
-     * near the organism and updates this particle or returns zero id there
-     * is no particle there.
+     * in format [x,y].
      * @param {Array} body Array of coordinates in format [x,y]
      * @param {Number} dir Direction of the sensor: 0 - up, 1 - right, 2 -
      * bottom, 3 - left
@@ -123,27 +148,84 @@ Evo.App = function () {
      * is no particle for example.
      */
     function _in(body, dir) {
-        var x         = body[0] + (dir === 1 ? 1 : (dir === 3 ? -1 : 0));
-        var y         = body[1] + (dir === 0 ? 1 : (dir === 2 ? -1 : 0));
-        var energy    = _world.getPixel(x, y);
-        var energyDec = 1;
-        var hash;
+        debugger;
+        return _world.getPixel(_dir2x(body[0], dir), _dir2y(body[1], dir));
+    }
+    /**
+     * out command handler. It puts an energy portion to the nearest particle
+     * or just on the ground
+     * @param {Array} body Array of coordinates [x,y]
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @param {Number} energy Amount of energy we need to put
+     * @private
+     */
+    function _out(body, dir, energy) {
+        debugger;
+        var x = _dir2x(body[0], dir);
+        var y = _dir2y(body[1], dir);
 
-        if (energy) {
-            energy -= energyDec;
-            hash    = _hash(x, y);
-            //
-            // near particle is another organism
-            //
-            if (_organisms[hash]) {
-                _organisms[hash].send('grabEnergy', energyDec, function (e) {
-                    _logSend(e, 'grabEnergy', energyDec);
-                });
-            }
-            _world.setPixel(x, y, energy);
+        // TODO: it's possible to obtain energy more then 00ff00 (65535). what to do?
+        return _world.setPixel(x, y, _world.getPixel(x, y) + energy);
+    }
+    /**
+     * Makes one step with specified direction
+     * @param {Array} body Coordinates of the organism's body [x, y]
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @returns {Array} New coordinates of organism or old one if
+     * impossible to move
+     */
+    function _step(body, dir) {
+        debugger;
+        var x       = _dir2x(body[0], dir);
+        var y       = _dir2y(body[1], dir);
+        var oldHash = _hash(body[0], body[1]);
+
+        //
+        // If new place for organism is free, them clear previous
+        // position and put new one.
+        //
+        if (!_world.getPixel(x, y)) {
+            _organisms[_hash(x, y)] = _organisms[oldHash];
+            delete _organisms[oldHash];
+            _world.setPixel(x, y, _cfg.organismColor);
+            _world.setPixel(body[0], body[1], 0);
+            return [x, y];
         }
 
-        return energy;
+        //
+        // We can't move in this direction
+        //
+        return body;
+    }
+    /**
+     * eat command handler. Eats
+     * @param {Array} body Array of coordinates [x,y]
+     * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * @param {Number} energy Amount of energy we need to put
+     * @private
+     */
+    function _eat(body, dir, energy) {
+        debugger;
+        var x          = _dir2x(body[0], dir);
+        var y          = _dir2y(body[1], dir);
+        var nearEnergy = _world.getPixel(x, y);
+        var hash       = _hash(x, y);
+
+        if (nearEnergy) {
+            if (nearEnergy - energy > 0) {
+                nearEnergy = energy;
+            }
+            //
+            // Our organism tries to eat nearest organism
+            //
+            if (_organisms[hash]) {
+                _organisms[hash].send('grabEnergy', nearEnergy, function (e) {
+                    _logSend(e, 'grabEnergy', nearEnergy);
+                });
+            }
+        }
+
+        return nearEnergy;
     }
     /**
      * Web Workers messages receiver. Handles requests from Organisms
@@ -281,6 +363,31 @@ Evo.App = function () {
             _servers[id].destroy();
             delete _servers[id];
             delete _clients[id];
+
+            return 'done';
+        },
+        /**
+         * Creates energy particles in the World randomly.
+         * @param {Number} amount Amount of particles we need to create
+         */
+        createEnergy: function (amount) {
+            var rnd    = Math.random;
+            var floor  = Math.floor;
+            var width  = _world.getWidth();
+            var height = _world.getHeight();
+            var x;
+            var y;
+
+            while (amount) {
+                x = floor(rnd() * width);
+                y = floor(rnd() * height);
+
+                if (!_world.getPixel(x, y)) {
+                    // TODO: this energy value should be configurable
+                    _world.setPixel(x, y, _cfg.energyColor); // 0x00FF00 - Green
+                    amount--;
+                }
+            }
 
             return 'done';
         }
