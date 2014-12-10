@@ -148,7 +148,6 @@ Evo.App = function () {
      * is no particle for example.
      */
     function _in(body, dir) {
-        debugger;
         return _world.getPixel(_dir2x(body[0], dir), _dir2y(body[1], dir));
     }
     /**
@@ -160,7 +159,6 @@ Evo.App = function () {
      * @private
      */
     function _out(body, dir, energy) {
-        debugger;
         var x = _dir2x(body[0], dir);
         var y = _dir2y(body[1], dir);
 
@@ -175,7 +173,6 @@ Evo.App = function () {
      * impossible to move
      */
     function _step(body, dir) {
-        debugger;
         var x       = _dir2x(body[0], dir);
         var y       = _dir2y(body[1], dir);
         var oldHash = _hash(body[0], body[1]);
@@ -205,7 +202,6 @@ Evo.App = function () {
      * @private
      */
     function _eat(body, dir, energy) {
-        debugger;
         var x          = _dir2x(body[0], dir);
         var y          = _dir2y(body[1], dir);
         var nearEnergy = _world.getPixel(x, y);
