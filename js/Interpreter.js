@@ -116,19 +116,19 @@ Evo.Interpreter = function Interpreter() {
     /**
      * {Uint16Array} Reference to the binary code. Is saved between runs
      */
-    var _code     = null;
+    var _code      = null;
     /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command. Memory may be set from outside. It stores it's values between
      * script runs.
      */
-    var _mem      = null;
+    var _mem       = null;
     /**
      * {Number} Amount of numbers in binary script array. This is an amount of all
      * words. This is not an amount of code lines. You may calculate amount of
      * script words by formula: amountOfLines * _LINE_SEGMENTS .
      */
-    var _codeLen  = 0;
+    var _codeLen   = 0;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
@@ -140,17 +140,17 @@ Evo.Interpreter = function Interpreter() {
      *  command will be referenced to this zero variable from scratch. Because
      *  Uint16Array immutable, we need to allocate big amount of data from start.
      */
-    var _vars     = new Uint16Array(_VARS_AMOUNT);
+    var _vars      = new Uint16Array(_VARS_AMOUNT);
     /**
      * {Uint16Array} Zero valued array, which is used for clearing of _vars field. We
      * need to do it every time, then run() method is called. Because previous variables
      * states, shouldn't affect to current running.
      */
-    var _zeroVars = new Uint16Array(_VARS_AMOUNT);
+    var _zeroVars  = new Uint16Array(_VARS_AMOUNT);
     /**
      * {Function} Default empty callback function for stubbing
      */
-    var _emptyFn  = function () {};
+    var _emptyFn   = function () {};
     /**
      * {Function} Input command callback. Is set from outside in run() method and is called
      * from in command. Should contain at least one parameter - another callback, which will
@@ -716,11 +716,11 @@ Evo.Interpreter = function Interpreter() {
          * If is not set, then it will be set to code.length
          */
         run: function (cfg) {
-            cfg         = cfg || {};
-            var vars    = _vars;
-            var segs    = _LINE_SEGMENTS;
-            var cmds    = _cmds;
-            var i       = cfg.i || 0;
+            cfg      = cfg || {};
+            var vars = _vars;
+            var segs = _LINE_SEGMENTS;
+            var cmds = _cmds;
+            var i    = cfg.i || 0;
             var code;
             var codeLen;
             var line;
