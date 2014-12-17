@@ -66,6 +66,13 @@ describe("Interpreter", function () {
             expect(v2).toBe(2);
         }});
     });
+    it('tests cloneCb config', function () {
+        int = new Evo.Interpreter();
+        // set 1,v1;  clone v1;
+        int.run({code: new Uint16Array([0,1,1,0, 28,1,0,0]), cloneCb: function(v1) {
+            expect(v1).toBe(1);
+        }});
+    });
     it('tests set command', function () {
         int = new Evo.Interpreter();
         int.run({code: new Uint16Array([0,1,0,0])});
