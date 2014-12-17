@@ -708,7 +708,7 @@ Evo.Interpreter = function Interpreter() {
          *                                          // do something
          *                                      }
          *                                  });
-         *        {Function}    outCb   Callback for out command. Signalizes outside
+         *        {Function}    echoCb  Callback for out command. Signalizes outside
          *                              code about new output number. This command is
          *                              synchronous.
          *                              Example:
