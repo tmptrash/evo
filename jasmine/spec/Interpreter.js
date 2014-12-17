@@ -27,6 +27,12 @@ describe("Interpreter", function () {
         int.run({code: new Uint16Array([0,1,0,0, 0,2,0,0])});
         expect(int.getVars()[0]).toBe(2);
     });
+    it('tests inCb config', function () {
+        var flag = false;
+        int = new Evo.Interpreter();
+        int.run({code: new Uint16Array([24,1,1,0]), inCb: function(cb, v) {flag=true;cb(v+2);}});
+        expect(int.getVars()[1]).toBe(2);
+    });
     it('tests set command', function () {
         int = new Evo.Interpreter();
         int.run({code: new Uint16Array([0,1,0,0])});

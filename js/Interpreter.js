@@ -534,7 +534,9 @@ Evo.Interpreter = function Interpreter() {
      * Example: 0018 0001 0002 # in one two. Result
      * will be stored in second variable. This example
      * means 'get word from 0001 sensor and store it in
-     * 0002 variable'.
+     * 0002 variable'. This call may be asynchronous or
+     * synchronous. In case of asynchronous call an interpreter
+     * will be stopped during response will be obtained.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -543,12 +545,17 @@ Evo.Interpreter = function Interpreter() {
     // TODO: think about optimization of this code. It's very
     // TODO: very slow, because of inter thread communication
     function _in(code, i, vars) {
+        var async = true;
+
         _stopped = true;
         _inCb(function (data) {
-            vars[code[i + 3]] = data;
+            vars[code[i + 2]] = data;
             _stopped = false;
-            _me.run({i: _lastIndex, code: code});
+            if (!async) {
+                _me.run({i: _lastIndex, code: code});
+            }
         }, vars[code[i + 1]]);
+        async = false;
     }
     /**
      * 'out' command handler. Send command to specified sensor.
@@ -567,18 +574,26 @@ Evo.Interpreter = function Interpreter() {
      * direction.
      * Example: 001A 0001 # step one. This example means
      * 'do one step in 0001 direction'. There are four
-     * directions: 0 - up, 1 - right, 2 - bottom, 3 - left
+     * directions: 0 - up, 1 - right, 2 - bottom, 3 - left.
+     * This call may be asynchronous or synchronous. In
+     * case of asynchronous call an interpreter will be
+     * stopped during response will be obtained.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
      * @param {Array} vars Array of variable values by index
      */
     function _step(code, i, vars) {
+        var async = true;
+
         _stopped = true;
         _stepCb(function () {
             _stopped = false;
-            _me.run({i: _lastIndex, code: code});
+            if (!async) {
+                _me.run({i: _lastIndex, code: code});
+            }
         }, vars[code[i + 1]]);
+        async = false;
     }
     /**
      * 'eat' command handler. Grabs an energy point from nearest
@@ -632,7 +647,6 @@ Evo.Interpreter = function Interpreter() {
          * @param {Object}      cfg     Configuration of interpreter
          *        {Uint16Array} code    Lines of code in binary format
          *        {Uint16Array} mem     Memory for read and write commands
-         *        {Array=}      out     Output stream
          *        {Number=}     codeLen Amount of words (Uint16) in binary script.
          *        {Number=}     i       Start index in script. Default is zero.
          *        TODO: update parameters for all callbacks
@@ -709,6 +723,16 @@ Evo.Interpreter = function Interpreter() {
          *                                  (new Evo.Interpreter).run({
          *                                      code  : code,
          *                                      cloneCb: function () {
+         *                                          // do something
+         *                                      }
+         *                                  });
+         *        {Function}    outCb   Callback for out command. Signalizes outside
+         *                              code about new output number. This command is
+         *                              synchronous.
+         *                              Example:
+         *                                  (new Evo.Interpreter).run({
+         *                                      code : code,
+         *                                      outCb: function () {
          *                                          // do something
          *                                      }
          *                                  });
