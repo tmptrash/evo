@@ -174,5 +174,8 @@ describe("Interpreter", function () {
         expect(int.getVars()[2]).toBe(0);
         int.run({code: new Uint16Array([0,1,0,0, 4,0,0,1])});
         expect(int.getVars()[0]).toBe(2);
+        int.run({code: new Uint16Array([0,2,0,0, 0,65535,1,0, 4,0,1,1])});
+        expect(int.getVars()[0]).toBe(2);
+        expect(int.getVars()[1]).toBe(1);
     });
 });
