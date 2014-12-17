@@ -78,18 +78,10 @@
  *     // Binary representation of our two lines
  *     // script (Evo.LINE_SEGMENTS words in each line)
  *     //
- *     var code = new Uint16Array(2 * Evo.LINE_SEGMENTS);
- *
- *     // 0000 0007 0000 # set 7 zero
- *     code[0]  = 0;  // set
- *     code[1]  = 7;  // 7
- *     code[2]  = 0;  // zero var
- *
+ *     // 0000 0007 0000 # set 7 v0
  *     // 0001 0000 0001 # move zero one
- *     code[4]  = 1;  // move
- *     code[5]  = 0;  // zero var
- *     code[6]  = 1;  // one var
- *
+ *     //
+ *     var code = new Uint16Array([0,7,0,0,  1,0,1,0]);
  *     (new Evo.Interpreter).run(code);
  *
  * @author DeadbraiN
@@ -100,7 +92,7 @@ Evo.Interpreter = function Interpreter() {
      * {Number} Amount of segments (parts) in one script line: command, arg1, arg2, arg3.
      * This variable it just a shortcut for performance interpreter issue.
      */
-    var _LINE_SEGMENTS   = 4;
+    var _LINE_SEGMENTS = 4;
     /**
      * {Number} Maximum memory size in words. This value shouldn't be
      * greater then word (65535), because commands like read and write
@@ -111,24 +103,24 @@ Evo.Interpreter = function Interpreter() {
      * @constant
      * {Number} Amount of internal variables
      */
-    var _VARS_AMOUNT     = 8;
+    var _VARS_AMOUNT = 8;
 
     /**
      * {Uint16Array} Reference to the binary code. Is saved between runs
      */
-    var _code      = null;
+    var _code = null;
     /**
      * {Uint16Array} Internal memory for reading and writing. Is used with 'read' and
      * 'write' command. Memory may be set from outside. It stores it's values between
      * script runs.
      */
-    var _mem       = null;
+    var _mem = null;
     /**
      * {Number} Amount of numbers in binary script array. This is an amount of all
      * words. This is not an amount of code lines. You may calculate amount of
      * script words by formula: amountOfLines * _LINE_SEGMENTS .
      */
-    var _codeLen   = 0;
+    var _codeLen = 0;
     /**
      * {Array} Array of variables values. Every variable has it's own unique index
      * started from zero. We use these indexes in different command. e.g.:
@@ -140,60 +132,60 @@ Evo.Interpreter = function Interpreter() {
      *  command will be referenced to this zero variable from scratch. Because
      *  Uint16Array immutable, we need to allocate big amount of data from start.
      */
-    var _vars      = new Uint16Array(_VARS_AMOUNT);
+    var _vars = new Uint16Array(_VARS_AMOUNT);
     /**
      * {Uint16Array} Zero valued array, which is used for clearing of _vars field. We
      * need to do it every time, then run() method is called. Because previous variables
      * states, shouldn't affect to current running.
      */
-    var _zeroVars  = new Uint16Array(_VARS_AMOUNT);
+    var _zeroVars = new Uint16Array(_VARS_AMOUNT);
     /**
      * {Function} Default empty callback function for stubbing
      */
-    var _emptyFn   = function () {};
+    var _emptyFn = function () {};
     /**
      * {Function} Input command callback. Is set from outside in run() method and is called
      * from in command. Should contain at least one parameter - another callback, which will
      * be called when the answer will be obtained. This, second callback has ne parameter -
      * obtained data. See run() method config.inCb description for details.
      */
-    var _inCb      = _emptyFn;
+    var _inCb = _emptyFn;
     /**
      * {Function} The same like inCb, but without callback parameter. Callback has three
      * custom parameters. You may use them what every you want. See run() method
      * config.outCb description for details.
      */
-    var _outCb     = _emptyFn;
+    var _outCb = _emptyFn;
     /**
      * {Function} Callback, which is called when an organism is moving. It should be set from
      * outside. Has one parameter - direction. There are four directions: 0 - up, 1 - right,
      * 2 - bottom, 3 - left
      */
-    var _stepCb    = _emptyFn;
+    var _stepCb = _emptyFn;
     /**
      * {Function} Callback for eat command. It means that current organism eats one point of energy
      * from the particle, which is near. It may be other organism or just a particle of the world.
      * Has one parameter - direction: 0 - up, 1 - right, 2 - bottom, 3 - left.
      */
-    var _eatCb     = _emptyFn;
+    var _eatCb = _emptyFn;
     /**
      * {Function} Callback for echo command. It's called every time then organism generates some
      * output information. This is an analog of saying something. Has one parameter - output number.
      */
-    var _echoCb    = _emptyFn;
+    var _echoCb = _emptyFn;
     /**
      * {Function} Callback for clone command. Is called to inform outside code about cloning and
      * amount of energy for new created child organism.
      */
-    var _cloneCb   = _emptyFn;
+    var _cloneCb = _emptyFn;
     /**
      * {Boolean} Means that now, script should be stopped
      */
-    var _stopped   = false;
+    var _stopped = false;
     /**
      * {Evo.Interpreter} this shortcut
      */
-    var _me        = null;
+    var _me = null;
     /**
      * {Number} Last index in binary script. If may be last one or index of command on which
      * we were break the script.
@@ -203,7 +195,7 @@ Evo.Interpreter = function Interpreter() {
      * {Array} Available commands by index. It's very important to keep these indexes
      * in a correct way, otherwise all scripts may be broken.
      */
-    var _cmds      = [
+    var _cmds = [
         _set,    // 0
         _move,   // 1
         _inc,    // 2
