@@ -58,6 +58,14 @@ describe("Interpreter", function () {
             }, 0);
         }});
     });
+    it('tests eatCb config', function () {
+        int = new Evo.Interpreter();
+        // set 1,v1;  set 2,v2;  eat v1,v2;
+        int.run({code: new Uint16Array([0,1,1,0, 0,2,2,0, 27,1,2,0]), eatCb: function(v1, v2) {
+            expect(v1).toBe(1);
+            expect(v2).toBe(2);
+        }});
+    });
     it('tests set command', function () {
         int = new Evo.Interpreter();
         int.run({code: new Uint16Array([0,1,0,0])});
