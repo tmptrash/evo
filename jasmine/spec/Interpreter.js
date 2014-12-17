@@ -27,11 +27,36 @@ describe("Interpreter", function () {
         int.run({code: new Uint16Array([0,1,0,0, 0,2,0,0])});
         expect(int.getVars()[0]).toBe(2);
     });
-    it('tests inCb config', function () {
-        var flag = false;
+    it('tests inCb config', function (done) {
         int = new Evo.Interpreter();
-        int.run({code: new Uint16Array([24,1,1,0]), inCb: function(cb, v) {flag=true;cb(v+2);}});
-        expect(int.getVars()[1]).toBe(2);
+        // in v1,v1
+        int.run({code: new Uint16Array([24,1,1,0]), inCb: function(cb, v) {
+            setTimeout(function () {
+                cb(v+2);
+                expect(int.getVars()[1]).toBe(2);
+                done();
+            }, 0);
+        }});
+    });
+    it('tests outCb config', function () {
+        int = new Evo.Interpreter();
+        // set 1,v1;  set 2,v2;  out v1,v2;
+        int.run({code: new Uint16Array([0,1,1,0, 0,2,2,0, 25,1,2,0]), outCb: function(v1, v2) {
+            expect(v1).toBe(1);
+            expect(v2).toBe(2);
+        }});
+    });
+    it('tests stepCb config', function (done) {
+        int = new Evo.Interpreter();
+        // set 1,v1;  step v1
+        int.run({code: new Uint16Array([0,1,1,0, 26,1,0,0]), stepCb: function(cb, v) {
+            expect(v).toBe(1);
+            setTimeout(function () {
+                // we just need to be here without checks
+                cb();
+                done();
+            }, 0);
+        }});
     });
     it('tests set command', function () {
         int = new Evo.Interpreter();

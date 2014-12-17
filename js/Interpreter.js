@@ -537,17 +537,12 @@ Evo.Interpreter = function Interpreter() {
     // TODO: think about optimization of this code. It's very
     // TODO: very slow, because of inter thread communication
     function _in(code, i, vars) {
-        var async = true;
-
         _stopped = true;
         _inCb(function (data) {
             vars[code[i + 2]] = data;
             _stopped = false;
-            if (!async) {
-                _me.run({i: _lastIndex, code: code});
-            }
+            _me.run({i: _lastIndex, code: code});
         }, vars[code[i + 1]]);
-        async = false;
     }
     /**
      * 'out' command handler. Send command to specified sensor.
@@ -576,16 +571,11 @@ Evo.Interpreter = function Interpreter() {
      * @param {Array} vars Array of variable values by index
      */
     function _step(code, i, vars) {
-        var async = true;
-
         _stopped = true;
         _stepCb(function () {
             _stopped = false;
-            if (!async) {
-                _me.run({i: _lastIndex, code: code});
-            }
+            _me.run({i: _lastIndex, code: code});
         }, vars[code[i + 1]]);
-        async = false;
     }
     /**
      * 'eat' command handler. Grabs an energy point from nearest
