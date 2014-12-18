@@ -134,6 +134,7 @@ Evo.App = function () {
      */
     function _logSend(e, cmd, cfg) {
         var data = e.data;
+        // TODO: data.rest may be Uint16Array and we need to convert it to string
         console.log(data.id + ': ' + cmd + '(' + JSON.stringify(cfg) + ')' + ((data.resp + '') === '' ? '' : ':' + data.resp));
     }
     /**

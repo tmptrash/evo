@@ -31,7 +31,7 @@ Evo.Organism = function Organism() {
     /**
      * {Number} Amount of energy of the organism
      */
-    var _energy = function () {};
+    var _energy = 0;
     /**
      * {Object} Configuration of current organism. If some properties
      * will not be set, then default values will be used. Should contain
@@ -75,12 +75,12 @@ Evo.Organism = function Organism() {
          * it's value every time, the organism is run the script or
          * do a mutation
          */
-        energyDecrease: 0.0001,
+        energyDecrease: 0.0000001,
         /**
          * {Number} Amount of mutations for current organism. Mutations
          * applies only after cloning (creation).
          */
-        mutations: 1000,
+        mutations: 100000,
         /**
          * {Array} Coordinates of the organism, where it will be created
          * in a World (in canvas). If this parameter will be skipped, then
@@ -106,7 +106,7 @@ Evo.Organism = function Organism() {
      * {Evo.Code2Text} Utility class for representing of binary code
      * in human readable manner.
      */
-    var _code2text  = new Evo.Code2Text();
+    //var _code2text  = new Evo.Code2Text();
     /**
      * {Evo.Client} Client for main thread. Is used for communicating
      * with the World and it's particles.
@@ -229,7 +229,6 @@ Evo.Organism = function Organism() {
          *        {Number}      codePadding     Padding of text code for every column: command, arg1, arg2, arg3
          *        {Number}      energy          Amount of energy which is inside the organism from the beginning
          *        {Number}      energyDecrease  Value, which is decrease an energy after every script run
-         *        {Array}       position        X and Y coordinates array of the body particles.
          *        {Number}      mutations       Amount of mutations which are applied after organism cloning.
          * @returns {Boolean|String} true or error message
          */
@@ -393,7 +392,7 @@ Evo.Organism = function Organism() {
             //}
             //
             //return _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1);
-            return new Uint16Array(_code.subarray(0, _interpreter.getCodeLen()));
+            return new Uint16Array((_code || new Uint16Array()).subarray(0, _interpreter.getCodeLen()));
         },
         /**
          * Returns memory dump of organism according to actual binary script. It's
@@ -416,6 +415,7 @@ Evo.Organism = function Organism() {
          * from outside.
          * @returns {Array}
          */
+        // TODO: do we need this method? because output numbers are send into main thread
         getOutput: function () {
             // TODO: config
             var mem = new Uint16Array(_cfg.maxNumber);
@@ -425,6 +425,13 @@ Evo.Organism = function Organism() {
             _interpreter.run(_code, mem, out, _interpreter.getCodeLen());
 
             return out;
+        },
+        /**
+         * Returns amount of energy of the organism
+         * @return {Number} amount of energy
+         */
+        getEnergy: function () {
+            return _energy;
         }
     };
 };
