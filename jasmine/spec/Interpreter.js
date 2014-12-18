@@ -177,5 +177,16 @@ describe("Interpreter", function () {
         int.run({code: new Uint16Array([0,2,0,0, 0,65535,1,0, 4,0,1,1])});
         expect(int.getVars()[0]).toBe(2);
         expect(int.getVars()[1]).toBe(1);
+        int.run({code: new Uint16Array([4,0,0,0])});
+        expect(int.getVars()[0]).toBe(0);
+    });
+    it('tests dec command', function () {
+        int = new Evo.Interpreter();
+        int.run({code: new Uint16Array([5,0,0,0])});
+        expect(int.getVars()[0]).toBe(0);
+        int.run({code: new Uint16Array([0,1,0,0, 5,0,0,0])});
+        expect(int.getVars()[0]).toBe(0);
+        int.run({code: new Uint16Array([0,1,0,0, 5,0,1,0])});
+        expect(int.getVars()[1]).toBe(65535);
     });
 });
