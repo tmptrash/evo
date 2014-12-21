@@ -37,7 +37,7 @@ this.Evo = {
      * depends on size of binary script and speed of client PC.
      * As big this number is as slow the script is grow.
      */
-    NEW_MUTATIONS_SPEED: 1,
+    NEW_MUTATIONS_SPEED: 0.1,
     /**
      * {Number} Amount of non interruptable iterations between
      * user commands from console. This parameter affects on

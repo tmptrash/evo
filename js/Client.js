@@ -86,5 +86,5 @@ Evo.Client = function Client(config) {
             config.worker.removeEventListener('message', _onMessage, false);
             config.worker.terminate();
         }
-    }
+    };
 };

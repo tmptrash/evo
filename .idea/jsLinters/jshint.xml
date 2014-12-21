@@ -48,7 +48,7 @@
     <option passfail="false" />
     <option phantom="false" />
     <option plusplus="false" />
-    <option predef="Evo, self, expect, it, describe, runs, waitsFor" />
+    <option predef="Evo, self, expect, it, describe, runs, waitsFor, console" />
     <option proto="false" />
     <option prototypejs="false" />
     <option quotmark="false" />

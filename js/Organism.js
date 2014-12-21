@@ -14,6 +14,10 @@
  */
 Evo.Organism = function Organism() {
     /**
+     * {Evo.Organism} Reference to this for this class
+     */
+    var _me = null;
+    /**
      * {Array} The body of the organism. The body is a set of particles.
      * Every particle is an energy container (for us it's a color).
      */
@@ -56,7 +60,7 @@ Evo.Organism = function Organism() {
          * user commands processing will be delayed. It depends
          * on current PC performance.
          */
-        busyCounter: 50000,
+        busyCounter: 10000,
         /**
          * {Number} Size of organism's memory in words (2 * MEMORY_SIZE bytes)
          */
@@ -202,20 +206,11 @@ Evo.Organism = function Organism() {
      * @param {Number} dir Direction: 0 - up, 1 - right, 2 - bottom, 3 - left
      */
     function _clone(dir) {
-        _client.send('clone', [dir, _cfg.energy, _code], function (resp) {
-            //
-            // resp format: {ok: Boolean, energy: Number}. Where: ok - result of
-            // cloning. energy - amount of energy, which should be grabbed from
-            // organism.
-            //
-            if (resp.ok) {
-                _cfg.energy -= resp.energy;
-            }
-        });
+        _client.send('clone', [_body, dir, _energy, _code]);
     }
 
 
-    return {
+    return (_me = {
         /**
          * Initializes the organism. id property is required.
          * TODO: review these parameters. I think most of them may be removed
@@ -230,6 +225,7 @@ Evo.Organism = function Organism() {
          *        {Number}      energy          Amount of energy which is inside the organism from the beginning
          *        {Number}      energyDecrease  Value, which is decrease an energy after every script run
          *        {Number}      mutations       Amount of mutations which are applied after organism cloning.
+         *        {Boolean}     live            Flag, which starts an organism to live just after creation
          * @returns {Boolean|String} true or error message
          */
         init: function (cfg) {
@@ -268,7 +264,12 @@ Evo.Organism = function Organism() {
                 echoCb : _echo,
                 cloneCb: _clone
             });
-
+            //
+            // Organism should be alive just after creation
+            //
+            if (cfg.live) {
+                _me.live();
+            }
             return true;
         },
         /**
@@ -371,27 +372,6 @@ Evo.Organism = function Organism() {
          * @returns {Uint16Array|String} Final generated binary script of organism
          */
         getCode: function (skipFormat, padWidth) {
-            // TODO: this code should be moved to app class
-            ////
-            //// We need to exclude an ability to create a reference to the
-            //// binary code, because organism is leaving now and mutator
-            //// is changing binary code right now. So our changing of this
-            //// code here may affect it in organism.
-            ////
-            //var code = new Uint16Array(_code.subarray(0, _interpreter.getCodeLen()));
-            //
-            //// TODO: config
-            //padWidth = padWidth || _cfg.codePadding;
-            //
-            //if (skipFormat === true || skipFormat === undefined) {
-            //    return code;
-            //}
-            //if (skipFormat.indexOf('text') !== -1) {
-            //    console.log('%c' + _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1), 'color: ' + _cfg.colorCode);
-            //    return undefined;
-            //}
-            //
-            //return _code2text.format(_code2text.convert(code), padWidth, skipFormat.indexOf('textNoLines') !== -1);
             return new Uint16Array((_code || new Uint16Array()).subarray(0, _interpreter.getCodeLen()));
         },
         /**
@@ -410,28 +390,11 @@ Evo.Organism = function Organism() {
             return mem;
         },
         /**
-         * Returns output stream of organism. It uses echo command for output.
-         * This method creates a copy of output array to prevent it's modification
-         * from outside.
-         * @returns {Array}
-         */
-        // TODO: do we need this method? because output numbers are send into main thread
-        getOutput: function () {
-            // TODO: config
-            var mem = new Uint16Array(_cfg.maxNumber);
-            var out = [];
-
-            mem.set(_lastData, 0);
-            _interpreter.run(_code, mem, out, _interpreter.getCodeLen());
-
-            return out;
-        },
-        /**
          * Returns amount of energy of the organism
          * @return {Number} amount of energy
          */
         getEnergy: function () {
             return _energy;
         }
-    };
+    });
 };
