@@ -60,7 +60,7 @@ Evo.Organism = function Organism() {
          * user commands processing will be delayed. It depends
          * on current PC performance.
          */
-        busyCounter: 10000,
+        busyCounter: 1000,
         /**
          * {Number} Size of organism's memory in words (2 * MEMORY_SIZE bytes)
          */
@@ -107,11 +107,6 @@ Evo.Organism = function Organism() {
      */
     var _interpreter = new Evo.Interpreter();
     /**
-     * {Evo.Code2Text} Utility class for representing of binary code
-     * in human readable manner.
-     */
-    //var _code2text  = new Evo.Code2Text();
-    /**
      * {Evo.Client} Client for main thread. Is used for communicating
      * with the World and it's particles.
      */
@@ -119,20 +114,44 @@ Evo.Organism = function Organism() {
 
 
     /**
+     * Reallocates buffer and copies old buffer to new extended buffer.
+     * New buffer size = buffer.size + tail
+     * @param {Uint16Array} buffer Old code buffer
+     * @param {Number} tail Additional size of new code buffer
+     * @return {Uint16Array} new buffer
+     */
+    function _reallocateBuffer(buffer, tail) {
+        var newBuf = new Uint16Array((buffer && buffer.length || 0) + tail);
+
+        newBuf.set(buffer || []);
+
+        return newBuf;
+    }
+    /**
      * Mutates an organism by amount according to configuration
+     * @param {Number} len Code length
+     * @param {Number=} tail Size of additional buffer.
      * @returns {Number} New code size in words
      */
-    function _mutate() {
+    function _mutate(len, tail) {
         var i;
         var mutations = _cfg.mutations;
         var code      = _code;
         var varsLen   = _interpreter.VARS_AMOUNT;
+        var segs      = _interpreter.LINE_SEGMENTS;
+        var newLen    = len;
 
+        len += tail;
         for (i = 0; i < mutations; i++) {
-            _mutator.mutate(code, varsLen, _mutator.getCodeLen());
+            if (len - newLen <= segs) {
+                code = _reallocateBuffer(code, tail);
+            }
+            _mutator.mutate(code, varsLen, newLen);
+            newLen = _mutator.getCodeLen();
         }
+        _code = code;
 
-        return _mutator.getCodeLen();
+        return newLen;
     }
 
     /**
@@ -284,10 +303,14 @@ Evo.Organism = function Organism() {
             var busyCounter = _cfg.busyCounter;
             var mutations   = _cfg.mutations;
             var mem         = new Uint16Array(_cfg.memSize);
-            var code        = _cfg.code || new Uint16Array(mutations * _interpreter.LINE_SEGMENTS);
+            //
+            // This is a most possible tail size, because it depends on code and mutations size
+            //
+            var tail        = Math.round(Math.sqrt(mutations)) * _interpreter.LINE_SEGMENTS;
+            var len         = _cfg.code && _cfg.code.length || 0;
+            var code        = _reallocateBuffer(_cfg.code, tail);
             var out         = [];
             var energyDec   = _cfg.energyDecrease;
-            var len         = _cfg.code ? code.length : 0;
             var b;
             /**
              * This method calls as a background thread. As you know
@@ -305,7 +328,7 @@ Evo.Organism = function Organism() {
                 while (b++ < busyCounter && _alive) {
                     //
                     // We don't need to change memory between the iterations.
-                    // Organism should remember it's previous experience. Thw
+                    // Organism should remember it's previous experience. The
                     // same about output.
                     //
                     _interpreter.run({
@@ -341,7 +364,7 @@ Evo.Organism = function Organism() {
             //
             // Right after born, organism should mutate itself
             //
-            len = _mutate();
+            len = _mutate(len, tail);
             //
             // This is an entry point of living process.
             // All other looping will be in background

@@ -326,7 +326,11 @@ Evo.Interpreter = function Interpreter() {
     }
     /**
      * 'jump' command handler. Jumps to specified line.
-     * Example: 0008 0007 # jump 7
+     * Example: 0008 0008 # jump 2
+     * It's important, that index of row should be set according
+     * to one row length (_LINE_SEGMENTS). So first line has 0
+     * index, second _LINE_SEGMENTS, third 2 * _LINE_SEGMENTS
+     * and so on.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -338,7 +342,11 @@ Evo.Interpreter = function Interpreter() {
     /**
      * 'jumpg' command handler. Jumps to specified line if one
      * variable is greater then other.
-     * Example: 0009 0000 0001 0007 # jumpg zero one 7
+     * Example: 0009 0000 0001 0008 # jumpg zero one 2
+     * It's important, that index of row should be set according
+     * to one row length (_LINE_SEGMENTS). So first line has 0
+     * index, second _LINE_SEGMENTS, third 2 * _LINE_SEGMENTS
+     * and so on.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -351,7 +359,11 @@ Evo.Interpreter = function Interpreter() {
     /**
      * 'jumpl' command handler. Jumps to specified line if one
      * variable is less then other.
-     * Example: 000A 0000 0001 0007 # jumpl zero one 7
+     * Example: 000A 0000 0001 0008 # jumpl zero one 2.
+     * It's important, that index of row should be set according
+     * to one row length (_LINE_SEGMENTS). So first line has 0
+     * index, second _LINE_SEGMENTS, third 2 * _LINE_SEGMENTS
+     * and so on.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -364,7 +376,11 @@ Evo.Interpreter = function Interpreter() {
     /**
      * 'jumpe' command handler. Jumps to specified line if one
      * variable is equals to other.
-     * Example: 000B 0000 0001 0007 # jumpe zero one 7
+     * Example: 000B 0000 0001 0008 # jumpe zero one 2.
+     * It's important, that index of row should be set according
+     * to one row length (_LINE_SEGMENTS). So first line has 0
+     * index, second _LINE_SEGMENTS, third 2 * _LINE_SEGMENTS
+     * and so on.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -377,7 +393,11 @@ Evo.Interpreter = function Interpreter() {
     /**
      * 'jumpz' command handler. Jumps to specified label if a
      * variable is equals to zero.
-     * Example: 000C 0000 0007 # jumpz one 7
+     * Example: 000C 0000 0008 # jumpz one 2.
+     * It's important, that index of row should be set according
+     * to one row length (_LINE_SEGMENTS). So first line has 0
+     * index, second _LINE_SEGMENTS, third 2 * _LINE_SEGMENTS
+     * and so on.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
@@ -390,7 +410,11 @@ Evo.Interpreter = function Interpreter() {
     /**
      * 'jumpn' command handler. Jumps to specified line if a
      * variable is not equal to zero.
-     * Example: 000D 0000 0007 # jumpz one 7
+     * Example: 000D 0000 0008 # jumpz one 2
+     * It's important, that index of row should be set according
+     * to one row length (_LINE_SEGMENTS). So first line has 0
+     * index, second _LINE_SEGMENTS, third 2 * _LINE_SEGMENTS
+     * and so on.
      *
      * @param {Uint16Array} code Script in binary representation
      * @param {Number} i Index of current code line
